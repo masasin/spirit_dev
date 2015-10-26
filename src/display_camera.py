@@ -15,6 +15,10 @@ from cv_bridge import CvBridge, CvBridgeError
 
 class Display(object):
     def __init__(self):
+        """
+        Remap image_raw to your target node from the launch file.
+
+        """
         self.subscriber = rospy.Subscriber("image_raw",
                                            Image, self.callback, queue_size=1)
         self.bridge = CvBridge()
