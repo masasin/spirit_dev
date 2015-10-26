@@ -1,0 +1,18 @@
+<launch>
+  <arg name="droneip" default="192.168.1.1" />
+  <node name="ardrone_driver" pkg="ardrone_autonomy" type="ardrone_driver" output="screen" args="-ip $(arg droneip)">
+    <param name="navdata_demo" value="False" />
+    <param name="realtime_navdata" value="True" />
+    <param name="realtime_video" value="True" />
+    <param name="looprate" value="30" />
+  </node>
+  <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
+    <remap from="image_raw" to="ardrone_camera/image_raw" />
+    <param name="contents" value="30 Hz feed" />
+  </node>
+  <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />
+  <node name="display_slow_camera" pkg="spirit" type="display_camera.py" output="screen">
+    <remap from="image_raw" to="output/slow_image_raw" />
+    <param name="contents" value="2 Hz feed" />
+  </node>
+</launch>
