@@ -1,0 +1,12 @@
+<launch>
+  <node name="ardrone_camera" pkg="spirit" type="fake_ardrone_camera.py" output="screen" />
+  <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
+    <remap from="image_raw" to="ardrone_camera/image_raw" />
+    <param name="contents" value="30 Hz feed" />
+  </node>
+  <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />
+  <node name="display_slow_camera" pkg="spirit" type="display_camera.py" output="screen">
+    <remap from="image_raw" to="output/slow_image_raw" />
+    <param name="contents" value="2 Hz feed" />
+  </node>
+</launch>

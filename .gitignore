@@ -135,6 +135,7 @@ qtcreator-*
 # Vim
 *~
 *.sw?
+.ropeproject/
 
 # Emacs
 .#*
