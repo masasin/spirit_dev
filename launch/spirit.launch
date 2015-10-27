@@ -7,7 +7,7 @@
     <param name="looprate" value="30" />
   </node>
   <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
-    <remap from="image_raw" to="ardrone_camera/image_raw" />
+    <remap from="image_raw" to="ardrone/image_raw" />
     <param name="contents" value="30 Hz feed" />
   </node>
   <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />

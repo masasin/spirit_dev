@@ -3,7 +3,7 @@
 # (C) 2015  Jean Nassar
 # Released under BSD version 4
 """
-Publish the stream from /dev/video0 to /ardrone_camera/image_raw at 30 Hz.
+Publish the stream from /dev/video0 to /ardrone/image_raw at 30 Hz.
 
 """
 import cv2
@@ -19,7 +19,7 @@ class Webcam(object):
 
     """
     def __init__(self):
-        self.cam_pub = rospy.Publisher("/ardrone_camera/image_raw",
+        self.cam_pub = rospy.Publisher("/ardrone/image_raw",
                                        Image, queue_size=1)
         self.camera = cv2.VideoCapture(0)
         self.bridge = CvBridge()
