@@ -1,5 +1,5 @@
 <launch>
-  <node name="ardrone_camera" pkg="spirit" type="fake_ardrone_camera.py" output="screen" />
+  <node name="ardrone" pkg="spirit" type="mock_ardrone_camera.py" output="screen" />
   <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
     <remap from="image_raw" to="ardrone_camera/image_raw" />
     <param name="contents" value="30 Hz feed" />

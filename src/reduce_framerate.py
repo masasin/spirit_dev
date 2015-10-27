@@ -27,7 +27,6 @@ class ImageFeature(object):
         rospy.logdebug("Subscribed to /ardrone_camera/image_raw.")
         self.count = 0
 
-
     def callback(self, ros_data):
         """
         Callback function of subscribed topic.
