@@ -15,7 +15,4 @@
     <remap from="image_raw" to="output/slow_image_raw" />
     <param name="contents" value="2 Hz feed" />
   </node>
-  <node name="mocap_node" pkg="mocap_optitrack" type="mocap_node" respawn="false" launch-prefix="" required="true">
-    <rosparam file="$(find mocap_optitrack)/config/mocap.yaml" command="load" />
-  </node>
 </launch>
