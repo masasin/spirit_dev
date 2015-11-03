@@ -1,0 +1,10 @@
+# 
+# Definition of all trackable objects
+# Identifier corresponds to Trackable ID set in Tracking Tools
+#
+rigid_bodies:
+    'drone':
+        pose: ardrone/pose
+        pose2d: ardrone/ground_pose
+        child_frame_id: ardrone/base_link
+        parent_frame_id: world
