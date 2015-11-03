@@ -1,9 +1,10 @@
+<?xml version="1.0"?>
 <robot name="ardrone">
   <link name="body">
     <visual>
       <geometry>
         <mesh filename="package://spirit/model/drone.stl"/>
-      <geometry>
-    <visual>
+      </geometry>
+    </visual>
   </link>
 </robot>
