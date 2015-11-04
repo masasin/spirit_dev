@@ -6,14 +6,14 @@
   <xacro:property name="hull_radius" value="0.125"/>
   <xacro:property name="hull_height" value="0.02"/>
 
-  <xacro:macro name="hull_circle" params="name x y material *colour">
+  <xacro:macro name="hull_circle" params="name x y material rgba">
     <link name="${name}">
       <visual>
 	<geometry>
 	  <cylinder radius="${hull_radius}" length="${hull_height}"/>
 	</geometry>
 	<material name="${material}">
-	  <xacro:insert_block name="colour"/>
+	  <color rgba="${rgba}"/>
 	</material>
       </visual>
     </link>
@@ -32,17 +32,9 @@
       </geometry>
     </visual>
   </link>
-  <xacro:hull_circle name="front_left" x="-1" y="1" material="white">
-    <color rgba="1 1 1 1"/>
-  </xacro:hull_circle>
-  <xacro:hull_circle name="front_right" x="1" y="1" material="white">
-    <color rgba="1 1 1 1"/>
-  </xacro:hull_circle>
-  <xacro:hull_circle name="aft_left" x="-1" y="-1" material="blue">
-    <color rgba="0 0 0.8 1"/>
-  </xacro:hull_circle>
-  <xacro:hull_circle name="aft_right" x="1" y="-1" material="blue">
-    <color rgba="0 0 0.8 1"/>
-  </xacro:hull_circle>
+  <xacro:hull_circle name="front_left" x="-1" y="1" material="white" rgba="1 1 1 1"/>
+  <xacro:hull_circle name="front_right" x="1" y="1" material="white" rgba="1 1 1 1"/>
+  <xacro:hull_circle name="aft_left" x="-1" y="-1" material="blue" rgba="0 0 0.8 1"/>
+  <xacro:hull_circle name="aft_right" x="1" y="-1" material="blue" rgba="0 0 0.8 1"/>
 </robot>
 
