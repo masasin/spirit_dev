@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ardrone">
+  <xacro:property name="base_width" value="0.43"/>
+  <xacro:property name="base_length" value="0.07"/>
+  <xacro:property name="base_height" value="0.04"/>
+  <xacro:property name="hull_radius" value="0.125"/>
+  <xacro:property name="hull_height" value="0.02"/>
+
+  <xacro:macro name="hull_circle" params="name x y material rgba">
+    <link name="${name}">
+      <visual>
+	<geometry>
+	  <cylinder radius="${hull_radius}" length="${hull_height}"/>
+	</geometry>
+	<material name="${material}">
+	  <color rgba="${rgba}"/>
+	</material>
+      </visual>
+    </link>
+
+    <joint name="base_to_${name}" type="fixed">
+      <parent link="base_link"/>
+      <child link="${name}"/>
+      <origin xyz="${hull_radius*x} ${hull_radius*y} 0"/>
+    </joint>
+  </xacro:macro>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+	<box size="${base_length} ${base_width} ${base_height}"/>
+      </geometry>
+    </visual>
+  </link>
+  <xacro:hull_circle name="front_left" x="-1" y="1" material="white" rgba="1 1 1 1"/>
+  <xacro:hull_circle name="front_right" x="1" y="1" material="white" rgba="1 1 1 1"/>
+  <xacro:hull_circle name="aft_left" x="-1" y="-1" material="blue" rgba="0 0 0.8 1"/>
+  <xacro:hull_circle name="aft_right" x="1" y="-1" material="blue" rgba="0 0 0.8 1"/>
+</robot>
+

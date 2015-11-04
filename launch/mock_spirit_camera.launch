@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
   <node name="ardrone" pkg="spirit" type="mock_ardrone_camera.py" output="screen" />
   <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">

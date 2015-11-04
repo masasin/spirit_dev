@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="ardrone">
+  <link name="base_link">
+    <visual>
+      <geometry>
+	<mesh filename="package://spirit/meshes/drone_small.dae"/>
+      </geometry>
+    </visual>
+  </link>
+</robot>
