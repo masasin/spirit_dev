@@ -19,8 +19,8 @@ class ImageFeature(object):
         self.image_subscriber = rospy.Subscriber("/ardrone/image_raw",
                                                  Image, self.image_callback,
                                                  queue_size=1)
-        self.image_pub = rospy.Publisher("/output/slow_image_raw",
-                                         Image, queue_size=1)
+        self.image_publisher = rospy.Publisher("/output/slow_image_raw",
+                                               Image, queue_size=1)
         rospy.logdebug("Subscribed to /ardrone/image_raw")
         self.count = 0
 
@@ -31,12 +31,12 @@ class ImageFeature(object):
         """
         # Publish every fifteenth frame
         if not self.count % 15:
-            self.image_pub.publish(frame)
+            self.image_publisher.publish(frame)
         self.count += 1
 
 
 def main():
-    """Initialize and cleanup ROS node."""
+    """Initialize ROS node."""
     rospy.init_node("framerate_reducer", anonymous=True)
     ImageFeature()
     rospy.loginfo("Reducing framerate")
