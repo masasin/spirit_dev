@@ -432,8 +432,9 @@ class Octree(object):
                 if self._node_outside_box(self.children[child],
                                           bound_min, bound_max):
                     continue
-                yield from self.children[child].get_points_in_box(bound_min,
-                                                                  bound_max)
+                for point in self.children[child].get_points_in_box(bound_min,
+                                                                    bound_max):
+                    yield point
 
     def get_nearest(self, point):
         """Get the point nearest to a given point."""
