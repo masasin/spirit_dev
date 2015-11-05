@@ -28,6 +28,7 @@ class Beeper(object):
 
         self._last_pose = None
         self._tracking_lost = False
+        self._no_contact = True
 
     def beep(self):
         """
@@ -37,6 +38,10 @@ class Beeper(object):
         pygame.mixer.music.play()
 
     def callback(self, pose):
+        if not self._no_contact:
+            rospy.loginfo("Callback called!")
+            self._no_contact = False
+
         if self._tracking_lost and self._last_pose.pose != pose.pose:
             self._tracking_lost = False
             rospy.loginfo("Tracking reacquired.")
