@@ -6,18 +6,20 @@
 Beep when pose does not change for `TIMEOUT_TIME`
 
 """
+import os
 import pygame
 import rospy
 from geometry_msgs.msg import PoseStamped
 
 
 TIMEOUT = 0.25  # seconds
+SPIRIT_ROOT = os.path.expanduser("~/catkin_ws/src/spirit")
 
 
 class Beeper(object):
     def __init__(self):
         pygame.init()
-        pygame.mixer.music.load("audio/beep.wav")
+        pygame.mixer.music.load(os.path.join(SPIRIT_ROOT, "audio/beep.wav"))
         self.beep()
         rospy.loginfo("Trial beep made.")
 
