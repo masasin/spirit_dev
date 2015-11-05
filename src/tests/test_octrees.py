@@ -1,6 +1,6 @@
 import pytest
 
-from octrees import Octree, OctreeBoundsError, _Frame
+from octree import Octree, OctreeBoundsError, _Frame
 
 
 class TestInitialization(object):
