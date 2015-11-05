@@ -62,7 +62,7 @@ def shutdown_hook():
 
 
 def main():
-    rospy.init_node("pose_determiner", anonymous=True)
+    rospy.init_node("beeper", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
     Beeper()
     rospy.spin()
