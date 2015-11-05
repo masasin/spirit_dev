@@ -58,11 +58,11 @@ class Node(object):
                                        self.stamp)
 
 
-def registrar():
+def manager():
     state = StateData()
     octree = Octree((0, 0, 0), 10000)
 
-    rospy.init_node("registrar")
+    rospy.init_node("manager")
     rate = rospy.rate(200)  # Hz
 
     rospy.Subscriber("/output/slow_image_raw", Image, state.image_callback)
@@ -80,6 +80,6 @@ def registrar():
 
 if __name__ == "__main__":
     try:
-        registrar()
+        manager()
     except rospy.ROSInterruptException:
         pass
