@@ -1,6 +1,6 @@
 import pytest
 
-from octrees import Octree, OctreeBoundsError, Picture
+from octrees import Octree, OctreeBoundsError, _Frame
 
 
 class TestInitialization(object):
@@ -15,13 +15,13 @@ class TestInitialization(object):
 class TestInsertion(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = Picture((20, 30, 40), "An item 1")
-        self.item1_copy = Picture((20, 30, 40), "An item 1 copy")
-        self.item2 = Picture((30, 30, 40), "An item 2")
-        self.item3 = Picture((40, 30, 40), "An item 3")
+        self.item1 = _Frame((20, 30, 40), "An item 1")
+        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = _Frame((30, 30, 40), "An item 2")
+        self.item3 = _Frame((40, 30, 40), "An item 3")
 
     def test_add_item_out_of_bounds(self):
-        item = Picture((20, 110, 40), "An item")
+        item = _Frame((20, 110, 40), "An item")
         with pytest.raises(OctreeBoundsError):
             self.o.insert(item)
 
@@ -52,10 +52,10 @@ class TestInsertion(object):
 class TestGetting(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = Picture((20, 30, 40), "An item 1")
-        self.item1_copy = Picture((20, 30, 40), "An item 1 copy")
-        self.item2 = Picture((30, 30, 40), "An item 2")
-        self.item3 = Picture((40, 30, 40), "An item 3")
+        self.item1 = _Frame((20, 30, 40), "An item 1")
+        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = _Frame((30, 30, 40), "An item 2")
+        self.item3 = _Frame((40, 30, 40), "An item 3")
 
     def test_get_empty_tree(self):
         with pytest.raises(KeyError):
@@ -103,10 +103,10 @@ class TestGetting(object):
 class TestRemoval(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = Picture((20, 30, 40), "An item 1")
-        self.item1_copy = Picture((20, 30, 40), "An item 1 copy")
-        self.item2 = Picture((30, 30, 40), "An item 2")
-        self.item3 = Picture((40, 30, 40), "An item 3")
+        self.item1 = _Frame((20, 30, 40), "An item 1")
+        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = _Frame((30, 30, 40), "An item 2")
+        self.item3 = _Frame((40, 30, 40), "An item 3")
 
     def test_remove_nonexistent_item(self):
         with pytest.raises(KeyError):
@@ -147,10 +147,10 @@ class TestRemoval(object):
 class TestPointGathering(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = Picture((20, 30, 40), "An item 1")
-        self.item1_copy = Picture((20, 30, 40), "An item 1 copy")
-        self.item2 = Picture((30, 30, 40), "An item 2")
-        self.item3 = Picture((40, 30, 40), "An item 3")
+        self.item1 = _Frame((20, 30, 40), "An item 1")
+        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = _Frame((30, 30, 40), "An item 2")
+        self.item3 = _Frame((40, 30, 40), "An item 3")
 
     def test_get_points_in_box_empty(self):
         points = self.o.get_points_in_box((0, 0, 0), (25, 35, 50))

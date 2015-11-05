@@ -9,9 +9,9 @@ class OctreeBoundsError(OctreeError):
     """Raised when a point is inserted outside of the bounds of the octree."""
 
 
-class Picture(object):
+class _Frame(object):
     """
-    Dummy picture class.
+    Dummy frame class.
 
     In a real application, it might normally include the pose at which the image
     was taken (perhaps as a quaternion), its timestamp, a thumbnail, and the
@@ -20,14 +20,14 @@ class Picture(object):
     Parameters
     ----------
     position : ndarray
-        The x, y, z coordinates at which the picture was taken.
+        The x, y, z coordinates at which the frame was taken.
     contents : any
         Any content.
 
     Attributes
     ----------
     position : ndarray
-        The x, y, z coordinates at which the picture was taken.
+        The x, y, z coordinates at which the frame was taken.
     contents : any
         Any content.
 
@@ -52,9 +52,9 @@ class Data(object):
     is_empty
     position : ndarray
         The x, y, z position of the data stored at the node.
-    contents : list of Picture
-        A list of all pictures added to the octree at this point, in the order
-        they were added. A full implementation might sort the pictures by
+    contents : list of _Frame
+        A list of all frames added to the octree at this point, in the order
+        they were added. A full implementation might sort the frames by
         quality.
 
     """
@@ -87,7 +87,7 @@ class Data(object):
 
         Parameters
         ----------
-        item : Picture
+        item : _Frame
             Any item with a position attribute.
 
         """
@@ -261,7 +261,7 @@ class Octree(object):
 
         Parameters
         ----------
-        item : Picture
+        item : _Frame
             The item to be inserted. The item must have a position attribute.
 
         Raises
@@ -320,7 +320,7 @@ class Octree(object):
 
         Parameters
         ----------
-        items : list of Picture
+        items : list of _Frame
             An iterable of items to be added.
 
         Raises
@@ -575,10 +575,10 @@ class Octree(object):
 
 if __name__ == "__main__":
     o = Octree((0, 0, 0), 100)
-    item1 = Picture((20, 30, 40), "An item 1")
-    item1_copy = Picture((20, 30, 40), "An item 1 copy")
-    item2 = Picture((30, 30, 40), "An item 2")
-    item3 = Picture((40, 30, 40), "An item 3")
+    item1 = _Frame((20, 30, 40), "An item 1")
+    item1_copy = _Frame((20, 30, 40), "An item 1 copy")
+    item2 = _Frame((30, 30, 40), "An item 2")
+    item3 = _Frame((40, 30, 40), "An item 3")
 
     o.insert(item1)
     o.insert(item1_copy)
