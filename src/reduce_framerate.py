@@ -3,12 +3,11 @@
 # (C) 2015  Jean Nassar
 # Released under BSD version 4
 """
-Reduce /ardrone_camera framerate to 2 Hz.
+Reduce /ardrone/image_raw framerate from 30 Hz to 2 Hz.
 
 """
 import rospy
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge, CvBridgeError
 
 
 class ImageFeature(object):
@@ -17,35 +16,30 @@ class ImageFeature(object):
 
     """
     def __init__(self):
-        self.subscriber = rospy.Subscriber("/ardrone/image_raw",
-                                           Image, self.callback, queue_size=1)
+        self.image_subscriber = rospy.Subscriber("/ardrone/image_raw",
+                                                 Image, self.image_callback,
+                                                 queue_size=1)
         self.image_pub = rospy.Publisher("/output/slow_image_raw",
                                          Image, queue_size=1)
-        self.bridge = CvBridge()
-        rospy.logdebug("Subscribed to /ardrone_camera/image_raw.")
+        rospy.logdebug("Subscribed to /ardrone/image_raw")
         self.count = 0
 
-    def callback(self, ros_data):
+    def frame_callback(self, frame):
         """
         Callback function of subscribed topic.
 
         """
         # Publish every fifteenth frame
         if not self.count % 15:
-            try:
-                image = self.bridge.imgmsg_to_cv2(ros_data, "bgr8")
-                self.image_pub.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
-            except CvBridgeError as e:
-                rospy.logerr(e)
-
+            self.image_pub.publish(frame)
         self.count += 1
 
 
 def main():
     """Initialize and cleanup ROS node."""
-    rospy.init_node("image_feature", anonymous=True)
+    rospy.init_node("framerate_reducer", anonymous=True)
     ImageFeature()
-    rospy.loginfo("Starting feature detection.")
+    rospy.loginfo("Reducing framerate")
     rospy.spin()
 
 
