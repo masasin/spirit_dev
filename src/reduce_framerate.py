@@ -17,7 +17,7 @@ class ImageFeature(object):
     """
     def __init__(self):
         self.image_subscriber = rospy.Subscriber("/ardrone/image_raw",
-                                                 Image, self.image_callback,
+                                                 Image, self.frame_callback,
                                                  queue_size=1)
         self.image_publisher = rospy.Publisher("/output/slow_image_raw",
                                                Image, queue_size=1)
