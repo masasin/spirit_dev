@@ -20,8 +20,6 @@ class Beeper(object):
     def __init__(self):
         pygame.init()
         pygame.mixer.music.load(os.path.join(SPIRIT_ROOT, "audio/beep.wav"))
-        self.beep()
-        rospy.loginfo("Trial beep made.")
 
         self.subscriber = rospy.Subscriber("/ardrone/pose", PoseStamped,
                                            self.callback, queue_size=1)
