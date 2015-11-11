@@ -27,8 +27,10 @@ class Beeper(object):
                                            self.callback, queue_size=1)
 
         self._last_pose = None
+        self._last_pose_change_time = None
         self._tracking_lost = False
-        self._no_contact = True
+        self._started = False
+        self._start_time = rospy.Time.now()
 
     def beep(self):
         """
@@ -38,20 +40,31 @@ class Beeper(object):
         pygame.mixer.music.play()
 
     def callback(self, pose):
-        if not self._no_contact:
-            rospy.loginfo("Callback called!")
-            self._no_contact = False
+        if not self._started:
+            rospy.loginfo("Connection active")
+            self._started = True
 
-        if self._tracking_lost and self._last_pose.pose != pose.pose:
-            self._tracking_lost = False
-            rospy.loginfo("Tracking reacquired.")
+        if self._last_pose is not None and pose is not None:
+            if self._last_pose.pose == pose.pose:
+                if self._last_pose_change_time is None:
+                    reference_time = self._start_time
+                else:
+                    reference_time = self._last_pose_change_time
 
-        if (not self._tracking_lost and self._last_pose is not None and
-            (self._last_pose.header.stamp - rospy.Time.now())
-                .to_sec() > TIMEOUT):
-            self._tracking_lost = True
-            rospy.loginfo("Tracking lost.")
-            self.beep()
+                if ((rospy.Time.now() - reference_time).to_sec() > TIMEOUT and
+                        not self._tracking_lost):
+                    self._tracking_lost = True
+                    if self._last_pose_change_time is None:
+                        rospy.logwarn("AR.Drone is not being tracked! "
+                                      "Please check your setup.")
+                    else:
+                        rospy.logwarn("Tracking lost!")
+                        self.beep()
+            else:
+                self._last_pose_change_time = self._last_pose.header.stamp
+                if self._tracking_lost:
+                    self._tracking_lost = False
+                    rospy.loginfo("Tracking reacquired")
 
         self._last_pose = pose
 
