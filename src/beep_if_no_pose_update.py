@@ -48,7 +48,7 @@ class Beeper(object):
 
         if (not self._tracking_lost and self._last_pose is not None and
             (self._last_pose.header.stamp - rospy.Time.now())
-                .to_secs() > TIMEOUT):
+                .to_sec() > TIMEOUT):
             self._tracking_lost = True
             rospy.loginfo("Tracking lost.")
             self.beep()
