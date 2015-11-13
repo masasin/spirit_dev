@@ -28,7 +28,11 @@ class TestBeeper(object):
         return pose
 
     def make_steady_state(self):
-        self.beeper.callback(self.create_pose())
+        pose = self.create_pose()
+        pose.pose.position.x = 1
+        self.beeper.callback(pose)
+        pose = self.create_pose()
+        self.beeper.callback(pose)
 
     @mock.patch.object(beeper.Beeper, "beep", autospec=True)
     def test_changing_pose_steady_state(self, mock_beep):
@@ -69,3 +73,9 @@ class TestBeeper(object):
         self.beeper.callback(pose)
         assert not mock_beep.called
         assert self.beeper.tracking
+
+    # More tests:
+    # Changing at start
+    # Not changing at start
+    # Acquire after not changing at start
+    # Empty callback
