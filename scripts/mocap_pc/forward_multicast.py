@@ -37,8 +37,14 @@ import struct
 
 
 def main():
+    """
+    Main entry point for the script.
+
+    """
+    # Sender sends straight to the base station.
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender:
         sender.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # Receiver connects to multicast and receives the data.
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver:
             receiver.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             receiver.bind(SERVER_ADDRESS)
