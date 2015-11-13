@@ -53,6 +53,7 @@ class Beeper(object):
         if self._last_pose is not None:
             # TODO (masasin): `self._last_pose.pose != pose.pose` always True
             if self._last_pose.pose == pose.pose:
+                reference_time = self.last_updated or self._start_time
                 if ((rospy.Time.now() - reference_time).to_sec() > TIMEOUT and
                         self.tracking is not False):  # Has a None init state
                     self.tracking = False
