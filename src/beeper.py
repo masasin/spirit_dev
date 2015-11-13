@@ -44,6 +44,7 @@ class Beeper(object):
             self._started = True
 
         if self._last_pose is not None and pose is not None:
+            # TODO (masasin): `self._last_pose.pose != pose.pose` always True
             if self._last_pose.pose == pose.pose:
                 if self._last_pose_change_time is None:
                     reference_time = self._start_time
@@ -60,7 +61,7 @@ class Beeper(object):
                         rospy.logwarn("Tracking lost!")
                         self.beep()
             else:
-                self._last_pose_change_time = self._last_pose.header.stamp
+                self._last_pose_change_time = pose.header.stamp
                 if self._tracking_lost:
                     self._tracking_lost = False
                     rospy.loginfo("Tracking reacquired")
