@@ -29,7 +29,7 @@ class Beeper(object):
         self.last_updated = None
 
         self._last_pose = None
-        self._tracking = True
+        self._tracking = None
         self._start_time = rospy.Time.now()
 
         rospy.loginfo("Waiting for a connection")
@@ -55,7 +55,7 @@ class Beeper(object):
                     reference_time = self.last_updated
 
                 if ((rospy.Time.now() - reference_time).to_sec() > TIMEOUT and
-                        self.tracking):
+                        self.tracking is not False):  # Has a None init state
                     self.tracking = False
             else:
                 self.last_updated = pose.header.stamp
@@ -70,15 +70,15 @@ class Beeper(object):
 
     @tracking.setter
     def tracking(self, value):
-        self._tracking = value
         if not value:
             self._handle_no_tracking()
-
         elif self.connected:
             self._handle_tracking()
 
+        self._tracking = value
+
     def _handle_no_tracking(self):
-        if self.last_updated is None:
+        if self.tracking is None:
             rospy.logwarn("AR.Drone is not being tracked! "
                           "Please check your setup.")
         else:
