@@ -7,9 +7,16 @@ except ImportError:
 
 from geometry_msgs.msg import PoseStamped
 import pygame
+import pytest
 import rospy
 
 import beeper
+
+
+@pytest.fixture(scope="session")
+def pygame_teardown():
+    def fin():
+        pygame.quit()
 
 
 class TestBeeper(object):
@@ -18,9 +25,6 @@ class TestBeeper(object):
         beeper.TIMEOUT = self.timeout
         rospy.init_node("beeper_test", anonymous=True)
         self.beeper = beeper.Beeper()
-
-    def teardown(self):
-        pygame.quit()
 
     def create_pose(self):
         pose = PoseStamped()
