@@ -42,11 +42,11 @@ class Beeper(object):
         pygame.mixer.music.play()
 
     def callback(self, pose):
-        if not self.connected:
-            rospy.loginfo("Connection active")
-            self.connected = True
-
         if pose is not None:
+            if not self.connected:
+                rospy.loginfo("Connection active")
+                self.connected = True
+
             # TODO (masasin): `self._last_pose.pose != pose.pose` always True
             if self._last_pose and self._last_pose.pose == pose.pose:
                 if self.last_updated is None:
@@ -62,7 +62,10 @@ class Beeper(object):
                 if not self.tracking:
                     self.tracking = True
 
-        self._last_pose = pose
+            self._last_pose = pose
+
+        else:
+            rospy.logwarn("Received empty data")
 
     @property
     def tracking(self):
