@@ -59,7 +59,7 @@ class Beeper(object):
                     self.tracking = False
             else:
                 self.last_updated = pose.header.stamp
-                if not self.tracking:
+                if not self.tracking and self._last_pose is not None:
                     self.tracking = True
 
             self._last_pose = pose
