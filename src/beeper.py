@@ -31,6 +31,8 @@ class Beeper(object):
         self._started = False
         self._start_time = rospy.Time.now()
 
+        rospy.loginfo("Waiting for a connection")
+
     def beep(self):
         """
         Beeps an audio file.
