@@ -72,15 +72,21 @@ class Beeper(object):
     def tracking(self, value):
         self._tracking = value
         if not value:
-            if self.last_updated is None:
-                rospy.logwarn("AR.Drone is not being tracked! "
-                              "Please check your setup.")
-            else:
-                rospy.logwarn("Tracking lost!")
-                self.beep()
+            self._handle_no_tracking()
 
         elif self.connected:
-            rospy.loginfo("Tracking reacquired")
+            self._handle_tracking()
+
+    def _handle_no_tracking(self):
+        if self.last_updated is None:
+            rospy.logwarn("AR.Drone is not being tracked! "
+                          "Please check your setup.")
+        else:
+            rospy.logwarn("Tracking lost!")
+            self.beep()
+
+    def _handle_tracking(self):
+        rospy.loginfo("Tracking reacquired")
 
 
 def shutdown_hook():
