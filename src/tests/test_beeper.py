@@ -6,6 +6,7 @@ except ImportError:
     import mock
 
 from geometry_msgs.msg import PoseStamped
+import pygame
 import rospy
 
 import beeper
@@ -18,21 +19,22 @@ class TestBeeper(object):
         rospy.init_node("beeper_test", anonymous=True)
         self.beeper = beeper.Beeper()
 
+    def teardown(self):
+        pygame.quit()
+
     def create_pose(self):
         pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
         return pose
 
     def make_steady_state(self):
-        pose = self.create_pose()
-        self.beeper.callback(pose)
+        self.beeper.callback(self.create_pose())
 
     @mock.patch.object(beeper.Beeper, "beep", autospec=True)
     def test_changing_pose_steady_state(self, mock_beep):
         self.make_steady_state()
 
         for i in range(21):
-            print(i)
             pose = self.create_pose()
             pose.pose.position.x = i
             self.beeper.callback(pose)
@@ -48,8 +50,7 @@ class TestBeeper(object):
         last_change_time = self.beeper.last_updated
 
         for i in range(21):
-            pose = self.create_pose()
-            self.beeper.callback(pose)
+            self.beeper.callback(self.create_pose())
             time.sleep(self.timeout / 10)
 
         assert mock_beep.called
