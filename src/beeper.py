@@ -53,20 +53,26 @@ class Beeper(object):
 
                 if ((rospy.Time.now() - reference_time).to_sec() > TIMEOUT and
                         not self._tracking_lost):
-                    self._tracking_lost = True
-                    if self._last_pose_change_time is None:
-                        rospy.logwarn("AR.Drone is not being tracked! "
-                                      "Please check your setup.")
-                    else:
-                        rospy.logwarn("Tracking lost!")
-                        self.beep()
+                    self.handle_tracking_lost()
             else:
                 self._last_pose_change_time = pose.header.stamp
                 if self._tracking_lost:
-                    self._tracking_lost = False
-                    rospy.loginfo("Tracking reacquired")
+                    self.handle_tracking_found()
 
         self._last_pose = pose
+
+    def handle_tracking_lost(self):
+        self._tracking_lost = True
+        if self._last_pose_change_time is None:
+            rospy.logwarn("AR.Drone is not being tracked! "
+                          "Please check your setup.")
+        else:
+            rospy.logwarn("Tracking lost!")
+            self.beep()
+
+    def handle_tracking_found(self):
+        self._tracking_lost = False
+        rospy.loginfo("Tracking reacquired")
 
 
 def shutdown_hook():
