@@ -89,7 +89,7 @@ class Beeper(object):
             self.beep()
 
     def _handle_tracking(self):
-        if self._last_pose is None:
+        if self.last_updated is None:
             rospy.loginfo("Tracking acquired")
         else:
             rospy.loginfo("Tracking reacquired")
