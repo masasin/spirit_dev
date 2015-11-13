@@ -25,10 +25,11 @@ class Beeper(object):
         self.subscriber = rospy.Subscriber("/ardrone/pose", PoseStamped,
                                            self.callback, queue_size=1)
 
+        self.connected = False
+        self.last_updated = None
+
         self._last_pose = None
-        self._last_pose_change_time = None
-        self._tracking_lost = False
-        self._started = False
+        self._tracking = True
         self._start_time = rospy.Time.now()
 
         rospy.loginfo("Waiting for a connection")
@@ -41,40 +42,45 @@ class Beeper(object):
         pygame.mixer.music.play()
 
     def callback(self, pose):
-        if not self._started:
+        if not self.connected:
             rospy.loginfo("Connection active")
-            self._started = True
+            self.connected = True
 
         if self._last_pose is not None and pose is not None:
             # TODO (masasin): `self._last_pose.pose != pose.pose` always True
             if self._last_pose.pose == pose.pose:
-                if self._last_pose_change_time is None:
+                if self.last_updated is None:
                     reference_time = self._start_time
                 else:
-                    reference_time = self._last_pose_change_time
+                    reference_time = self.last_updated
 
                 if ((rospy.Time.now() - reference_time).to_sec() > TIMEOUT and
-                        not self._tracking_lost):
-                    self.handle_tracking_lost()
+                        self.tracking):
+                    self.tracking = False
             else:
-                self._last_pose_change_time = pose.header.stamp
-                if self._tracking_lost:
-                    self.handle_tracking_found()
+                self.last_updated = pose.header.stamp
+                if not self.tracking:
+                    self.tracking = True
 
         self._last_pose = pose
 
-    def handle_tracking_lost(self):
-        self._tracking_lost = True
-        if self._last_pose_change_time is None:
-            rospy.logwarn("AR.Drone is not being tracked! "
-                          "Please check your setup.")
-        else:
-            rospy.logwarn("Tracking lost!")
-            self.beep()
+    @property
+    def tracking(self):
+        return self._tracking
 
-    def handle_tracking_found(self):
-        self._tracking_lost = False
-        rospy.loginfo("Tracking reacquired")
+    @tracking.setter
+    def tracking(self, value):
+        self._tracking = value
+        if not value:
+            if self.last_updated is None:
+                rospy.logwarn("AR.Drone is not being tracked! "
+                              "Please check your setup.")
+            else:
+                rospy.logwarn("Tracking lost!")
+                self.beep()
+
+        elif self.connected:
+            rospy.loginfo("Tracking reacquired")
 
 
 def shutdown_hook():
