@@ -46,9 +46,9 @@ class Beeper(object):
             rospy.loginfo("Connection active")
             self.connected = True
 
-        if self._last_pose is not None and pose is not None:
+        if pose is not None:
             # TODO (masasin): `self._last_pose.pose != pose.pose` always True
-            if self._last_pose.pose == pose.pose:
+            if self._last_pose and self._last_pose.pose == pose.pose:
                 if self.last_updated is None:
                     reference_time = self._start_time
                 else:
@@ -86,7 +86,10 @@ class Beeper(object):
             self.beep()
 
     def _handle_tracking(self):
-        rospy.loginfo("Tracking reacquired")
+        if self._last_pose is None:
+            rospy.loginfo("Tracking acquired")
+        else:
+            rospy.loginfo("Tracking reacquired")
 
 
 def shutdown_hook():
