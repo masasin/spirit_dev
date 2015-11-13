@@ -13,26 +13,27 @@ import beeper
 
 class TestBeeper(object):
     def setup(self):
-        self.timeout = 1e-4
+        self.timeout = 5e-4
         beeper.TIMEOUT = self.timeout
         rospy.init_node("beeper_test", anonymous=True)
         self.beeper = beeper.Beeper()
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
-    def test_changing_pose_steady_state(self, mock_beep):
-        initial_pose = PoseStamped()
-        initial_pose.header.stamp = rospy.Time.now()
-
-        self.beeper.connected = True
-        self.beeper._last_pose = initial_pose
-        self.beeper.last_updated = rospy.Time.now()
-
+    def create_pose(self):
         pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
+        return pose
+
+    def make_steady_state(self):
+        pose = self.create_pose()
+        self.beeper.callback(pose)
+
+    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    def test_changing_pose_steady_state(self, mock_beep):
+        self.make_steady_state()
 
         for i in range(21):
-            pose = PoseStamped()
-            pose.header.stamp = rospy.Time.now()
+            print(i)
+            pose = self.create_pose()
             pose.pose.position.x = i
             self.beeper.callback(pose)
             time.sleep(self.timeout / 10)
@@ -43,18 +44,11 @@ class TestBeeper(object):
 
     @mock.patch.object(beeper.Beeper, "beep", autospec=True)
     def test_not_changing_pose_steady_state(self, mock_beep):
-        pose = PoseStamped()
-        pose.header.stamp = rospy.Time.now()
-
-        self.beeper.connected = True
-        self.beeper._last_pose = pose
-        self.beeper.last_updated = rospy.Time.now()
+        self.make_steady_state()
         last_change_time = self.beeper.last_updated
 
         for i in range(21):
-            pose = PoseStamped()
-            pose.header.stamp = rospy.Time.now()
-            pose.pose.position.x = 0
+            pose = self.create_pose()
             self.beeper.callback(pose)
             time.sleep(self.timeout / 10)
 
@@ -63,18 +57,12 @@ class TestBeeper(object):
         assert self.beeper.last_updated == last_change_time
 
     @mock.patch.object(beeper.Beeper, "beep", autospec=True)
-    def test_tracking_reacquired(self, mock_beep):
-        initial_pose = PoseStamped()
-        initial_pose.header.stamp = rospy.Time.now()
-
-        self.beeper.connected = True
-        self.beeper._last_pose = initial_pose
-        self.beeper.last_updated = rospy.Time.now()
+    def test_tracking_reacquired_steady_state(self, mock_beep):
+        self.make_steady_state()
         self.beeper._tracking = False
 
         time.sleep(self.timeout / 10)
-        pose = PoseStamped()
-        pose.header.stamp = rospy.Time.now()
+        pose = self.create_pose()
         pose.pose.position.x = 1
 
         self.beeper.callback(pose)
