@@ -7,9 +7,10 @@ Beep when pose does not change for `TIMEOUT_TIME`
 
 """
 import os
+
+from geometry_msgs.msg import PoseStamped
 import pygame
 import rospy
-from geometry_msgs.msg import PoseStamped
 
 
 TIMEOUT = 0.25  # seconds
