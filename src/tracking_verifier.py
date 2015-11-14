@@ -22,7 +22,7 @@ TIMEOUT = 0.25  # seconds
 SPIRIT_ROOT = os.path.expanduser("~/catkin_ws/src/spirit")
 
 
-class TrackingVerifier(object):
+class Verifier(object):
     """
     Verify tracking.
 
@@ -149,7 +149,7 @@ def main():
     """Main entry point for script."""
     rospy.init_node("tracking_verifier", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
-    TrackingVerifier()
+    Verifier()
     rospy.spin()
 
 
