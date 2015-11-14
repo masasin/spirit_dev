@@ -19,12 +19,12 @@ def pygame_teardown():
         pygame.quit()
 
 
-class TestBeeper(object):
+class TestTrackingVerifier(object):
     def setup(self):
         self.timeout = 5e-4
         beeper.TIMEOUT = self.timeout
         rospy.init_node("beeper_test", anonymous=True)
-        self.beeper = beeper.Beeper()
+        self.beeper = beeper.TrackingVerifier()
 
     def create_pose(self):
         pose = PoseStamped()
@@ -38,7 +38,7 @@ class TestBeeper(object):
         pose = self.create_pose()
         self.beeper.callback(pose)
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    @mock.patch.object(beeper.TrackingVerifier, "beep", autospec=True)
     def test_changing_pose_steady_state(self, mock_beep):
         self.make_steady_state()
 
@@ -52,7 +52,7 @@ class TestBeeper(object):
         assert self.beeper.tracking
         assert self.beeper.last_updated == pose.header.stamp
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    @mock.patch.object(beeper.TrackingVerifier, "beep", autospec=True)
     def test_not_changing_pose_steady_state(self, mock_beep):
         self.make_steady_state()
         last_change_time = self.beeper.last_updated
@@ -65,7 +65,7 @@ class TestBeeper(object):
         assert not self.beeper.tracking
         assert self.beeper.last_updated == last_change_time
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    @mock.patch.object(beeper.TrackingVerifier, "beep", autospec=True)
     def test_tracking_reacquired_steady_state(self, mock_beep):
         self.make_steady_state()
         self.beeper._tracking = False
@@ -78,7 +78,7 @@ class TestBeeper(object):
         assert not mock_beep.called
         assert self.beeper.tracking
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    @mock.patch.object(beeper.TrackingVerifier, "beep", autospec=True)
     def test_changing_pose_at_start(self, mock_beep):
         pose = self.create_pose()
         self.beeper.callback(pose)
@@ -96,7 +96,7 @@ class TestBeeper(object):
         assert self.beeper.tracking
         assert self.beeper.last_updated == pose.header.stamp
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    @mock.patch.object(beeper.TrackingVerifier, "beep", autospec=True)
     def test_not_changing_pose_at_start(self, mock_beep):
         pose = self.create_pose()
         self.beeper.callback(pose)
@@ -109,7 +109,7 @@ class TestBeeper(object):
         assert self.beeper.tracking is False
         assert self.beeper.last_updated is None
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    @mock.patch.object(beeper.TrackingVerifier, "beep", autospec=True)
     def test_tracking_reacquired_after_bad_start(self, mock_beep):
         pose = self.create_pose()
         self.beeper.callback(pose)
@@ -126,7 +126,7 @@ class TestBeeper(object):
         assert not mock_beep.called
         assert self.beeper.tracking
 
-    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    @mock.patch.object(beeper.TrackingVerifier, "beep", autospec=True)
     def test_empty_pose(self, mock_beep):
         self.beeper.callback(None)
 

@@ -17,7 +17,7 @@ TIMEOUT = 0.25  # seconds
 SPIRIT_ROOT = os.path.expanduser("~/catkin_ws/src/spirit")
 
 
-class Beeper(object):
+class TrackingVerifier(object):
     def __init__(self):
         pygame.init()
         pygame.mixer.music.load(os.path.join(SPIRIT_ROOT, "audio/beep.wav"))
@@ -99,9 +99,9 @@ def shutdown_hook():
 
 
 def main():
-    rospy.init_node("beeper", anonymous=True)
+    rospy.init_node("tracking_verifier", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
-    Beeper()
+    TrackingVerifier()
     rospy.spin()
 
 
