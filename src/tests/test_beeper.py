@@ -73,13 +73,63 @@ class TestBeeper(object):
         time.sleep(self.timeout / 10)
         pose = self.create_pose()
         pose.pose.position.x = 1
-
         self.beeper.callback(pose)
+
         assert not mock_beep.called
         assert self.beeper.tracking
 
-    # More tests:
-    # Changing at start
-    # Not changing at start
-    # Acquire after not changing at start
-    # Empty callback
+    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    def test_changing_pose_at_start(self, mock_beep):
+        pose = self.create_pose()
+        self.beeper.callback(pose)
+
+        assert not mock_beep.called
+        assert self.beeper.tracking is None
+        assert self.beeper.last_updated is None
+
+        time.sleep(self.timeout / 10)
+        pose = self.create_pose()
+        pose.pose.position.x = 1
+        self.beeper.callback(pose)
+
+        assert not mock_beep.called
+        assert self.beeper.tracking
+        assert self.beeper.last_updated == pose.header.stamp
+
+    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    def test_not_changing_pose_at_start(self, mock_beep):
+        pose = self.create_pose()
+        self.beeper.callback(pose)
+
+        for i in range(21):
+            self.beeper.callback(self.create_pose())
+            time.sleep(self.timeout / 10)
+
+        assert not mock_beep.called
+        assert self.beeper.tracking is False
+        assert self.beeper.last_updated is None
+
+    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    def test_tracking_reacquired_after_bad_start(self, mock_beep):
+        pose = self.create_pose()
+        self.beeper.callback(pose)
+
+        for i in range(21):
+            self.beeper.callback(self.create_pose())
+            time.sleep(self.timeout / 10)
+
+        time.sleep(self.timeout / 10)
+        pose = self.create_pose()
+        pose.pose.position.x = 1
+        self.beeper.callback(pose)
+
+        assert not mock_beep.called
+        assert self.beeper.tracking
+
+    @mock.patch.object(beeper.Beeper, "beep", autospec=True)
+    def test_empty_pose(self, mock_beep):
+        self.beeper.callback(None)
+
+        assert not mock_beep.called
+        assert self.beeper.tracking is None
+        assert self.beeper.last_updated is None
