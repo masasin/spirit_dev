@@ -75,26 +75,20 @@ class TrackingVerifier(object):
     @tracking.setter
     def tracking(self, value):
         if not value:
-            self._handle_no_tracking()
+            if self.tracking is None:
+                rospy.logwarn("AR.Drone is not being tracked! "
+                              "Please check your setup.")
+            else:
+                rospy.logwarn("Tracking lost!")
+                self.beep()
         elif self.connected:
-            self._handle_tracking()
+            if self.last_updated is None:
+                rospy.loginfo("Tracking acquired")
+            else:
+                rospy.loginfo("Tracking reacquired")
 
         self._tracking = value
         self.publisher.publish(Bool(value))
-
-    def _handle_no_tracking(self):
-        if self.tracking is None:
-            rospy.logwarn("AR.Drone is not being tracked! "
-                          "Please check your setup.")
-        else:
-            rospy.logwarn("Tracking lost!")
-            self.beep()
-
-    def _handle_tracking(self):
-        if self.last_updated is None:
-            rospy.loginfo("Tracking acquired")
-        else:
-            rospy.loginfo("Tracking reacquired")
 
 
 def shutdown_hook():
