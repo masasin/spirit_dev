@@ -3,12 +3,13 @@
 # (C) 2015  Jean Nassar
 # Released under BSD version 4
 """
-Beep when pose does not change for `TIMEOUT_TIME`
+Publish the tracking status of the AR.Drone.
 
 """
 import os
 
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Bool
 import pygame
 import rospy
 
@@ -24,6 +25,8 @@ class TrackingVerifier(object):
 
         self.subscriber = rospy.Subscriber("/ardrone/pose", PoseStamped,
                                            self.callback, queue_size=1)
+        self.publisher = rospy.Publisher("/ardrone/tracked", Bool,
+                                         latch=True, queue_size=1)
 
         self.connected = False
         self.last_updated = None
@@ -77,6 +80,7 @@ class TrackingVerifier(object):
             self._handle_tracking()
 
         self._tracking = value
+        self.publisher.publish(Bool(value))
 
     def _handle_no_tracking(self):
         if self.tracking is None:
