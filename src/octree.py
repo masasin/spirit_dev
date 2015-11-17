@@ -438,7 +438,7 @@ class Octree(object):
 
     def get_nearest(self, point):
         """Get the point nearest to a given point."""
-        pass
+        raise NotImplementedError
 
     @property
     def centre(self):
