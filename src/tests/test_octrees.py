@@ -104,7 +104,7 @@ class TestGetting(object):
         self.o.insert(self.item1)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get_nearest(self.item1)
+        data = self.o.get_nearest(self.item1.position)
         assert data.contents == [self.item2]
 
     @pytest.mark.xfail
@@ -113,7 +113,7 @@ class TestGetting(object):
         self.o.insert(self.item2)
         self.o.insert(self.item3)
         self.o.insert(self.item1_copy)
-        data = self.o.get_nearest(self.item2)
+        data = self.o.get_nearest(self.item2.position)
         assert data.contents == [[self.item1, self.item1_copy], self.item3]
 
 
