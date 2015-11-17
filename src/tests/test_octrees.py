@@ -99,22 +99,51 @@ class TestGetting(object):
         data = self.o.get((20, 30, 40))
         assert data.contents == [self.item1, self.item1_copy]
 
-    @pytest.mark.xfail
-    def test_get_nearest(self):
+    def test_get_nearest_empty(self):
+        with pytest.raises(ValueError):
+            dists, data = self.o.get_nearest((26, 30, 40))
+
+    def test_get_nearest_point_arbitrary(self):
         self.o.insert(self.item1)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get_nearest(self.item1.position)
-        assert data.contents == [self.item2]
+        dists, data = self.o.get_nearest((26, 30, 40))
+        assert data[0].contents == [self.item2]
 
-    @pytest.mark.xfail
-    def test_get_nearest_equal_distance(self):
+    def test_get_nearest_point_same(self):
+        self.o.insert(self.item1)
+        self.o.insert(self.item2)
+        self.o.insert(self.item3)
+        dists, data = self.o.get_nearest(self.item1.position)
+        assert dists[0] == 0
+        assert data[0].contents == [self.item1]
+
+    def test_get_nearest_point_list(self):
         self.o.insert(self.item1)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
         self.o.insert(self.item1_copy)
-        data = self.o.get_nearest(self.item2.position)
-        assert data.contents == [[self.item1, self.item1_copy], self.item3]
+        dists, data = self.o.get_nearest(self.item1.position)
+        assert data[0].contents == [self.item1, self.item1_copy]
+
+    def test_get_nearest_two_items(self):
+        self.o.insert(self.item1)
+        self.o.insert(self.item2)
+        self.o.insert(self.item3)
+        self.o.insert(self.item1_copy)
+        dists, data = self.o.get_nearest((32, 30, 40), k=2)
+        contents = [data[i].contents for i in range(len(data))]
+        assert [self.item2] in contents
+        assert [self.item3] in contents
+
+    def test_get_nearest_equidistant_two_items(self):
+        self.o.insert(self.item1)
+        self.o.insert(self.item3)
+        self.o.insert(self.item1_copy)
+        dists, data = self.o.get_nearest(self.item2.position, k=2)
+        contents = [data[i].contents for i in range(len(data))]
+        assert [self.item1, self.item1_copy] in contents
+        assert [self.item3] in contents
 
 
 class TestRemoval(object):
