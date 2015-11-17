@@ -161,16 +161,20 @@ class Octree(object):
     """
     def __init__(self, centre, half_dim, parent=None):
         self.parent = parent
-        if self.parent is not None:
+
+        # Store a set of points for easy retrieval. Can be converted into a
+        # numpy array in order to find nearest neighbours.
+        if self.parent is not None:  # Not the root node
             self._root = self.parent._root
             self._points = self._root._points
             self._points_array = self._root._points_array
             self._points_array_up_to_date = self._root._points_array_up_to_date
-        else:
+        else:  # Root node
             self._root = self
             self._points = set()
             self._points_array = None
             self._points_array_up_to_date = True
+
         self._centre = np.asarray(centre)
         self._half_dim = half_dim
         self._bound_min = self.centre - self.half_dim * np.ones(3)
