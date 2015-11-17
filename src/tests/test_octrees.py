@@ -99,6 +99,23 @@ class TestGetting(object):
         data = self.o.get((20, 30, 40))
         assert data.contents == [self.item1, self.item1_copy]
 
+    @pytest.mark.xfail
+    def test_get_nearest(self):
+        self.o.insert(self.item1)
+        self.o.insert(self.item2)
+        self.o.insert(self.item3)
+        data = self.o.get_nearest(self.item1)
+        assert data.contents == [self.item2]
+
+    @pytest.mark.xfail
+    def test_get_nearest_equal_distance(self):
+        self.o.insert(self.item1)
+        self.o.insert(self.item2)
+        self.o.insert(self.item3)
+        self.o.insert(self.item1_copy)
+        data = self.o.get_nearest(self.item2)
+        assert data.contents == [[self.item1, self.item1_copy], self.item3]
+
 
 class TestRemoval(object):
     def setup(self):
