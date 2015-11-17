@@ -301,9 +301,9 @@ class Octree(object):
 
         if self._is_leaf():
             # Register the point
-            self._root._points.add(Coordinates(*item.position))
-            if self._root._points_array_up_to_date:
-                self._root._points_array_up_to_date = False
+            self._points.add(Coordinates(*item.position))
+            if self._points_array_up_to_date:
+                self._points_array_up_to_date = False
 
             # Data can be added.
             if self.data.is_empty or all(self.data.position == item.position):
@@ -383,8 +383,8 @@ class Octree(object):
         This method is recursive.
 
         """
-        if Coordinates(*point) not in self._root._points:
-            print(point, self._root._points)
+        if Coordinates(*point) not in self._points:
+            print(point, self._points)
             raise KeyError("Could not find point.")
 
         if self._is_leaf():
@@ -416,9 +416,9 @@ class Octree(object):
 
         if clear:
             n_cleared = len(data.contents)
-            self._root._points.remove(Coordinates(*data.position))
-            if self._root._points_array_up_to_date:
-                self._root._points_array_up_to_date = False
+            self._points.remove(Coordinates(*data.position))
+            if self._points_array_up_to_date:
+                self._points_array_up_to_date = False
             data.clear()
 
             while node is not None:
@@ -427,9 +427,9 @@ class Octree(object):
         else:
             data.pop()
             if data.is_empty:
-                self._root._points.remove(Coordinates(*data.position))
-                if self._root._points_array_up_to_date:
-                    self._root._points_array_up_to_date = False
+                self._points.remove(Coordinates(*data.position))
+                if self._points_array_up_to_date:
+                    self._points_array_up_to_date = False
                 data.clear()
             while node is not None:
                 self._n_items -= 1
@@ -501,11 +501,11 @@ class Octree(object):
         if k < 1:
             raise ValueError("At least one neighbour needs to be found.")
 
-        if not self._root._points_array_up_to_date:
-            self._root._points_array = np.array(list(self._root._points))
-            self._root._points_array_up_to_date = True
+        if not self._points_array_up_to_date:
+            self._points_array = np.array(list(self._points))
+            self._points_array_up_to_date = True
 
-        tree = KDTree(self._root._points_array)
+        tree = KDTree(self._points_array)
         distances, indices = tree.query(point, k=min(k, len(tree.data)))
 
         if k == 1:
