@@ -97,7 +97,7 @@ class Data(object):
             raise OctreeError("Wrong position")
         self.contents.append(item)
 
-    def _pop(self):
+    def pop(self):
         """Return and remove the last item in `contents`."""
         return self.contents.pop()
 
@@ -395,7 +395,7 @@ class Octree(object):
                 node._n_items -= n_cleared
                 node = node.parent
         else:
-            data._pop()
+            data.pop()
             if data.is_empty:
                 data.clear()
             while node is not None:
