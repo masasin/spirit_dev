@@ -1,4 +1,15 @@
+from collections import namedtuple
+
 import numpy as np
+from scipy.spatial import cKDTree as KDTree
+
+
+# TODO (masasin):
+#     - Allow dynamic expansion of Octree
+#     - Merge empty sibling leaves
+
+
+Coordinates = namedtuple("Coordinates", "x y z")
 
 
 class OctreeError(Exception):
@@ -150,6 +161,11 @@ class Octree(object):
     """
     def __init__(self, centre, half_dim, parent=None):
         self.parent = parent
+        if self.parent is not None:
+            self._root = self.parent._root
+        else:
+            self._root = self
+            self._points = set()
         self._centre = np.asarray(centre)
         self._half_dim = half_dim
         self._bound_min = self.centre - self.half_dim * np.ones(3)
@@ -279,6 +295,9 @@ class Octree(object):
             raise OctreeBoundsError
 
         if self._is_leaf():
+            # Register the point
+            self._root._points.add(Coordinates(*item.position))
+
             # Data can be added.
             if self.data.is_empty or all(self.data.position == item.position):
                 # A node may only have data at one position.
@@ -357,11 +376,12 @@ class Octree(object):
         This method is recursive.
 
         """
+        if Coordinates(*point) not in self._root._points:
+            print(point, self._root._points)
+            raise KeyError("Could not find point.")
+
         if self._is_leaf():
-            if self.data.is_empty or any(self.data.position != point):
-                raise KeyError("Could not find point.")
-            else:
-                return self.data
+            return self.data
 
         octant = self._get_octant(point)
         return self.children[octant].get(point)
@@ -389,6 +409,7 @@ class Octree(object):
 
         if clear:
             n_cleared = len(data.contents)
+            # self._root._points.remove(Coordinates(*data.position))
             data.clear()
 
             while node is not None:
@@ -397,6 +418,7 @@ class Octree(object):
         else:
             data.pop()
             if data.is_empty:
+                # self._root._points.remove(Coordinates(*data.position))
                 data.clear()
             while node is not None:
                 self._n_items -= 1
