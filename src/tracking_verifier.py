@@ -83,6 +83,9 @@ class Verifier(object):
             # TODO (masasin): `self._last_pose.pose != pose.pose` was always
             #                 True in live tests. Cannot reproduce. Check to see
             #                 if it is still the case.
+            #
+            #                 Might be a python2 bug comparing IDs if __neq__ is
+            #                 not defined.
             if self._last_pose.pose == pose.pose:  # Pose unchanged.
                 reference_time = self.last_updated or self._start_time
                 if ((rospy.Time.now() - reference_time).to_sec() > TIMEOUT and
