@@ -9,6 +9,7 @@ Adds all frame and position data to the octree, and selects the best image for
 SPIRIT based on an evaluation function. The data for that image is published.
 
 """
+from __future__ import division
 from time import localtime, strftime
 
 import numpy as np
@@ -25,7 +26,7 @@ class State(object):
         self._position_precise = np.array([self.pose.position.x,
                                            self.pose.position.y,
                                            self.pose.position.z])
-        self.position = self._position_precise // 10 * 10  # Round to 1 cm
+        self.position = self._position_precise // 10 * 100  # Round to 10 cm
         self.image = image
         self.stamp = strftime("%Y-%m-%d %H:%M:%S",
                               localtime(self.pose.header.stamp.to_time()))
@@ -42,7 +43,7 @@ class Manager(object):
     """
     def __init__(self):
         self.clear()
-        self.octree = Octree((0, 0, 0), 10000)  # 10 m
+        self.octree = Octree((0, 0, 0), 100000)  # 100 m
         rospy.Subscriber("/output/slow_image_raw", Image, self.image_callback)
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
 
@@ -55,7 +56,7 @@ class Manager(object):
 
     def pose_callback(self, pose):
         self.pose = pose
-        best = self.select_best_past_image()
+        # best = self.select_best_past_image()
 
     def select_best_past_image(self):
         """
