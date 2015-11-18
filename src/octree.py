@@ -363,9 +363,9 @@ class Octree(object):
         for item in items:
             self.insert(item)
 
-    def get(self, point):
+    def _get(self, point):
         """
-        Retrieve the data at a given point.count
+        Retrieve the data at a given point.
 
         Parameters
         ----------
@@ -395,7 +395,39 @@ class Octree(object):
             return self.data
 
         octant = self._get_octant(point)
-        return self.children[octant].get(point)
+        return self.children[octant]._get(point)
+
+    def get(self, points):
+        """
+        Get a sequence of items.
+
+        Parameters
+        ----------
+        point : iterable of ndarray
+            A list of the coordinates of the points whose data is to be
+            retrieved.
+
+        Returns
+        -------
+        Data or list of Data
+            The data requested. If only a single point is requested, the data
+            will not be added to the list.
+
+        Raises
+        ------
+        KeyError
+            If any point does not exist.
+
+        """
+        try:
+            points[0][0]
+            data = []
+            for point in points:
+                data.append(self._get(point))
+        except (TypeError, IndexError):
+            data = self._get(points)
+
+        return data
 
     def remove(self, point, clear=False):
         """

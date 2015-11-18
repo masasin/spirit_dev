@@ -77,6 +77,15 @@ class TestGetting(object):
         data = self.o.get((40, 30, 40))
         assert data.contents == [self.item3]
 
+    def test_get_existing_multiple_item(self):
+        self.o.insert(self.item1)
+        self.o.insert(self.item1_copy)
+        self.o.insert(self.item2)
+        self.o.insert(self.item3)
+        data = self.o.get([(40, 30, 40), [30, 30, 40]])
+        assert data[0].contents == [self.item3]
+        assert data[1].contents == [self.item2]
+
     def test_get_item_pair(self):
         self.o.insert(self.item1)
         self.o.insert(self.item1_copy)
