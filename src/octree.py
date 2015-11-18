@@ -148,13 +148,12 @@ class Octree(object):
     bound_max
     parent : Octree
         The parent of the octree. Root nodes have a parent of None.
-    children: dict of {str: Octree}
-        The dictionary containing the list of children, one at each octant. The
-        dictionary keys are three characters long. The characters represent the
-        value of the x, y, and z coordinates respectively. If a coordinate's
-        value is less than the centre's, it will be displayed as "-";
-        coordinates with a value greater than or equal to the centre's are
-        displayed as "+".
+    children: list of Octree
+        The list of children, one at each octant. The binary value of the list
+        index represents the x, y, and z coordinates respectively.  If a
+        coordinate's value is less than the centre's, its index will have a
+        value of "0"; coordinates with a value greater than or equal to the
+        centre's are displayed as "1".
     data : Data
         The data contained in the octree.
 
@@ -181,16 +180,7 @@ class Octree(object):
         self._bound_max = self.centre + self.half_dim * np.ones(3)
         self._n_items = 0
 
-        self.children = {
-            "---": None,
-            "--+": None,
-            "-+-": None,
-            "-++": None,
-            "+--": None,
-            "+-+": None,
-            "++-": None,
-            "+++": None
-        }
+        self.children = [None] * 8
         self.data = Data()
 
     def __len__(self):
@@ -199,17 +189,12 @@ class Octree(object):
 
     def __repr__(self):
         return "[{}D{}C{}I]".format(0 if self.data.is_empty else 1,
-                                    0 if self.children else 1,
+                                    0 if self._is_leaf_node() else 1,
                                     self._n_items)
 
     def _get_octant(self, point):
         """
         Return the octant that the point is in.
-
-        The characters represent the value of the x, y, and z coordinates
-        respectively. If a coordinate's value is less than the centre's, it will
-        be displayed as "-"; coordinates with a value greater than or equal to
-        the centre's are displayed as "+".
 
         Parameters
         ----------
@@ -218,18 +203,20 @@ class Octree(object):
 
         Returns
         -------
-        str
+        int
             The octant that the point is in.
 
         """
         pos = point >= self.centre
-        return "".join("+" if i else "-" for i in pos)
+        return int("".join("1" if i else "0" for i in pos), base=2)
 
-    def _is_leaf(self):
+    def _is_leaf_node(self):
         """
         Check whether the node is a leaf node.
 
-        A leaf node does not have any children, and may contain data.
+        A leaf node does not have any children, and may contain data. Since the
+        children are either all None or all nodes, we can check only the first
+        child.
 
         Returns
         -------
@@ -237,9 +224,9 @@ class Octree(object):
             True if the node is a leaf node.
 
         """
-        return self.children["---"] is None
+        return self.children[0] is None
 
-    def _check_bounds(self, point):
+    def _point_in_node(self, point):
         """
         Check whether a point's coordinates are within the node boundaries.
 
@@ -249,9 +236,9 @@ class Octree(object):
             True if the point is within the bounding box.
 
         """
-        return self._check_box(point, self.bound_min, self.bound_max)
+        return self._point_in_box(point, self.bound_min, self.bound_max)
 
-    def _check_box(self, point, bound_min, bound_max):
+    def _point_in_box(self, point, bound_min, bound_max):
         """
         Check whether a point's coordinates are within a box boundaries.
 
@@ -275,7 +262,7 @@ class Octree(object):
         """
         node_bmin = node.bound_min
         node_bmax = node.bound_max
-        return any(node_bmin > bound_max) or any(node_bmax < bound_min)
+        return all(node_bmin > bound_max) or all(node_bmax < bound_min)
 
     def insert(self, item):
         """
@@ -300,10 +287,10 @@ class Octree(object):
         the function again.
 
         """
-        if not self._check_bounds(item.position) and self.parent is None:
+        if not self._point_in_node(item.position) and self.parent is None:
             raise OctreeBoundsError
 
-        if self._is_leaf():
+        if self._is_leaf_node():
             # Register the point
             self._points.add(Coordinates(*item.position))
             if self._points_array_up_to_date:
@@ -316,14 +303,14 @@ class Octree(object):
             else:
                 # Split the node by creating new children.
                 new_half_dim = self.half_dim / 2
-                for child in self.children:
+                for pos in range(len(self.children)):
                     new_centre = self.centre.copy()
-                    for i, sign in enumerate(child):
-                        multiplier = 1 if sign == "+" else -1
+                    for i, sign in enumerate(bin(pos)[2:]):
+                        multiplier = 1 if sign == "1" else -1
                         new_centre[i] += new_half_dim * multiplier
-                    self.children[child] = Octree(new_centre,
-                                                  new_half_dim,
-                                                  parent=self)
+                    self.children[pos] = Octree(new_centre,
+                                                new_half_dim,
+                                                parent=self)
 
                 # The old data contents must be moved into a child node.
                 old_data_octant = self._get_octant(self.data.position)
@@ -391,7 +378,7 @@ class Octree(object):
             print(point, self._points)
             raise KeyError("Could not find point.")
 
-        if self._is_leaf():
+        if self._is_leaf_node():
             return self.data
 
         octant = self._get_octant(point)
@@ -420,7 +407,7 @@ class Octree(object):
 
         """
         try:
-            points[0][0]
+            points[0][0]  # Check to see if list of lists. Assumes no strings.
             data = []
             for point in points:
                 data.append(self._get(point))
@@ -492,17 +479,15 @@ class Octree(object):
         This method is recursive.
 
         """
-        if self._is_leaf():
+        if self._is_leaf_node():
             if not self.data.is_empty:
-                if self._check_box(self.data.position, bound_min, bound_max):
+                if self._point_in_box(self.data.position, bound_min, bound_max):
                     yield self.data
         else:
             for child in self.children:
-                if self._node_outside_box(self.children[child],
-                                          bound_min, bound_max):
+                if self._node_outside_box(child, bound_min, bound_max):
                     continue
-                for point in self.children[child].get_points_in_box(bound_min,
-                                                                    bound_max):
+                for point in child.get_points_in_box(bound_min, bound_max):
                     yield point
 
     def get_nearest(self, point, k=1):
