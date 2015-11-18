@@ -89,6 +89,7 @@ class Data(object):
         -------
         bool
             True if the data has no content.
+
         """
         return not len(self.contents)
 
