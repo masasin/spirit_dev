@@ -680,7 +680,7 @@ class Ntree(object):
 
 class Octree(Ntree):
     def __init__(self, centre, half_dim, parent=None):
-        super().__init__(centre, half_dim, parent, n_dims=3)
+        super(Octree, self).__init__(centre, half_dim, parent, n_dims=3)
 
 
 if __name__ == "__main__":
