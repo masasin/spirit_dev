@@ -497,7 +497,9 @@ class Ntree(object):
         Get the k points nearest to a given point.
 
         Note that if the point corresponds to an existing coordinate, then the
-        distance is zero, and the data at that point will also be returned.
+        distance is zero, and the data at that point will also be returned. If k
+        is greater than the number of points stored in the tree, only those
+        points are returned.
 
         Parameters
         ----------
