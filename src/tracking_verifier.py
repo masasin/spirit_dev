@@ -42,8 +42,7 @@ class Verifier(object):
 
         self.subscriber = rospy.Subscriber("/ardrone/pose", PoseStamped,
                                            self.callback, queue_size=1)
-        self.publisher = rospy.Publisher("/ardrone/tracked", Bool,
-                                         latch=True, queue_size=1)
+        self.publisher = rospy.Publisher("/ardrone/tracked", Bool, queue_size=1)
 
         self.connected = False
         self.last_updated = None
@@ -92,6 +91,7 @@ class Verifier(object):
                     self.tracking = True
 
         self._last_pose = pose
+        self.publisher.publish(Bool(self.tracking))
 
     @property
     def tracking(self):
@@ -134,7 +134,6 @@ class Verifier(object):
                 rospy.loginfo("Tracking reacquired")
 
         self._tracking = value
-        self.publisher.publish(Bool(value))
 
 
 def shutdown_hook():
