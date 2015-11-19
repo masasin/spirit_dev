@@ -128,7 +128,7 @@ class Verifier(object):
                 rospy.logwarn("Tracking lost!")
                 self.beep()
         elif self.connected:
-            if self.last_updated is None:
+            if self.tracking is None:
                 rospy.loginfo("Tracking acquired")
             else:
                 rospy.loginfo("Tracking reacquired")
