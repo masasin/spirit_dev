@@ -120,7 +120,7 @@ class Verifier(object):
             The new value of the tracking state.
 
         """
-        if not value:
+        if value is False:
             if self.tracking is None:
                 rospy.logwarn("AR.Drone is not being tracked! "
                               "Please check your setup.")
