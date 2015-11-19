@@ -8,6 +8,6 @@
     required="true">
     <rosparam file="$(find spirit)/config/mocap.yaml" command="load"/>
   </node>
-  <node name="beeper" pkg="spirit" type="beeper.py" output="screen" />
+  <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
 </launch>
 
