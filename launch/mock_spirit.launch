@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- camera -->
+  <node name="ardrone" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <param name="video_device" value="/dev/video0" />
+    <param name="camera_name" value="ardrone_front" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="ardrone/base_link" />
+    <param name="io_method" value="mmap"/>
+    <param name="camera_info_url" type="string" value="file://$(find spirit)/config/ardrone_front.yaml" />
+  </node>
+  <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />
+
+  <!-- display -->
+  <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
+    <remap from="image_raw" to="ardrone/image_raw" />
+    <param name="contents" value="30 Hz feed" />
+  </node>
+  <node name="display_slow_camera" pkg="spirit" type="display_camera.py" output="screen">
+    <remap from="image_raw" to="ardrone/slow_image_raw" />
+    <param name="contents" value="2 Hz feed" />
+  </node>
+
+  <!-- mocap -->
+  <node pkg="mocap_optitrack"
+    type="mocap_node"
+    name="mocap_node"
+    respawn="false"
+    launch-prefix=""
+    required="true">
+    <rosparam file="$(find spirit)/config/mocap.yaml" command="load"/>
+  </node>
+  <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
+
+  <!-- past image -->
+  <node name="past_image_selector" pkg="spirit" type="past_image_selector.py" output="screen" />
+
+  <!-- rviz -->
+  <arg name="model" />
+  <arg name="gui" default="False"/>
+  <param name="robot_description" textfile="$(find spirit)/urdf/drone.urdf" />
+  <param name="use_gui" value="$(arg gui)" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find spirit)/config/spirit.rviz" required="True" />
+</launch>
+
