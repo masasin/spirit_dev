@@ -1,26 +1,21 @@
-from collections import namedtuple
-
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
 
 
 # TODO (masasin):
-#     - Allow dynamic expansion of Octree
+#     - Allow dynamic expansion of Ntree
 #     - Merge empty sibling leaves
 
 
-Coordinates = namedtuple("Coordinates", "x y z")
+class NtreeError(Exception):
+    """Generic ntree error."""
 
 
-class OctreeError(Exception):
-    """Generic octree error."""
+class NtreeBoundsError(NtreeError):
+    """Raised when a point is inserted outside of the bounds of the ntree."""
 
 
-class OctreeBoundsError(OctreeError):
-    """Raised when a point is inserted outside of the bounds of the octree."""
-
-
-class _Frame(object):
+class Frame(object):
     """
     Dummy frame class.
 
@@ -30,25 +25,25 @@ class _Frame(object):
 
     Parameters
     ----------
-    position : ndarray
-        The x, y, z coordinates at which the frame was taken.
+    coordinates : ndarray
+        The coordinates at which the frame was taken.
     contents : any
         Any content.
 
     Attributes
     ----------
-    position : ndarray
-        The x, y, z coordinates at which the frame was taken.
+    coordinates : ndarray
+        The coordinates at which the frame was taken.
     contents : any
         Any content.
 
     """
-    def __init__(self, position, contents):
-        self.position = np.asarray(position)
+    def __init__(self, coordinates, contents):
+        self.coordinates = np.asarray(coordinates)
         self.contents = contents
 
     def __repr__(self):
-        return "Frame ({}): {}".format(self.position.tolist(), self.contents)
+        return "Frame ({}): {}".format(self.coordinates.tolist(), self.contents)
 
 
 class Data(object):
@@ -56,21 +51,21 @@ class Data(object):
     A data class.
 
     It represents the data value of a given node. If there is no data, the
-    position field is also cleared.
+    coordinates field is also cleared.
 
     Attributes
     ----------
     is_empty
-    position : ndarray
-        The x, y, z position of the data stored at the node.
-    contents : list of _Frame
-        A list of all frames added to the octree at this point, in the order
+    coordinates : ndarray
+        The coordinates of the data stored at the node.
+    contents : list of Frame
+        A list of all frames added to the ntree at this point, in the order
         they were added. A full implementation might sort the frames by
         quality.
 
     """
     def __init__(self):
-        self.position = None
+        self.coordinates = None
         self.contents = []
 
     def __len__(self):
@@ -78,7 +73,7 @@ class Data(object):
         return len(self.contents)
 
     def __repr__(self):
-        return "Data ({}): {}".format(self.position, self.contents)
+        return "Data ({}): {}".format(self.coordinates, self.contents)
 
     @property
     def is_empty(self):
@@ -99,14 +94,14 @@ class Data(object):
 
         Parameters
         ----------
-        item : _Frame
-            Any item with a position attribute.
+        item : Frame
+            Any item with a coordinates attribute.
 
         """
-        if self.position is None:
-            self.position = np.asarray(item.position)
-        elif any(item.position != self.position):
-            raise OctreeError("Wrong position")
+        if self.coordinates is None:
+            self.coordinates = np.asarray(item.coordinates)
+        elif any(item.coordinates != self.coordinates):
+            raise NtreeError("Wrong coordinates")
         self.contents.append(item)
 
     def pop(self):
@@ -115,18 +110,19 @@ class Data(object):
 
     def clear(self):
         """Reset the `Data` object to its default state."""
-        self.position = None
+        self.coordinates = None
         self.contents = []
 
 
-class Octree(object):
+class Ntree(object):
     """
-    An octree class.
+    An ntree class.
 
-    In this implementation, octrees are perfectly cubical, and they can only
-    accept one data point. If more than one data point is inserted, the octree
-    splits. If an item is removed, and that node's siblings have no data either,
-    it currently does not merge those nodes to form the parent node.
+    In this implementation, ntree sizes are the same for all dimensions, and
+    ntrees can only accept one data point. If more than one data point is
+    inserted, the ntree splits. If an item is removed, and that node's siblings
+    have no data either, it currently does not merge those nodes to form the
+    parent node.
 
     Changes to the boundaries, the centre, or the length update the other
     variables simultaneously.
@@ -134,11 +130,11 @@ class Octree(object):
     Parameters
     ----------
     centre : ndarray
-        The x, y, z coordinates of the centre of the octree.
+        The coordinates of the centre of the ntree.
     half_dim : float
-        Half the length of one side of the cube.
-    parent : Octree, optional
-        The parent of the octree. Default (for the root node) is None.
+        Half the length of one side of one dimension.
+    parent : Ntree, optional
+        The parent of the ntree. Default (for the root node) is None.
 
     Attributes
     ----------
@@ -147,20 +143,23 @@ class Octree(object):
     side
     bound_min
     bound_max
-    parent : Octree
-        The parent of the octree. Root nodes have a parent of None.
-    children: list of Octree
+    n_dims : int, optional
+        The number of dimensions that the tree has. Default is 2, or a quadtree.
+    parent : Ntree, optional
+        The parent of the ntree. Root nodes have a parent of None.
+    children: list of Ntree
         The list of children, one at each octant. The binary value of the list
         index represents the x, y, and z coordinates respectively.  If a
         coordinate's value is less than the centre's, its index will have a
         value of "0"; coordinates with a value greater than or equal to the
         centre's are displayed as "1".
     data : Data
-        The data contained in the octree.
+        The data contained in the ntree.
 
     """
-    def __init__(self, centre, half_dim, parent=None):
+    def __init__(self, centre, half_dim, parent=None, n_dims=2):
         self.parent = parent
+        self._n_dims = n_dims
 
         # Store a set of points for easy retrieval. Can be converted into a
         # numpy array in order to find nearest neighbours.
@@ -177,11 +176,11 @@ class Octree(object):
 
         self._centre = np.asarray(centre)
         self._half_dim = half_dim
-        self._bound_min = self.centre - self.half_dim * np.ones(3)
-        self._bound_max = self.centre + self.half_dim * np.ones(3)
+        self._bound_min = self.centre - self.half_dim * np.ones(self._n_dims)
+        self._bound_max = self.centre + self.half_dim * np.ones(self._n_dims)
         self._n_items = 0
 
-        self.children = [None] * 8
+        self.children = [None] * 2**self._n_dims
         self.data = Data()
 
     def __len__(self):
@@ -200,7 +199,7 @@ class Octree(object):
         Parameters
         ----------
         point : ndarray
-            The x, y, z coordinates of the point whose quadrant is to be found.
+            The coordinates of the point whose quadrant is to be found.
 
         Returns
         -------
@@ -274,13 +273,13 @@ class Octree(object):
 
         Parameters
         ----------
-        item : _Frame
-            The item to be inserted. The item must have a position attribute.
+        item : Frame
+            The item to be inserted. The item must have a coordinates attribute.
 
         Raises
         ------
-        OctreeBoundsError
-            If the item coordinates are outside the boundaries of the octree.
+        NtreeBoundsError
+            If the item coordinates are outside the boundaries of the ntree.
 
         Notes
         -----
@@ -288,64 +287,65 @@ class Octree(object):
         the function again.
 
         """
-        if not self._point_in_node(item.position) and self.parent is None:
-            raise OctreeBoundsError
+        if not self._point_in_node(item.coordinates) and self.parent is None:
+            raise NtreeBoundsError
 
         if self._is_leaf_node():
             # Register the point
-            self._points.add(Coordinates(*item.position))
+            self._points.add(tuple(item.coordinates))
             if self._points_array_up_to_date:
                 self._points_array_up_to_date = False
 
             # Data can be added.
-            if self.data.is_empty or all(self.data.position == item.position):
+            if self.data.is_empty or all(self.data.coordinates ==
+                                         item.coordinates):
                 # A node may only have data at one position.
                 self.data.append(item)
             else:
                 # Split the node by creating new children.
                 new_half_dim = self.half_dim / 2
-                for pos in range(len(self.children)):
+                for pos in range(2**self._n_dims):
                     new_centre = self.centre.copy()
                     for i, sign in enumerate(bin(pos)[2:]):
                         multiplier = 1 if sign == "1" else -1
                         new_centre[i] += new_half_dim * multiplier
-                    self.children[pos] = Octree(new_centre,
-                                                new_half_dim,
-                                                parent=self)
+                    self.children[pos] = self.__class__(new_centre,
+                                                        new_half_dim,
+                                                        parent=self)
 
                 # The old data contents must be moved into a child node.
-                old_data_octant = self._get_octant(self.data.position)
+                old_data_octant = self._get_octant(self.data.coordinates)
                 self.children[old_data_octant].extend(self.data.contents)
                 self.data.clear()
 
                 # The new data is inserted recursively into the child node.
-                new_data_octant = self._get_octant(item.position)
+                new_data_octant = self._get_octant(item.coordinates)
                 self.children[new_data_octant].insert(item)
 
         else:
             # This is an interior node. We need to go the leaf.
-            octant = self._get_octant(item.position)
+            octant = self._get_octant(item.coordinates)
             self.children[octant].insert(item)
 
         self._n_items += 1
 
     def extend(self, items):
         """
-        Extend the octree with a sequence of items.
+        Extend the ntree with a sequence of items.
 
         This function inserts each item in the sequence into its respective node
         on the tree.
 
         Parameters
         ----------
-        items : list of _Frame
+        items : list of Frame
             An iterable of items to be added.
 
         Raises
         ------
-        OctreeBoundsError
+        NtreeBoundsError
             If at least one item in the list is outside the bounding box of the
-            octree.
+            ntree.
 
         """
         for item in items:
@@ -358,7 +358,7 @@ class Octree(object):
         Parameters
         ----------
         point : ndarray
-            The x, y, z coordinates of the point whose data is to be retrieved.
+            The coordinates of the point whose data is to be retrieved.
 
         Returns
         -------
@@ -375,7 +375,7 @@ class Octree(object):
         This method is recursive.
 
         """
-        if Coordinates(*point) not in self._points:
+        if tuple(point) not in self._points:
             print(point, self._points)
             raise KeyError("Could not find point.")
 
@@ -424,7 +424,7 @@ class Octree(object):
         Parameters
         ----------
         point : ndarray
-            The x, y, z coordinates of the point to be removed.
+            The coordinates of the point to be removed.
         clear : bool, optional
             If True, empties the contents of the data at the point. Default is
             False.
@@ -440,7 +440,7 @@ class Octree(object):
 
         if clear:
             n_cleared = len(data.contents)
-            self._points.remove(Coordinates(*data.position))
+            self._points.remove(tuple(data.coordinates))
             if self._points_array_up_to_date:
                 self._points_array_up_to_date = False
             data.clear()
@@ -451,7 +451,7 @@ class Octree(object):
         else:
             data.pop()
             if data.is_empty:
-                self._points.remove(Coordinates(*data.position))
+                self._points.remove(tuple(data.coordinates))
                 if self._points_array_up_to_date:
                     self._points_array_up_to_date = False
                 data.clear()
@@ -466,9 +466,9 @@ class Octree(object):
         Parameters
         ----------
         bound_min : ndarray
-            The x, y, z coordinates of the vertex with the minimum values.
+            The coordinates of the vertex with the minimum values.
         bound_max : ndarray
-            The x, y, z coordinates of the vertex with the maximum values.
+            The coordinates of the vertex with the maximum values.
 
         Yields
         ------
@@ -482,7 +482,8 @@ class Octree(object):
         """
         if self._is_leaf_node():
             if not self.data.is_empty:
-                if self._point_in_box(self.data.position, bound_min, bound_max):
+                if self._point_in_box(self.data.coordinates,
+                                      bound_min, bound_max):
                     yield self.data
         else:
             for child in self.children:
@@ -501,7 +502,7 @@ class Octree(object):
         Parameters
         ----------
         point : ndarray
-            The x, y, z coordinates of the point.
+            The coordinates of the point.
         k : int
             The number of neighbours to find.
 
@@ -516,7 +517,7 @@ class Octree(object):
         Raises
         ------
         ValueError
-            - If there are no filled nodes in the octree.
+            - If there are no filled nodes in the ntree.
             - If k has an invalid value.
 
         """
@@ -543,12 +544,12 @@ class Octree(object):
     @property
     def centre(self):
         """
-        Return the x, y, z coordinates of the centre of the octree.
+        Return the coordinates of the centre of the ntree.
 
         Returns
         -------
         ndarray
-            The x, y, z coordinates of the centre of the octree.
+            The coordinates of the centre of the ntree.
 
         """
         return self._centre
@@ -556,7 +557,7 @@ class Octree(object):
     @centre.setter
     def centre(self, values):
         """
-        Move the x, y, z coordinates of the centre of the octree.
+        Move the coordinates of the centre of the ntree.
 
         Update the bounds simultaneously.
 
@@ -567,18 +568,18 @@ class Octree(object):
 
         """
         self._centre = np.asarray(values)
-        self._bound_min = self.centre - self.half_dim * np.ones(3)
-        self._bound_max = self.centre + self.half_dim * np.ones(3)
+        self._bound_min = self.centre - self.half_dim * np.ones(self._n_dims)
+        self._bound_max = self.centre + self.half_dim * np.ones(self._n_dims)
 
     @property
     def half_dim(self):
         """
-        Return half the length of one side of the cube.
+        Return half the length of one dimension.
 
         Returns
         -------
         float
-            Half the length of one side of the cube.
+            Half the length of one side of one dimension.
 
         """
         return self._half_dim
@@ -586,7 +587,8 @@ class Octree(object):
     @half_dim.setter
     def half_dim(self, value):
         """
-        Set the length of half one side of the cube, while keeping the centre.
+        Set the length of half one side of one dimension, while keeping the
+        centre fixed.
 
         Update the bounds simultaneously.
 
@@ -597,18 +599,18 @@ class Octree(object):
 
         """
         self._half_dim = value
-        self._bound_min = self.centre - self.half_dim * np.ones(3)
-        self._bound_max = self.centre + self.half_dim * np.ones(3)
+        self._bound_min = self.centre - self.half_dim * np.ones(self._n_dims)
+        self._bound_max = self.centre + self.half_dim * np.ones(self._n_dims)
 
     @property
     def side(self):
         """
-        Return the length of one side of the octree.
+        Return the length of one side of the ntree.
 
         Returns
         -------
         float
-            The length of one side of the octree.
+            The length of one side of the ntree.
 
         """
         return self.half_dim * 2
@@ -621,7 +623,7 @@ class Octree(object):
         Returns
         -------
         ndarray
-            The x, y, z coordinates of the vertex with the minimum values.
+            The coordinates of the vertex with the minimum values.
 
         """
         return self._bound_min
@@ -629,14 +631,14 @@ class Octree(object):
     @bound_min.setter
     def bound_min(self, values):
         """
-        Set the minimum boundary of the octree while keeping the maximum.
+        Set the minimum boundary of the ntree while keeping the maximum.
 
         Update the centre and half_dim lengths simultaneously.
 
         Parameters
         ----------
         values : ndarray
-            The x, y, z coordinates of the vertex with the minimum values.
+            The coordinates of the vertex with the minimum values.
 
         """
         self._bound_min = np.asarray(values)
@@ -651,7 +653,7 @@ class Octree(object):
         Returns
         -------
         ndarray
-            The x, y, z coordinates of the vertex with the maximum values.
+            The coordinates of the vertex with the maximum values.
 
         """
         return self._bound_max
@@ -659,14 +661,14 @@ class Octree(object):
     @bound_max.setter
     def bound_max(self, values):
         """
-        Set the maximum boundary of the octree while keeping the minimum.
+        Set the maximum boundary of the ntree while keeping the minimum.
 
         Update the centre and half_dim lengths simultaneously.
 
         Parameters
         ----------
         values : ndarray
-            The x, y, z coordinates of the vertex with the maximum values.
+            The coordinates of the vertex with the maximum values.
 
         """
         self._bound_max = np.asarray(values)
@@ -674,12 +676,17 @@ class Octree(object):
         self._half_dim = (self.bound_min - self.bound_min) / 2
 
 
+class Octree(Ntree):
+    def __init__(self, centre, half_dim, parent=None):
+        super().__init__(centre, half_dim, parent, n_dims=3)
+
+
 if __name__ == "__main__":
     o = Octree((0, 0, 0), 100)
-    item1 = _Frame((20, 30, 40), "An item 1")
-    item1_copy = _Frame((20, 30, 40), "An item 1 copy")
-    item2 = _Frame((30, 30, 40), "An item 2")
-    item3 = _Frame((40, 30, 40), "An item 3")
+    item1 = Frame((20, 30, 40), "An item 1")
+    item1_copy = Frame((20, 30, 40), "An item 1 copy")
+    item2 = Frame((30, 30, 40), "An item 2")
+    item3 = Frame((40, 30, 40), "An item 3")
 
     o.insert(item1)
     o.insert(item1_copy)

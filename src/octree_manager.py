@@ -17,22 +17,22 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 
-from octree import Octree
+from ntree import Octree
 
 
 class State(object):
     def __init__(self, pose, image):
         self.pose = pose
-        self._position_precise = np.array([self.pose.position.x,
-                                           self.pose.position.y,
-                                           self.pose.position.z])
-        self.position = self._position_precise // 10 * 100  # Round to 10 cm
+        self._coords_precise = np.array([self.pose.position.x,
+                                         self.pose.position.y,
+                                         self.pose.position.z])
+        self.coordinates = self._coords_precise // 10 * 100  # Round to 10 cm
         self.image = image
         self.stamp = strftime("%Y-%m-%d %H:%M:%S",
                               localtime(self.pose.header.stamp.to_time()))
 
     def __repr__(self):
-        return "Frame ({}): {}".format(self._position_precise.tolist(),
+        return "Frame ({}): {}".format(self._coords_precise.tolist(),
                                        self.stamp)
 
 

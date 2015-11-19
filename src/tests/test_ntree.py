@@ -1,6 +1,9 @@
 import pytest
 
-from octree import Octree, OctreeBoundsError, _Frame
+from ntree import Octree, NtreeBoundsError, Frame
+
+
+# Note that Ntrees with n_dims != 3 have not been tested yet.
 
 
 class TestInitialization(object):
@@ -15,14 +18,14 @@ class TestInitialization(object):
 class TestInsertion(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = _Frame((20, 30, 40), "An item 1")
-        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
-        self.item2 = _Frame((30, 30, 40), "An item 2")
-        self.item3 = _Frame((40, 30, 40), "An item 3")
+        self.item1 = Frame((20, 30, 40), "An item 1")
+        self.item1_copy = Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = Frame((30, 30, 40), "An item 2")
+        self.item3 = Frame((40, 30, 40), "An item 3")
 
     def test_add_item_out_of_bounds(self):
-        item = _Frame((20, 110, 40), "An item")
-        with pytest.raises(OctreeBoundsError):
+        item = Frame((20, 110, 40), "An item")
+        with pytest.raises(NtreeBoundsError):
             self.o.insert(item)
 
     def test_add_one_item(self):
@@ -52,10 +55,10 @@ class TestInsertion(object):
 class TestGetting(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = _Frame((20, 30, 40), "An item 1")
-        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
-        self.item2 = _Frame((30, 30, 40), "An item 2")
-        self.item3 = _Frame((40, 30, 40), "An item 3")
+        self.item1 = Frame((20, 30, 40), "An item 1")
+        self.item1_copy = Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = Frame((30, 30, 40), "An item 2")
+        self.item3 = Frame((40, 30, 40), "An item 3")
 
     def test_get_empty_tree(self):
         with pytest.raises(KeyError):
@@ -123,7 +126,7 @@ class TestGetting(object):
         self.o.insert(self.item1)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        dists, data = self.o.get_nearest(self.item1.position)
+        dists, data = self.o.get_nearest(self.item1.coordinates)
         assert dists[0] == 0
         assert data[0].contents == [self.item1]
 
@@ -132,7 +135,7 @@ class TestGetting(object):
         self.o.insert(self.item2)
         self.o.insert(self.item3)
         self.o.insert(self.item1_copy)
-        dists, data = self.o.get_nearest(self.item1.position)
+        dists, data = self.o.get_nearest(self.item1.coordinates)
         assert data[0].contents == [self.item1, self.item1_copy]
 
     def test_get_nearest_two_items(self):
@@ -149,7 +152,7 @@ class TestGetting(object):
         self.o.insert(self.item1)
         self.o.insert(self.item3)
         self.o.insert(self.item1_copy)
-        dists, data = self.o.get_nearest(self.item2.position, k=2)
+        dists, data = self.o.get_nearest(self.item2.coordinates, k=2)
         contents = [data[i].contents for i in range(len(data))]
         assert [self.item1, self.item1_copy] in contents
         assert [self.item3] in contents
@@ -158,10 +161,10 @@ class TestGetting(object):
 class TestRemoval(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = _Frame((20, 30, 40), "An item 1")
-        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
-        self.item2 = _Frame((30, 30, 40), "An item 2")
-        self.item3 = _Frame((40, 30, 40), "An item 3")
+        self.item1 = Frame((20, 30, 40), "An item 1")
+        self.item1_copy = Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = Frame((30, 30, 40), "An item 2")
+        self.item3 = Frame((40, 30, 40), "An item 3")
 
     def test_remove_nonexistent_item(self):
         with pytest.raises(KeyError):
@@ -175,7 +178,7 @@ class TestRemoval(object):
         data = self.o.get((40, 30, 40))
         self.o.remove((40, 30, 40))
         assert data.contents == []
-        assert data.position is None
+        assert data.coordinates is None
         assert len(self.o) == 3
 
     def test_remove_existing_item_from_list(self):
@@ -202,10 +205,10 @@ class TestRemoval(object):
 class TestPointGathering(object):
     def setup(self):
         self.o = Octree((0, 0, 0), 100)
-        self.item1 = _Frame((20, 30, 40), "An item 1")
-        self.item1_copy = _Frame((20, 30, 40), "An item 1 copy")
-        self.item2 = _Frame((30, 30, 40), "An item 2")
-        self.item3 = _Frame((40, 30, 40), "An item 3")
+        self.item1 = Frame((20, 30, 40), "An item 1")
+        self.item1_copy = Frame((20, 30, 40), "An item 1 copy")
+        self.item2 = Frame((30, 30, 40), "An item 2")
+        self.item3 = Frame((40, 30, 40), "An item 3")
 
     def test_get_points_in_box_empty(self):
         points = self.o.get_points_in_box((0, 0, 0), (25, 35, 50))
