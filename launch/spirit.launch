@@ -13,7 +13,7 @@
   </node>
   <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />
   <node name="display_slow_camera" pkg="spirit" type="display_camera.py" output="screen">
-    <remap from="image_raw" to="output/slow_image_raw" />
+    <remap from="image_raw" to="ardrone/slow_image_raw" />
     <param name="contents" value="2 Hz feed" />
   </node>
   <node name="mocap_node" pkg="mocap_optitrack" type="mocap_node" respawn="false" launch-prefix="" required="true">

@@ -19,7 +19,7 @@ class ImageFeature(object):
         self.image_subscriber = rospy.Subscriber("/ardrone/image_raw",
                                                  Image, self.frame_callback,
                                                  queue_size=1)
-        self.image_publisher = rospy.Publisher("/output/slow_image_raw",
+        self.image_publisher = rospy.Publisher("/ardrone/slow_image_raw",
                                                Image, queue_size=1)
         rospy.logdebug("Subscribed to /ardrone/image_raw")
         self.count = 0
