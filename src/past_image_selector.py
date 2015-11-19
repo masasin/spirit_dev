@@ -68,7 +68,7 @@ class Selector(object):
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
         rospy.Subscriber("/ardrone/tracked", Bool, self.tracked_callback)
 
-        self.past_image_pub = rospy.Publisher("/output/past_image", Image,
+        self.past_image_pub = rospy.Publisher("/ardrone/past_image", Image,
                                               queue_size=1)
         self.tf_pub = tf2_ros.TransformBroadcaster()
 
