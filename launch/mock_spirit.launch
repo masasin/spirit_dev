@@ -32,6 +32,7 @@
     required="true">
     <rosparam file="$(find spirit)/config/mocap.yaml" command="load"/>
   </node>
+  <!-- <node name="mocap_node" pkg="spirit" type="mock_mocap.py" output="screen" /> -->
   <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
 
   <!-- past image -->
