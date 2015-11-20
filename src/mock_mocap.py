@@ -6,6 +6,8 @@
 Publish random similar poses to /ardrone/pose.
 
 """
+from __future__ import division
+
 import numpy as np
 
 import rospy
@@ -35,22 +37,17 @@ class PoseGenerator(object):
             pose.header.seq = sequence
             pose.header.stamp = rospy.Time.now()
 
-            pose.pose.position.x = np.random.rand()
-            pose.pose.position.y = np.random.rand()
-            pose.pose.position.z = np.random.rand()
+            pose.pose.position.x = np.random.rand() / 100
+            pose.pose.position.y = np.random.rand() / 100
+            pose.pose.position.z = np.random.rand() / 100
 
-            pose.pose.orientation.x = np.random.rand()
-            pose.pose.orientation.y = np.random.rand()
-            pose.pose.orientation.z = np.random.rand()
-            pose.pose.orientation.w = np.random.rand()
+            pose.pose.orientation.x = np.random.rand() / 100
+            pose.pose.orientation.y = np.random.rand() / 100
+            pose.pose.orientation.z = np.random.rand() / 100
+            pose.pose.orientation.w = np.random.rand() / 100
 
             self.pose_pub.publish(pose)
             self.rate.sleep()
-
-        self.shutdown()
-
-    def shutdown(self):
-        self.camera.release()
 
 
 def main():
