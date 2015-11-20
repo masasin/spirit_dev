@@ -22,17 +22,21 @@
     <remap from="image_raw" to="ardrone/slow_image_raw" />
     <param name="contents" value="2 Hz feed" />
   </node>
+  <node name="display_past_image" pkg="spirit" type="display_camera.py" output="screen">
+    <remap from="image_raw" to="ardrone/past_image" />
+    <param name="contents" value="Past Image" />
+  </node>
 
   <!-- mocap -->
-  <node pkg="mocap_optitrack"
-    type="mocap_node"
-    name="mocap_node"
-    respawn="false"
-    launch-prefix=""
-    required="true">
-    <rosparam file="$(find spirit)/config/mocap.yaml" command="load"/>
-  </node>
-  <!-- <node name="mocap_node" pkg="spirit" type="mock_mocap.py" output="screen" /> -->
+  <!-- <node pkg="mocap_optitrack" -->
+  <!--   type="mocap_node" -->
+  <!--   name="mocap_node" -->
+  <!--   respawn="false" -->
+  <!--   launch-prefix="" -->
+  <!--   required="true"> -->
+  <!--   <rosparam file="$(find spirit)/config/mocap.yaml" command="load"/> -->
+  <!-- </node> -->
+  <node name="mocap_node" pkg="spirit" type="mock_mocap.py" output="screen" />
   <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
 
   <!-- past image -->
