@@ -60,7 +60,7 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        ardrone/base_link:
+        ardrone/body:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -87,7 +87,7 @@ Visualization Manager:
       Value: false
     - Class: rviz/Camera
       Enabled: true
-      Image Rendering: background and overlay
+      Image Rendering: background
       Image Topic: /ardrone/past_image
       Name: Camera
       Overlay Alpha: 0.5
@@ -124,7 +124,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.9968
+      Distance: 3.142
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -159,5 +159,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1535
-  X: 55
-  Y: -14
+  X: 65
+  Y: 24

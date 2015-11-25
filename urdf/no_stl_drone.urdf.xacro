@@ -19,13 +19,13 @@
     </link>
 
     <joint name="base_to_${name}" type="fixed">
-      <parent link="base_link"/>
+      <parent link="body"/>
       <child link="${name}"/>
       <origin xyz="${hull_radius*x} ${hull_radius*y} 0"/>
     </joint>
   </xacro:macro>
 
-  <link name="base_link">
+  <link name="body">
     <visual>
       <geometry>
 	<box size="${base_length} ${base_width} ${base_height}"/>

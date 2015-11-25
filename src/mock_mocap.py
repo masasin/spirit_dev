@@ -43,10 +43,10 @@ class PoseGenerator(object):
             pose.pose.position.y = np.random.rand() / 100
             pose.pose.position.z = np.random.rand() / 100
 
-            pose.pose.orientation.x = np.random.rand() / 100
-            pose.pose.orientation.y = np.random.rand() / 100
-            pose.pose.orientation.z = np.random.rand() / 100
-            pose.pose.orientation.w = np.random.rand() / 100
+            pose.pose.orientation.x = 0.1
+            pose.pose.orientation.y = 0
+            pose.pose.orientation.z = 0.1
+            pose.pose.orientation.w = 0.1
 
             t = TransformStamped()
             t.header.stamp = rospy.Time.now()
