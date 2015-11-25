@@ -13,6 +13,21 @@
   </node>
   <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />
 
+  <!-- mocap -->
+  <node pkg="mocap_optitrack"
+    type="mocap_node"
+    name="mocap_node"
+    respawn="false"
+    launch-prefix=""
+    required="true">
+    <rosparam file="$(find spirit)/config/mocap.yaml" command="load"/>
+  </node>
+  <!-- <node name="mocap_node" pkg="spirit" type="mock_mocap.py" output="screen" /> -->
+  <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
+
+  <!-- past images -->
+  <node name="past_image_selector" pkg="spirit" type="past_image_selector.py" output="screen" />
+
   <!-- display -->
   <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
     <remap from="image_raw" to="ardrone/image_raw" />
@@ -26,21 +41,6 @@
     <remap from="image_raw" to="ardrone/past_image" />
     <param name="contents" value="Past Image" />
   </node>
-
-  <!-- mocap -->
-  <!-- <node pkg="mocap_optitrack" -->
-  <!--   type="mocap_node" -->
-  <!--   name="mocap_node" -->
-  <!--   respawn="false" -->
-  <!--   launch-prefix="" -->
-  <!--   required="true"> -->
-  <!--   <rosparam file="$(find spirit)/config/mocap.yaml" command="load"/> -->
-  <!-- </node> -->
-  <node name="mocap_node" pkg="spirit" type="mock_mocap.py" output="screen" />
-  <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
-
-  <!-- past image -->
-  <node name="past_image_selector" pkg="spirit" type="past_image_selector.py" output="screen" />
 
   <!-- rviz -->
   <arg name="model" />

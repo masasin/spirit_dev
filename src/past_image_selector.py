@@ -9,7 +9,6 @@ import numpy as np
 from numpy.linalg import norm
 import rospy
 import tf2_ros
-
 from geometry_msgs.msg import PoseStamped, TransformStamped
 from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
@@ -132,7 +131,7 @@ class Selector(object):
         t = TransformStamped()
         t.header.stamp = rospy.Time.now()
         t.header.frame_id = "world"
-        t.child_frame_id = "ardrone"
+        t.child_frame_id = "ardrone/body"
 
         t.transform.translation.x = position[0]
         t.transform.translation.y = position[1]

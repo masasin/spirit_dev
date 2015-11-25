@@ -11,7 +11,8 @@ from __future__ import division
 import numpy as np
 
 import rospy
-from geometry_msgs.msg import PoseStamped
+import tf2_ros
+from geometry_msgs.msg import PoseStamped, TransformStamped
 
 
 class PoseGenerator(object):
@@ -22,6 +23,7 @@ class PoseGenerator(object):
     def __init__(self):
         self.pose_pub = rospy.Publisher("/ardrone/pose",
                                         PoseStamped, queue_size=1)
+        self.tf_pub = tf2_ros.TransformBroadcaster()
         self.rate = rospy.Rate(30)
 
     def stream(self):
@@ -45,6 +47,20 @@ class PoseGenerator(object):
             pose.pose.orientation.y = np.random.rand() / 100
             pose.pose.orientation.z = np.random.rand() / 100
             pose.pose.orientation.w = np.random.rand() / 100
+
+            t = TransformStamped()
+            t.header.stamp = rospy.Time.now()
+            t.header.frame_id = "world"
+            t.child_frame_id = "ardrone/body"
+
+            t.transform.translation.x = pose.pose.position.x
+            t.transform.translation.y = pose.pose.position.y
+            t.transform.translation.z = pose.pose.position.z
+
+            t.transform.rotation.x = pose.pose.orientation.x
+            t.transform.rotation.y = pose.pose.orientation.y
+            t.transform.rotation.z = pose.pose.orientation.z
+            t.transform.rotation.w = pose.pose.orientation.w
 
             self.pose_pub.publish(pose)
             self.rate.sleep()
