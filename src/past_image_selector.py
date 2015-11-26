@@ -48,13 +48,53 @@ class Frame(object):
                                        self.stamp)
 
 
+class Evaluator(object):
+    def __init__(self, method, parent=None):
+        self.parent = parent
+        self.evaluate = self.__getattribute__(method)
+
+    def constant_time_delay(self, pose):
+        if len(self.parent.frames):
+            optimum_timestamp = pose.header.stamp.to_sec() - self.parent._delay
+
+            for frame in reversed(self.parent.frames):
+                if frame.stamp.to_sec() < optimum_timestamp:
+                    return frame
+            return self.parent.frames[-1]
+
+    def constant_distance(self, pose, distance=None):
+        if len(self.parent.frames):
+            optimum_distance = error_current = error_min = self.parent._distance
+            position, orientation = get_pose_components(pose)
+            for frame in reversed(self.parent.frames):
+                frame_distance = norm(frame._coords_precise - position)
+                if frame_distance > optimum_distance:
+                    error_current = abs(frame_distance - optimum_distance)
+                    if (error_current < error_min):
+                        return frame
+            return self.parent.frames[-1]
+
+    def test(self, pose):
+        def eval_func(pose, frame):
+            pass
+
+        position, orientation = get_pose_components(pose)
+        nearest_ten = self.parent.octree.get_nearest(position, k=10)
+        results = {}
+        for location in nearest_ten:
+            for frame in location:
+                results[frame] = eval_func(frame)
+        return min(results, key=results.get)
+
+
 class Selector(object):
     def __init__(self):
         self.clear()
         self.octree = Octree((0, 0, 0), 100000)  # 100 m
         self.frames = []  # Chronological
 
-        self.evaluate = self.get_eval_function(rospy.get_param("~eval_method"))
+        method = rospy.get_param("~eval_method")
+        self.evaluate = Evaluator(method, self).evaluate
 
         rospy.Subscriber("/ardrone/slow_image_raw", Image, self.image_callback)
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
@@ -84,47 +124,6 @@ class Selector(object):
 
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
-
-    def get_eval_function(self, method):
-        eval = {
-            "constant_time_delay": self._eval_const_time_delay,
-            "constant_distance": self._eval_const_distance,
-            "test": self._eval_test,
-        }
-        return eval[method]
-
-    def _eval_const_time_delay(self, pose):
-        if len(self.frames):
-            optimum_timestamp = pose.header.stamp.to_sec() - self._delay
-
-            for frame in reversed(self.frames):
-                if frame.stamp.to_sec() < optimum_timestamp:
-                    return frame
-            return self.frames[-1]
-
-    def _eval_const_distance(self, pose, distance=None):
-        if len(self.frames):
-            optimum_distance = error_current = error_min = self._distance
-            position, orientation = get_pose_components(pose)
-            for frame in reversed(self.frames):
-                frame_distance = norm(frame._coords_precise - position)
-                if frame_distance > optimum_distance:
-                    error_current = abs(frame_distance - optimum_distance)
-                    if (error_current < error_min):
-                        return frame
-            return self.frames[-1]
-
-    def _eval_test(self, pose):
-        def eval_func(pose, frame):
-            pass
-
-        position, orientation = get_pose_components(pose)
-        nearest_ten = self.octree.get_nearest(position, k=10)
-        results = {}
-        for location in nearest_ten:
-            for frame in location:
-                results[frame] = eval_func(frame)
-        return min(results, key=results.get)
 
     def update_tf(self, pose):
         position, orientation = get_pose_components(pose)
