@@ -5,10 +5,11 @@ try:
 except ImportError:
     import mock
 
-from geometry_msgs.msg import PoseStamped
 import pygame
 import pytest
+
 import rospy
+from geometry_msgs.msg import PoseStamped
 
 import tracking_verifier
 

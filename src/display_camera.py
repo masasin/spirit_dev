@@ -7,10 +7,10 @@ Display raw feed and low framerate feed.
 
 """
 import cv2
+from cv_bridge import CvBridge, CvBridgeError
 
 import rospy
 from sensor_msgs.msg import Image
-from cv_bridge import CvBridge, CvBridgeError
 
 
 class Display(object):

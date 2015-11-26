@@ -12,10 +12,11 @@ tracking was lost, beep to let the operator know.
 """
 import os
 
+import pygame
+
+import rospy
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool
-import pygame
-import rospy
 
 
 TIMEOUT = 0.25  # seconds
