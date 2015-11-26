@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="eval_method" default="constant_time_delay" doc="The evaluation method to use" />
+  <arg name="constant_time_delay_delay" default="10" doc="Time delay, in seconds" />
+  <arg name="constant_distance_distance" default="1.5" doc="Distance, in metres" />
+
+  <node name="past_image_selector" pkg="spirit" type="past_image_selector.py" output="screen">
+    <param name="eval_method" value="$(arg eval_method)" />
+    <param name="delay" value="$(arg constant_time_delay_delay)" />
+    <param name="distance" value="$(arg constant_distance_distance)" />
+  </node>
+</launch>

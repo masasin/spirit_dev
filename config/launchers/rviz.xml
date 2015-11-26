@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="urdf_path" default="$(find spirit)/urdf/drone.urdf" doc="The path to the drone model" />
+  <arg name="rviz_settings_path"
+       default="$(find spirit)/config/spirit.rviz"
+       doc="The path to the rviz configuration file" />
+  <arg name="joint_state_publisher_gui" default="false" doc="Whether to display the JSP GUI"/>
+
+  <param name="robot_description" textfile="$(arg urdf_path)" />
+  <param name="use_gui" value="$(arg joint_state_publisher_gui)" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_settings_path)" required="True" />
+</launch>

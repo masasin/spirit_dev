@@ -1,22 +1,68 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="droneip" default="192.168.1.1" />
-  <node name="ardrone_driver" pkg="ardrone_autonomy" type="ardrone_driver" output="screen" args="-ip $(arg droneip)">
-    <param name="navdata_demo" value="False" />
-    <param name="realtime_navdata" value="True" />
-    <param name="realtime_video" value="True" />
-    <param name="looprate" value="30" />
-  </node>
-  <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
-    <remap from="image_raw" to="ardrone/image_raw" />
-    <param name="contents" value="30 Hz feed" />
-  </node>
-  <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />
-  <node name="display_slow_camera" pkg="spirit" type="display_camera.py" output="screen">
-    <remap from="image_raw" to="ardrone/slow_image_raw" />
-    <param name="contents" value="2 Hz feed" />
-  </node>
-  <node name="mocap_node" pkg="mocap_optitrack" type="mocap_node" respawn="false" launch-prefix="" required="true">
-    <rosparam filename="package://spirit/config/mocap.yaml" command="load" />
-  </node>
+  <!-- Flags -->
+  <arg name="mock_ardrone" value="true" />
+  <arg name="mock_pose" value="true" />
+
+  <arg name="use_mocap" value="false" />
+  <arg name="display_feeds" value="true" doc="Whether to display all camera feeds" />
+  <arg name="joint_state_publisher_gui" value="false" />
+
+  <!-- Settings -->
+  <arg name="drone_ip" value="192.168.1.1" />
+  <arg name="past_image_eval_method" value="constant_time_delay" />
+  <arg name="urdf_path" value="$(find spirit)/urdf/drone.urdf" />
+  <arg name="rviz_settings_path" value="$(find spirit)/config/spirit.rviz" />
+
+  <!-- Camera
+       
+       Receives the camera feed from the AR.Drone, unless mocked. The feed is
+       then slowed from 30 Hz to 2 Hz.
+
+  -->
+  <include file="$(find spirit)/config/launchers/ardrone.xml" >
+    <arg name="mock_ardrone" value="$(arg mock_ardrone)" />
+    <arg name="drone_ip" value="$(arg drone_ip)" />
+  </include>
+
+  <!-- Pose
+      
+       Publishes the pose of the AR.Drone, unless mocked.
+
+       Note that if the AR.Drone feed is mocked, `ardrone_autonomy` would not be
+       launched, so there would be no odometry. In that case, the pose will be
+       mocked if `use_mocap` is `false`.
+       
+  -->
+  <include file="$(find spirit)/config/launchers/pose.xml" >
+    <arg name="mock_pose" value="$(arg mock_pose)" />
+    <arg name="use_mocap" value="$(arg use_mocap)" />
+    <arg name="mock_ardrone" value="$(arg mock_ardrone)" />
+  </include>
+
+  <!-- Past images
+
+       Selects the past image to use and publishes it.
+       
+  -->
+  <include file="$(find spirit)/config/launchers/past_images.xml" >
+    <arg name="eval_method" value="$(arg past_image_eval_method)" />
+    <arg name="constant_time_delay_delay" value="10" doc="seconds" />
+    <arg name="constant_distance_distance" value="1.5" doc="metres" />
+  </include>
+
+  <!-- Display
+
+       Displays all video feeds if `display_feeds` is `true`.
+       
+  -->
+  <include file="$(find spirit)/config/launchers/display.xml" if="$(arg display_feeds)" />
+
+  <!-- rviz -->
+  <include file="$(find spirit)/config/launchers/rviz.xml" >
+    <arg name="urdf_path" value="$(arg urdf_path)" />
+    <arg name="rviz_settings_path" value="$(arg rviz_settings_path)" />
+    <arg name="joint_state_publisher_gui" value="$(arg joint_state_publisher_gui)" />
+  </include>
 </launch>
+

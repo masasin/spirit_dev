@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="mock_pose" default="false" doc="Whether to mock the drone pose" />
+  <arg name="use_mocap" default="false" doc="Whether to connect to the mocap system" />
+  <arg name="mock_ardrone" default="false" doc="Whether to mock the drone camera input" />
+
+  <node name="mocap_node"
+    pkg="spirit"
+    type="mock_mocap.py"
+    output="screen"
+    if="$(arg mock_pose)" />
+
+  <group unless="$(arg mock_pose)" >
+    <node name="mocap_node"
+	  pkg="mocap_optitrack"
+	  type="mocap_node"
+	  respawn="false"
+	  launch-prefix=""
+	  required="true"
+	  if="$(arg use_mocap)" >
+      <rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
+    </node>
+
+    <group unless="$(arg use_mocap)" >
+      <node name="mocap_node"
+	pkg="spirit"
+	type="mock_mocap.py"
+	output="screen"
+	if="$(arg mock_ardrone)" />
+
+      <node name="mocap_node"
+	pkg="spirit"
+	type="pose_from_odometry.py"
+	output="screen"
+	if="$(arg mock_ardrone)" />
+    </group>
+  </group>
+
+  <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
+</launch>
