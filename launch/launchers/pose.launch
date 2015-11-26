@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="mock_pose" default="false" doc="Whether to mock the drone pose" />
-  <arg name="use_mocap" default="false" doc="Whether to connect to the mocap system" />
-  <arg name="mock_ardrone" default="false" doc="Whether to mock the drone camera input" />
+  <arg name="mock_pose" />
+  <arg name="use_mocap" />
+  <arg name="mock_ardrone" />
 
   <node name="mocap_node"
     pkg="spirit"

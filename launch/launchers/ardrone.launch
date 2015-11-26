@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="mock_ardrone" default="false" doc="Whether to mock the drone camera input" />
-  <arg name="drone_ip" default="192.168.1.1" doc="The IP address of the drone, if connected" />
+  <arg name="mock_ardrone" />
+  <arg name="drone_ip" />
 
   <group unless="$(arg mock_ardrone)" >
     <node name="ardrone"

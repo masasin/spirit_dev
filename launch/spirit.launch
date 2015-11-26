@@ -1,18 +1,23 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Flags -->
-  <arg name="mock_ardrone" value="true" />
-  <arg name="mock_pose" value="true" />
+  <arg name="mock_ardrone" default="false" doc="Whether to mock the drone camera input" />
+  <arg name="mock_pose" default="false" doc="Whether to mock the drone pose" />
 
-  <arg name="use_mocap" value="false" />
-  <arg name="display_feeds" value="true" doc="Whether to display all camera feeds" />
-  <arg name="joint_state_publisher_gui" value="false" />
+  <arg name="use_mocap" default="false" doc="Whether to connect to the mocap system" />
+  <arg name="display_feeds" default="false" doc="Whether to display all camera feeds" />
+  <arg name="joint_state_publisher_gui" default="false" doc="Whether to display the JSP GUI"/>
 
   <!-- Settings -->
-  <arg name="drone_ip" value="192.168.1.1" />
-  <arg name="past_image_eval_method" value="constant_time_delay" />
-  <arg name="urdf_path" value="$(find spirit)/urdf/drone.urdf" />
-  <arg name="rviz_settings_path" value="$(find spirit)/config/spirit.rviz" />
+  <arg name="drone_ip" default="192.168.1.1" doc="The IP address of the drone, if connected" />
+  <arg name="past_image_eval_method" default="constant_time_delay" doc="The evaluation method to use" />
+  <arg name="past_image_ctime_delay" default="10" doc="seconds" />
+  <arg name="past_image_cdist_distance" default="1.5" doc="metres" />
+
+  <arg name="urdf_path" default="$(find spirit)/urdf/drone.urdf" doc="The path to the drone model" />
+  <arg name="rviz_settings_path"
+       default="$(find spirit)/config/spirit.rviz"
+       doc="The path to the rviz configuration file" />
 
   <!-- Camera
        
@@ -47,8 +52,8 @@
   -->
   <include file="$(find spirit)/launch/launchers/past_images.launch" >
     <arg name="eval_method" value="$(arg past_image_eval_method)" />
-    <arg name="constant_time_delay_delay" value="10" doc="seconds" />
-    <arg name="constant_distance_distance" value="1.5" doc="metres" />
+    <arg name="constant_time_delay_delay" value="$(arg past_image_ctime_delay)" />
+    <arg name="constant_distance_distance" value="$(arg past_image_cdist_distance)" />
   </include>
 
   <!-- Display
