@@ -10,7 +10,7 @@ import rospy
 from sensor_msgs.msg import Image
 
 
-class ImageFeature(object):
+class FramerateReducer(object):
     """
     A ROS image Publisher/Subscriber.
 
@@ -38,7 +38,7 @@ class ImageFeature(object):
 def main():
     """Initialize ROS node."""
     rospy.init_node("framerate_reducer", anonymous=True)
-    ImageFeature()
+    FramerateReducer()
     rospy.loginfo("Reducing framerate")
     rospy.spin()
 
