@@ -86,48 +86,45 @@ class Selector(object):
         self.tracked = tracked.data
 
     def get_eval_function(self, method):
-        if method == "constant_time_delay":
-            delay = rospy.get_param("~delay")
+        eval = {
+            "constant_time_delay": self._eval_const_time_delay,
+            "constant_distance": self._eval_const_distance,
+            "test": self._eval_test,
+        }
+        return eval[method]
 
-            def eval_function(pose):
-                if len(self.frames):
-                    optimum_timestamp = pose.header.stamp.to_sec() - delay
+    def _eval_const_time_delay(self, pose):
+        if len(self.frames):
+            optimum_timestamp = pose.header.stamp.to_sec() - self._delay
 
-                    for frame in reversed(self.frames):
-                        if frame.stamp.to_sec() < optimum_timestamp:
-                            return frame
-                    return self.frames[-1]
+            for frame in reversed(self.frames):
+                if frame.stamp.to_sec() < optimum_timestamp:
+                    return frame
+            return self.frames[-1]
 
-        elif method == "constant_distance":
-            distance = rospy.get_param("~distance")
+    def _eval_const_distance(self, pose, distance=None):
+        if len(self.frames):
+            optimum_distance = error_current = error_min = self._distance
+            position, orientation = get_pose_components(pose)
+            for frame in reversed(self.frames):
+                frame_distance = norm(frame._coords_precise - position)
+                if frame_distance > optimum_distance:
+                    error_current = abs(frame_distance - optimum_distance)
+                    if (error_current < error_min):
+                        return frame
+            return self.frames[-1]
 
-            def eval_function(pose):
-                if len(self.frames):
-                    optimum_distance = error_current = error_min = distance
-                    position, orientation = get_pose_components(pose)
-                    for frame in reversed(self.frames):
-                        frame_distance = norm(frame._coords_precise - position)
-                        if frame_distance > optimum_distance:
-                            error_current = abs(frame_distance -
-                                                optimum_distance)
-                            if (error_current < error_min):
-                                return frame
-                    return self.frames[-1]
+    def _eval_test(self, pose):
+        def eval_func(pose, frame):
+            pass
 
-        elif method == "test":
-            def eval_function(pose):
-                def eval_func(pose, frame):
-                    pass
-
-                position, orientation = get_pose_components(pose)
-                nearest_ten = self.octree.get_nearest(position, k=10)
-                results = {}
-                for location in nearest_ten:
-                    for frame in location:
-                        results[frame] = eval_func(frame)
-                return min(results, key=results.get)
-
-        return eval_function
+        position, orientation = get_pose_components(pose)
+        nearest_ten = self.octree.get_nearest(position, k=10)
+        results = {}
+        for location in nearest_ten:
+            for frame in location:
+                results[frame] = eval_func(frame)
+        return min(results, key=results.get)
 
     def update_tf(self, pose):
         position, orientation = get_pose_components(pose)
@@ -156,6 +153,14 @@ class Selector(object):
         self.image = None
         self.pose = None
         self.tracked = None
+
+    def __getattr__(self, name):
+        if name == "_delay":
+            self._delay = rospy.get_param("~delay")
+            return self._delay
+        if name == "_distance":
+            self._distance = rospy.get_param("~distance")
+            return self._distance
 
 
 def main():
