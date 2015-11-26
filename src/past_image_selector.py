@@ -60,8 +60,6 @@ class Selector(object):
             "test": self._eval_test,
         }
         self.evaluate = _eval[rospy.get_param("~eval_method")]
-        self._delay = rospy.get_param("~delay")  # seconds
-        self._distance = rospy.get_param("~distance")  # metres
 
         rospy.Subscriber("/ardrone/slow_image_raw", Image, self.image_callback)
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
@@ -92,18 +90,22 @@ class Selector(object):
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
 
-    def _eval_const_time_delay(self, pose):
+    def _eval_const_time_delay(self, pose, delay=None):
+        if delay is None:
+            delay = rospy.get_param("~delay")
         if len(self.frames):
-            optimum_timestamp = pose.header.stamp.to_sec() - self._delay
+            optimum_timestamp = pose.header.stamp.to_sec() - delay
 
             for frame in reversed(self.frames):
                 if frame.stamp.to_sec() < optimum_timestamp:
                     return frame
             return self.frames[-1]
 
-    def _eval_const_distance(self, pose):
+    def _eval_const_distance(self, pose, distance=None):
+        if distance is None:
+            distance = rospy.get_param("~distance")
         if len(self.frames):
-            optimum_distance = error_current = error_min = self._distance
+            optimum_distance = error_current = error_min = distance
             position, orientation = get_pose_components(pose)
             for frame in reversed(self.frames):
                 frame_distance = norm(frame._coords_precise - position)
