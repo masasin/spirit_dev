@@ -19,11 +19,10 @@ class Display(object):
         Remap image_raw to your target node from the launch file.
 
         """
-        self.subscriber = rospy.Subscriber("image_raw",
-                                           Image, self.callback, queue_size=1)
+        self.subscriber = rospy.Subscriber("image", Image, self.callback,
+                                           queue_size=1)
         self.bridge = CvBridge()
-        self.contents = rospy.get_param(rospy.search_param("contents"),
-                                        "camera")
+        self.contents = rospy.get_param("~window_name", "camera")
 
     def callback(self, ros_data):
         """
