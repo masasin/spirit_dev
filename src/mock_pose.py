@@ -80,7 +80,7 @@ class PoseGenerator(object):
 
 def main():
     rospy.init_node("mock_pose", anonymous=True)
-    rospy.loginfo("Streaming mock poses.")
+    rospy.loginfo("Streaming mock poses")
     PoseGenerator().stream()
 
 
