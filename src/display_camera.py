@@ -42,12 +42,18 @@ class Display(object):
 
 
 def shutdown_hook():
-    """Runs on shutdown."""
+    """
+    Run on shutdown.
+
+    """
     cv2.destroyAllWindows()
 
 
 def main():
-    """Initialize and cleanup ROS node."""
+    """
+    Main entry point for script.
+
+    """
     rospy.init_node("image_feature", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
     display = Display()
