@@ -24,7 +24,7 @@ class PoseGenerator(object):
         self.pose_pub = rospy.Publisher("/ardrone/pose",
                                         PoseStamped, queue_size=1)
         self.tf_pub = tf2_ros.TransformBroadcaster()
-        self.rate = rospy.Rate(30)
+        self.rate = rospy.Rate(200)
 
     def stream(self):
         """
