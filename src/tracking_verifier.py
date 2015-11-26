@@ -14,13 +14,14 @@ import os
 
 import pygame
 
+import rospkg
 import rospy
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool
 
 
 TIMEOUT = 0.25  # seconds
-SPIRIT_ROOT = os.path.expanduser("~/catkin_ws/src/spirit")
+SPIRIT_ROOT = rospkg.RosPack().get_path("spirit")
 
 
 class Verifier(object):
