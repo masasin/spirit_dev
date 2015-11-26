@@ -58,10 +58,9 @@ class Selector(object):
             "constant_distance": self._eval_const_distance,
             "test": self._eval_test,
         }
-        self.evaluate = _eval[rospy.get_param("~eval_method",
-                                              "constant_time_delay")]
-        self._delay = rospy.get_param("~delay", 10)  # seconds
-        self._distance = rospy.get_param("~distance", 1.5)  # metres
+        self.evaluate = _eval[rospy.get_param("~eval_method")]
+        self._delay = rospy.get_param("~delay")  # seconds
+        self._distance = rospy.get_param("~distance")  # metres
 
         rospy.Subscriber("/ardrone/slow_image_raw", Image, self.image_callback)
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
