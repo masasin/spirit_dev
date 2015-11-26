@@ -14,7 +14,13 @@ from geometry_msgs.msg import PoseStamped
 import tracking_verifier
 
 
-@pytest.fixture(scope="session")
+try:
+    rospy.init_node("pytest", anonymous=True)
+except rospy.exceptions.ROSException:
+    pass
+
+
+@pytest.fixture(scope="module")
 def pygame_teardown():
     def fin():
         pygame.quit()
@@ -24,7 +30,6 @@ class TestVerifier(object):
     def setup(self):
         self.timeout = 5e-4
         tracking_verifier.TIMEOUT = self.timeout
-        rospy.init_node("tracking_verifier_test", anonymous=True)
         self.tracking_verifier = tracking_verifier.Verifier()
 
     def create_pose(self):
