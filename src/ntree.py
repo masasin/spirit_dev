@@ -135,6 +135,8 @@ class Ntree(object):
         Half the length of one side of one dimension.
     parent : Ntree, optional
         The parent of the ntree. Default (for the root node) is None.
+    n_dims : int, optional
+        The number of dimensions that the tree has. Default is 2, or a quadtree.
 
     Attributes
     ----------
@@ -143,11 +145,9 @@ class Ntree(object):
     side
     bound_min
     bound_max
-    n_dims : int, optional
-        The number of dimensions that the tree has. Default is 2, or a quadtree.
     parent : Ntree, optional
         The parent of the ntree. Root nodes have a parent of None.
-    children: list of Ntree
+    children : list of Ntree
         The list of children, one at each octant. The binary value of the list
         index represents the x, y, and z coordinates respectively.  If a
         coordinate's value is less than the centre's, its index will have a
@@ -679,6 +679,39 @@ class Ntree(object):
 
 
 class Octree(Ntree):
+    """
+    An octree class.
+
+    This is simply a 3-dimensional `ntree`. All above caveats apply.
+
+    Parameters
+    ----------
+    centre : ndarray
+        The coordinates of the centre of the ntree.
+    half_dim : float
+        Half the length of one side of one dimension.
+    parent : Ntree, optional
+        The parent of the ntree. Default (for the root node) is None.
+
+    Attributes
+    ----------
+    centre
+    half_dim
+    side
+    bound_min
+    bound_max
+    parent : Ntree, optional
+        The parent of the ntree. Root nodes have a parent of None.
+    children : list of Ntree
+        The list of children, one at each octant. The binary value of the list
+        index represents the x, y, and z coordinates respectively.  If a
+        coordinate's value is less than the centre's, its index will have a
+        value of "0"; coordinates with a value greater than or equal to the
+        centre's are displayed as "1".
+    data : Data
+        The data contained in the ntree.
+
+    """
     def __init__(self, centre, half_dim, parent=None):
         super(Octree, self).__init__(centre, half_dim, parent, n_dims=3)
 

@@ -107,7 +107,7 @@ class Selector(object):
     def image_callback(self, image):
         rospy.logdebug("New image")
         self.image = image
-        if self.is_ready:
+        if self.can_make_frame:
             rospy.logdebug("Adding frames to octree and queue")
             frame = Frame(self.pose, self.image)
             self.octree.insert(frame)
@@ -145,15 +145,43 @@ class Selector(object):
         self.tf_pub.sendTransform(t)
 
     @property
-    def is_ready(self):
+    def can_make_frame(self):
+        """
+        Check if we can make a frame.
+
+        """
         return self.image and self.pose and self.tracked
 
     def clear(self):
+        """
+        Reset status attributes to default values.
+
+        """
         self.image = None
         self.pose = None
         self.tracked = None
 
     def __getattr__(self, name):
+        """
+        Return undefined attributes.
+
+        Upon first access, the value of the parameter is obtained from the ros
+        parameter dictionary and stored as an attribute, from where it is read
+        on subsequent accesses.
+
+        Parameters
+        ----------
+        name : str
+            The attribute to get.
+
+        Raises
+        ------
+        AttributeError
+            If the attribute does not exist.
+        KeyError
+            If the ros parameter has not been defined.
+
+        """
         if name == "_delay":
             self._delay = rospy.get_param("~delay")
             return self._delay
@@ -163,7 +191,10 @@ class Selector(object):
 
 
 def main():
-    """Initialize ROS node."""
+    """
+    Main entry point for script.
+
+    """
     rospy.init_node("past_image_selector")
     Selector()
     rospy.loginfo("Started the past image selector")

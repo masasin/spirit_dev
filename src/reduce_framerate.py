@@ -26,7 +26,7 @@ class FramerateReducer(object):
 
     def frame_callback(self, frame):
         """
-        Callback function of subscribed topic.
+        Publish at a reduced rate.
 
         """
         # Publish every fifteenth frame
@@ -36,7 +36,10 @@ class FramerateReducer(object):
 
 
 def main():
-    """Initialize ROS node."""
+    """
+    Initialize ROS node.
+
+    """
     rospy.init_node("framerate_reducer", anonymous=True)
     FramerateReducer()
     rospy.loginfo("Reducing framerate")

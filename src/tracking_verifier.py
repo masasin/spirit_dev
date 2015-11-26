@@ -139,12 +139,18 @@ class Verifier(object):
 
 
 def shutdown_hook():
-    """Runs on shutdown."""
+    """
+    Run on shutdown.
+
+    """
     pygame.quit()
 
 
 def main():
-    """Main entry point for script."""
+    """
+    Main entry point for script.
+
+    """
     rospy.init_node("tracking_verifier", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
     Verifier()
