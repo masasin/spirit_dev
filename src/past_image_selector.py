@@ -5,29 +5,16 @@
 from __future__ import division
 from time import localtime, strftime
 
-import numpy as np
 from numpy.linalg import norm
 
 import rospy
 import tf2_ros
-from geometry_msgs.msg import PoseStamped, TransformStamped
+from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 from ntree import Octree
-
-
-def get_pose_components(pose):
-    coords = np.array([pose.pose.position.x,
-                       pose.pose.position.y,
-                       pose.pose.position.z])
-
-    orientation = np.array([pose.pose.orientation.x,
-                            pose.pose.orientation.y,
-                            pose.pose.orientation.z,
-                            pose.pose.orientation.w])
-
-    return coords, orientation
+from helpers import get_pose_components, tf_from_pose
 
 
 class Frame(object):
@@ -44,8 +31,9 @@ class Frame(object):
         return norm(self._coords_precise - other._coords_precise)
 
     def __repr__(self):
-        return "Frame ({}): {}".format(self._coords_precise.tolist(),
-                                       self.stamp)
+        return "Frame ({coords}): {time}".format(
+            coords=self._coords_precise.tolist(),
+            time=self.stamp)
 
 
 class Evaluator(object):
@@ -120,29 +108,10 @@ class Selector(object):
         best_frame = self.evaluate(pose)
         if best_frame is not None:
             self.past_image_pub.publish(best_frame.image)
-        self.update_tf(pose)
+        self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone/body"))
 
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
-
-    def update_tf(self, pose):
-        position, orientation = get_pose_components(pose)
-
-        t = TransformStamped()
-        t.header.stamp = rospy.Time.now()
-        t.header.frame_id = "world"
-        t.child_frame_id = "ardrone/body"
-
-        t.transform.translation.x = position[0]
-        t.transform.translation.y = position[1]
-        t.transform.translation.z = position[2]
-
-        t.transform.rotation.x = orientation[0]
-        t.transform.rotation.y = orientation[1]
-        t.transform.rotation.z = orientation[2]
-        t.transform.rotation.w = orientation[3]
-
-        self.tf_pub.sendTransform(t)
 
     @property
     def can_make_frame(self):
