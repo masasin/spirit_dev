@@ -6,7 +6,7 @@
 
   <node name="pose_node"
     pkg="spirit"
-    type="mock_mocap.py"
+    type="mock_pose.py"
     output="screen"
     if="$(arg mock_pose)" />
 
@@ -24,7 +24,7 @@
     <group unless="$(arg use_mocap)" >
       <node name="pose_node"
 	pkg="spirit"
-	type="mock_mocap.py"
+	type="mock_pose.py"
 	output="screen"
 	if="$(arg mock_ardrone)" />
 
