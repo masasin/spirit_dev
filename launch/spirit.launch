@@ -20,7 +20,7 @@
        then slowed from 30 Hz to 2 Hz.
 
   -->
-  <include file="$(find spirit)/config/launchers/ardrone.xml" >
+  <include file="$(find spirit)/launch/launchers/ardrone.launch" >
     <arg name="mock_ardrone" value="$(arg mock_ardrone)" />
     <arg name="drone_ip" value="$(arg drone_ip)" />
   </include>
@@ -34,7 +34,7 @@
        mocked if `use_mocap` is `false`.
        
   -->
-  <include file="$(find spirit)/config/launchers/pose.xml" >
+  <include file="$(find spirit)/launch/launchers/pose.launch" >
     <arg name="mock_pose" value="$(arg mock_pose)" />
     <arg name="use_mocap" value="$(arg use_mocap)" />
     <arg name="mock_ardrone" value="$(arg mock_ardrone)" />
@@ -45,7 +45,7 @@
        Selects the past image to use and publishes it.
        
   -->
-  <include file="$(find spirit)/config/launchers/past_images.xml" >
+  <include file="$(find spirit)/launch/launchers/past_images.launch" >
     <arg name="eval_method" value="$(arg past_image_eval_method)" />
     <arg name="constant_time_delay_delay" value="10" doc="seconds" />
     <arg name="constant_distance_distance" value="1.5" doc="metres" />
@@ -56,10 +56,10 @@
        Displays all video feeds if `display_feeds` is `true`.
        
   -->
-  <include file="$(find spirit)/config/launchers/display.xml" if="$(arg display_feeds)" />
+  <include file="$(find spirit)/launch/launchers/display.launch" if="$(arg display_feeds)" />
 
   <!-- rviz -->
-  <include file="$(find spirit)/config/launchers/rviz.xml" >
+  <include file="$(find spirit)/launch/launchers/rviz.launch" >
     <arg name="urdf_path" value="$(arg urdf_path)" />
     <arg name="rviz_settings_path" value="$(arg rviz_settings_path)" />
     <arg name="joint_state_publisher_gui" value="$(arg joint_state_publisher_gui)" />
