@@ -45,7 +45,7 @@ class PoseGenerator(object):
 
     @staticmethod
     def generate_pose(sequence=0):
-        pose = pose_from_components(coords=np.random.rand(3) / 100,
+        return pose_from_components(coords=np.random.rand(3) / 100,
                                     orientation=(0.1, 0, 0.1, 0.1),
                                     sequence=sequence)
 
