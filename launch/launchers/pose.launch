@@ -4,16 +4,16 @@
   <arg name="use_mocap" />
   <arg name="mock_ardrone" />
 
-  <node name="mocap_node"
+  <node name="pose_node"
     pkg="spirit"
     type="mock_mocap.py"
     output="screen"
     if="$(arg mock_pose)" />
 
   <group unless="$(arg mock_pose)" >
-    <node name="mocap_node"
+    <node name="pose_node"
 	  pkg="mocap_optitrack"
-	  type="mocap_node"
+	  type="pose_node"
 	  respawn="false"
 	  launch-prefix=""
 	  required="true"
@@ -22,13 +22,13 @@
     </node>
 
     <group unless="$(arg use_mocap)" >
-      <node name="mocap_node"
+      <node name="pose_node"
 	pkg="spirit"
 	type="mock_mocap.py"
 	output="screen"
 	if="$(arg mock_ardrone)" />
 
-      <node name="mocap_node"
+      <node name="pose_node"
 	pkg="spirit"
 	type="pose_from_odometry.py"
 	output="screen"
