@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <launch>
-  <node name="display_camera" pkg="spirit" type="display_camera.py" output="screen">
-    <remap from="image_raw" to="ardrone/image_raw" />
-    <param name="contents" value="30 Hz feed" />
+  <node name="display_camera" pkg="image_view" type="image_view" output="screen" >
+    <remap from="image" to="ardrone/image_raw" />
+    <param name="window_name" value="30 Hz feed" />
   </node>
 
-  <node name="display_slow_camera" pkg="spirit" type="display_camera.py" output="screen">
-    <remap from="image_raw" to="ardrone/slow_image_raw" />
-    <param name="contents" value="2 Hz feed" />
+  <node name="display_slow_camera" pkg="image_view" type="image_view" output="screen" >
+    <remap from="image" to="ardrone/slow_image_raw" />
+    <param name="window_name" value="2 Hz feed" />
   </node>
 
-  <node name="display_past_image" pkg="spirit" type="display_camera.py" output="screen">
-    <remap from="image_raw" to="ardrone/past_image" />
-    <param name="contents" value="Past Image" />
+  <node name="display_past_image" pkg="image_view" type="image_view" output="screen" >
+    <remap from="image" to="ardrone/past_image" />
+    <param name="window_name" value="Past images feed" />
   </node>
 </launch>
