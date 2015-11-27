@@ -37,14 +37,14 @@ class PoseGenerator(object):
 
         while not rospy.is_shutdown():
             sequence += 1
-            pose = self.generate_pose(sequence)
+            pose = self.generate_random_pose(sequence)
 
             self.pose_pub.publish(pose)
             self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone/body"))
             self.rate.sleep()
 
     @staticmethod
-    def generate_pose(sequence=0):
+    def generate_random_pose(sequence=0):
         return pose_from_components(coords=np.random.rand(3) / 100,
                                     orientation=(0.1, 0, 0.1, 0.1),
                                     sequence=sequence)
