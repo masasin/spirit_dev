@@ -3,7 +3,7 @@
 # (C) 2015  Jean Nassar
 # Released under BSD version 4
 """
-Publish random similar poses to /ardrone/pose.
+Publishes random similar poses to /ardrone/pose.
 
 """
 from __future__ import division
@@ -45,12 +45,29 @@ class PoseGenerator(object):
 
     @staticmethod
     def generate_random_pose(sequence=0):
+        """
+        Generate a random pose.
+
+        Parameters
+        ----------
+        sequence : int, optional
+            The sequence of the pose. Default is zero.
+
+        Returns
+        -------
+        The random pose.
+
+        """
         return pose_from_components(coords=np.random.rand(3) / 100,
                                     orientation=(0.1, 0, 0.1, 0.1),
                                     sequence=sequence)
 
 
 def main():
+    """
+    Main entry point for script.
+
+    """
     rospy.init_node("mock_pose", anonymous=True)
     rospy.loginfo("Streaming mock poses")
     PoseGenerator().stream()

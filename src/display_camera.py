@@ -14,11 +14,13 @@ from sensor_msgs.msg import Image
 
 
 class Display(object):
-    def __init__(self):
-        """
-        Remap image_raw to your target node from the launch file.
+    """
+    Displays images in an OpenCV window.
 
-        """
+    Remap image to the target node from the launch file.
+
+    """
+    def __init__(self):
         self.subscriber = rospy.Subscriber("image", Image, self.callback,
                                            queue_size=1)
         self.bridge = CvBridge()
@@ -26,9 +28,7 @@ class Display(object):
 
     def callback(self, ros_data):
         """
-        Callback function of subscribed topic.
-
-        Here, the image is displayed.
+        Display the image.
 
         """
         # Convert to CV2.

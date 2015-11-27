@@ -12,7 +12,7 @@ from sensor_msgs.msg import Image
 
 class FramerateReducer(object):
     """
-    A ROS image Publisher/Subscriber.
+    Reduces the framerate of a video feed to one fifteenth of the original.
 
     """
     def __init__(self):
