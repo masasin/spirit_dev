@@ -86,7 +86,7 @@ class Frame(object):
             time=self.stamp)
 
 
-class Evaluator(object):
+class Evaluators(object):
     """
     Contains evaluation functions.
 
@@ -194,7 +194,7 @@ class Selector(object):
         self.frames = []  # Chronological
 
         method = rospy.get_param("~eval_method")
-        self.evaluate = Evaluator(method, self).evaluate
+        self.evaluate = Evaluators(method, parent=self).evaluate
 
         rospy.Subscriber("/ardrone/slow_image_raw", Image, self.image_callback)
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
