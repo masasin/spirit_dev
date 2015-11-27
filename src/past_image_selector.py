@@ -9,6 +9,7 @@ Selects the best image for SPIRIT.
 from __future__ import division
 from time import localtime, strftime
 
+import numpy as np
 from numpy.linalg import norm
 
 import rospy
@@ -114,33 +115,105 @@ class Evaluators(object):
         If the delay has not yet passed, return the first frame.
 
         """
-        if len(self.parent.frames):
-            optimum_timestamp = pose.header.stamp.to_sec() - self.parent._delay
+        if len(self._parent.frames):
+            optimum_timestamp = pose.header.stamp.to_sec() - self._parent._delay
 
-            for frame in reversed(self.parent.frames):
+            for frame in reversed(self._parent.frames):
                 if frame.stamp.to_sec() < optimum_timestamp:
                     return frame
-            return self.parent.frames[-1]
+            return self._parent.frames[0]
 
-    def constant_distance(self, pose, distance=None):
+    def constant_distance(self, pose):
         """
         Return the frame a fixed distance away.
 
         If the distance has not yet been crossed, return the first frame.
 
         """
-        if len(self.parent.frames):
-            optimum_distance = error_current = error_min = self.parent._distance
+        if len(self._parent.frames):
+            optimum_distance = err_current = err_min = self._parent._distance
             position, orientation = get_pose_components(pose)
-            for frame in reversed(self.parent.frames):
+            for frame in reversed(self._parent.frames):
                 frame_distance = norm(frame._coords_precise - position)
                 if frame_distance > optimum_distance:
-                    error_current = abs(frame_distance - optimum_distance)
-                    if (error_current < error_min):
+                    err_current = abs(frame_distance - optimum_distance)
+                    if (err_current < err_min):
                         return frame
-            return self.parent.frames[-1]
+            return self._parent.frames[0]
 
-    def test(self, pose):
+    def murata(self, pose):
+        """
+        Use the evaluation function from Murata's thesis. [#]_
+
+        Notes
+        -----
+        The evaluation function is:
+
+        .. math::
+            E = a_1 ((z_{camera} - z_{ref})/z_{ref})^2 +
+                a_2 (β_{xy}/(π / 2))^2 +
+                a_3 (α/φ_v)^2 +
+                a_4 ((|\mathbf{a}| - L)/L)^2 +
+                a_5 (|\mathbf{x}^v - \mathbf{x}^v_{curr}|/
+                     |\mathbf{x}^v_{curr}|)^2
+
+        where :math:`a_1` through :math:`a_4` are coefficients, :math:`z` is the
+        difference in height of the drone, :math:`α` is the tilt angle,
+        :math:`β` is the difference in yaw, :math:`\mathbf{a}` is the distance
+        vector, :math:`L` is the optimal distance, and :math:`φ_v` is the angle
+        of the vertical field of view.
+
+        :math:`φ_v` is calculated using :math:`φ_h`, the angle of the horizontal
+        field of view:
+
+        .. math::
+            φ_v = 2\mathrm{arctan}(γ\mathrm{tan}(φ_h/2))
+
+        where :math:`γ` is the aspect ratio of the display.
+
+        References
+        ----------
+        .. [#] Ryosuke Murata, Undergrad Thesis, Kyoto University, 2013
+               過去画像履歴を用いた移動マニピュレータの遠隔操作システム
+
+        """
+        def eval_func(pose, frame):
+            coords, orientation = get_pose_components(pose)
+            best_state_vector = np.hstack((coords, orientation))
+            old_state_vector = np.hstack(
+                (self._parent.current_frame.coords_precise,
+                 self._parent.current_frame.orientation))
+            change = best_state_vector - old_state_vector
+
+            a1, a2, a3, a4, a5 = (1, 2, 3, 4, 5)
+            z_camera = change[2]
+            z_ref = 0.5
+
+            beta = 1
+            alpha = 1
+            fov_v = np.pi / 3
+
+            a_mag = norm(coords - self._parent.current_frame.coords_precise)
+            L_ref = 1
+
+            score = (a1 * ((z_camera - z_ref)/z_ref) ** 2 +
+                     a2 * (beta / (np.pi / 2)) ** 2 +
+                     a3 * (alpha / fov_v) ** 2 +
+                     a4 * ((a_mag - L_ref)/L_ref) ** 2 +
+                     a5 * (change / old_state_vector) ** 2)
+
+            return score
+
+        if self._parent.current_frame is None:
+            return self._parent.frames[0]
+
+        if len(self._parent.frames):
+            results = {}
+            for frame in reversed(self._parent.frames):
+                results[frame] = eval_func(pose, frame)
+            return min(results, key=results.get)
+
+    def spirit(self, pose):
         """
         Not implemented yet.
 
@@ -155,7 +228,7 @@ class Evaluators(object):
         results = {}
         for location in nearest_ten:
             for frame in location:
-                results[frame] = eval_func(frame)
+                results[frame] = eval_func(pose, frame)
         return min(results, key=results.get)
 
 
@@ -190,7 +263,9 @@ class Selector(object):
     """
     def __init__(self):
         self.clear()
-        self.octree = Octree((0, 0, 0), 100000)  # 100 m
+        self.current_frame = None
+
+        self.octree = Octree((0, 0, 0), 100000)  # 100 m per side
         self.frames = []  # Chronological
 
         method = rospy.get_param("~eval_method")
@@ -225,10 +300,12 @@ class Selector(object):
         """
         rospy.logdebug("New pose")
         self.pose = pose
+        self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone/body"))
+
         best_frame = self.evaluate(pose)
         if best_frame is not None:
+            self.current_frame = best_frame
             self.past_image_pub.publish(best_frame.image)
-        self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone/body"))
 
     def tracked_callback(self, tracked):
         """
