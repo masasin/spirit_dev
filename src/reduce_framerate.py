@@ -37,7 +37,7 @@ class FramerateReducer(object):
 
 def main():
     """
-    Initialize ROS node.
+    Main entry point for script.
 
     """
     rospy.init_node("framerate_reducer", anonymous=True)
