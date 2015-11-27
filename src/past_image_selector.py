@@ -151,12 +151,9 @@ class Selector(object):
             If the ros parameter has not been defined.
 
         """
-        if name == "_delay":
-            self._delay = rospy.get_param("~delay")
-            return self._delay
-        if name == "_distance":
-            self._distance = rospy.get_param("~distance")
-            return self._distance
+        if name in ("_delay", "_distance"):
+            self.__setattr__(name, rospy.get_param("~{n}".format(n=name[1:])))
+            return self.__getattribute__(name)
 
 
 def main():
