@@ -75,7 +75,7 @@ class Frame(object):
             The distance to the target frame.
 
         """
-        return norm(self._coords_precise - other._coords_precise)
+        return norm(self.coords_precise - other.coords_precise)
 
     def __repr__(self):
         """
@@ -83,7 +83,7 @@ class Frame(object):
 
         """
         return "Frame ({coords}): {time}".format(
-            coords=self._coords_precise.tolist(),
+            coords=self.coords_precise.tolist(),
             time=self.stamp)
 
 
@@ -127,19 +127,19 @@ class Evaluators(object):
         """
         Return the frame a fixed distance away.
 
-        If the distance has not yet been crossed, return the first frame.
+        If the distance has not yet been crossed, return the last frame.
 
         """
         if len(self._parent.frames):
             optimum_distance = err_current = err_min = self._parent._distance
             position, orientation = get_pose_components(pose)
             for frame in reversed(self._parent.frames):
-                frame_distance = norm(frame._coords_precise - position)
+                frame_distance = norm(frame.coords_precise - position)
                 if frame_distance > optimum_distance:
                     err_current = abs(frame_distance - optimum_distance)
                     if (err_current < err_min):
                         return frame
-            return self._parent.frames[0]
+            return self._parent.frames[-1]
 
     def murata(self, pose):
         """
@@ -300,7 +300,7 @@ class Selector(object):
         """
         rospy.logdebug("New pose")
         self.pose = pose
-        self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone/body"))
+        self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone"))
 
         best_frame = self.evaluate(pose)
         if best_frame is not None:

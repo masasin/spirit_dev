@@ -3,7 +3,7 @@
 # (C) 2015  Jean Nassar
 # Released under BSD version 4
 """
-Reduce /ardrone/image_raw framerate from 30 Hz to 2 Hz.
+Reduce /ardrone/image_color framerate from 30 Hz to 2 Hz.
 
 """
 import rospy
@@ -16,12 +16,12 @@ class FramerateReducer(object):
 
     """
     def __init__(self):
-        self.image_subscriber = rospy.Subscriber("/ardrone/image_raw",
+        self.image_subscriber = rospy.Subscriber("/ardrone/image_color",
                                                  Image, self.frame_callback,
                                                  queue_size=1)
         self.image_publisher = rospy.Publisher("/ardrone/slow_image_raw",
                                                Image, queue_size=1)
-        rospy.logdebug("Subscribed to /ardrone/image_raw")
+        rospy.logdebug("Subscribed to /ardrone/image_color")
         self.count = 0
 
     def frame_callback(self, frame):

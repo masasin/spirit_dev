@@ -60,6 +60,10 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        ardrone:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         ardrone/body:
           Alpha: 1
           Show Axes: false
@@ -124,7 +128,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.142
+      Distance: 2.57153
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -136,10 +140,10 @@ Visualization Manager:
         Z: 0
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.455397
-      Target Frame: <Fixed Frame>
+      Pitch: 0.200396
+      Target Frame: ardrone/body
       Value: Orbit (rviz)
-      Yaw: 1.6754
+      Yaw: 6.27859
     Saved: ~
 Window Geometry:
   Camera:

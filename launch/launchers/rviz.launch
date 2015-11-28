@@ -4,7 +4,12 @@
   <arg name="rviz_settings_path" />
   <arg name="joint_state_publisher_gui" />
 
-  <param name="robot_description" textfile="$(arg urdf_path)" />
+  <node name="ardrone2body"
+        pkg="tf"
+	type="static_transform_publisher"
+	args="0 0 0 0 0 0 1 ardrone ardrone/body 100" />
+
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(arg urdf_path)'" />
   <param name="use_gui" value="$(arg joint_state_publisher_gui)" />
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />

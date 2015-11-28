@@ -14,7 +14,7 @@
   <arg name="past_image_ctime_delay" default="10" doc="seconds" />
   <arg name="past_image_cdist_distance" default="1.5" doc="metres" />
 
-  <arg name="urdf_path" default="$(find spirit)/urdf/drone.urdf" doc="The path to the drone model" />
+  <arg name="urdf_path" default="$(find spirit)/urdf/drone.urdf.xacro" doc="The path to the drone model" />
   <arg name="rviz_settings_path"
        default="$(find spirit)/config/spirit.rviz"
        doc="The path to the rviz configuration file" />

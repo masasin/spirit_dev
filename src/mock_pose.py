@@ -29,9 +29,9 @@ class PoseGenerator(object):
         self.rate = rospy.Rate(200)
         self.n_items = 100000
         x = np.arange(self.n_items)
-        self.x_pos = np.sin(0.5*x*np.pi/180)
-        self.y_pos = np.sin(1*x*np.pi/180)
-        self.z_pos = np.sin(1.5*x*np.pi/180)
+        self.x_pos = np.sin(0.1*x*np.pi/180)
+        self.y_pos = np.sin(0.1*x*np.pi/180)
+        self.z_pos = np.sin(0.1*x*np.pi/180)
 
     def stream(self):
         """
@@ -63,10 +63,10 @@ class PoseGenerator(object):
 
         """
         idx = sequence % self.n_items
-        return pose_from_components(coords=(self.x_pos[idx],
-                                            self.y_pos[idx],
-                                            self.z_pos[idx]),
-                                    orientation=(0.1, 0, 0.1, 0.1),
+        return pose_from_components(coords=(30*self.x_pos[idx],
+                                            0,
+                                            0),  # self.z_pos[idx]),
+                                    orientation=(0, 1, 0, -0.6),
                                     sequence=sequence)
 
     @staticmethod
