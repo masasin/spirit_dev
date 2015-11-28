@@ -51,6 +51,26 @@ class TestInsertion(object):
         self.o.insert(self.item1_copy)
         assert self.o.data.contents == [self.item1, self.item1_copy]
 
+    def test_adding_does_not_recurse(self):
+        tree = Octree((0, 0, 0), 1000)
+        failing_sequence = (61, 76, 89, 103, 112, 124, 137, 154, 164, 178, 183,
+                            205, 219, 228, 237, 244, 252, 260, 266, 272, 278,
+                            282, 287, 295, 296, 298, 299, 300)
+
+        for item in failing_sequence:
+            tree.insert(Frame((item, 0, 0), "frame"))
+
+
+class TestGetOctant(object):
+    def test_simple_case(self):
+        tree = Octree((0, 0, 0), 1000)
+        assert tree.get_octant((61, 0, 0)) == 0b111
+
+    def test_next_step(self):
+        tree = Octree((500, 500, 500), 500)
+        assert tree.get_octant((61, 0, 0)) == 0b000
+        assert tree.get_octant((76, 0, 0)) == 0b000
+
 
 class TestGetting(object):
     def setup(self):
