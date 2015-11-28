@@ -306,19 +306,7 @@ class Ntree(object):
                 # A node may only have data at one position.
                 self.data.append(item)
             else:
-                # Split the node by creating new children.
-                new_half_dim = self.half_dim / 2
-                for pos in range(2**self.n_dims):
-                    new_centre = []
-                    for i, sign in enumerate(format(pos,
-                                                    "0{}b".format(self.n_dims)
-                                                    )):
-                        multiplier = 1 if sign == "1" else -1
-                        new_centre.append(self.centre[i] +
-                                          new_half_dim * multiplier)
-                    self.children[pos] = self.__class__(new_centre,
-                                                        new_half_dim,
-                                                        parent=self)
+                self.split()  # Split the node by creating new children.
 
                 # The old data contents must be moved into a child node.
                 old_data_octant = self.get_octant(self.data.coordinates)
@@ -357,6 +345,20 @@ class Ntree(object):
         """
         for item in items:
             self.insert(item)
+
+    def split(self):
+        """
+        Split the ntree into multiple nodes.
+
+        """
+        half_dim = self.half_dim / 2
+        for pos in range(2**self.n_dims):
+            centre = []
+            for i, sign in enumerate(format(pos, "0{}b".format(self.n_dims))):
+                multiplier = 1 if sign == "1" else -1
+                centre.append(self.centre[i] + half_dim * multiplier)
+
+            self.children[pos] = self.__class__(centre, half_dim, parent=self)
 
     def _get(self, point):
         """

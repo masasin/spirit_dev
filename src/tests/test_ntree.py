@@ -1,6 +1,6 @@
 import pytest
 
-from ntree import Octree, NtreeBoundsError, Frame
+from ntree import Ntree, Octree, NtreeBoundsError, Frame
 
 
 # Note that Ntrees with n_dims != 3 have not been tested yet.
@@ -11,8 +11,13 @@ class TestInitialization(object):
         self.o = Octree((0, 0, 0), 100)
 
     def test_default_limits(self):
-        self.o.bound_min.tolist() == [-100, -100, -100]
-        self.o.bound_max.tolist() == [100, 100, 100]
+        assert self.o.bound_min.tolist() == [-100, -100, -100]
+        assert self.o.bound_max.tolist() == [100, 100, 100]
+
+    def test_ntree_size(self):
+        assert Ntree((0, 0), 100).n_dims == 2
+        assert Ntree((0, 0, 0), 100).n_dims == 3
+        assert Ntree((0, 0, 0, 0), 100).n_dims == 4
 
 
 class TestInsertion(object):
@@ -59,6 +64,13 @@ class TestInsertion(object):
 
         for item in failing_sequence:
             tree.insert(Frame((item, 0, 0), "frame"))
+
+    def test_split(self):
+        self.o.split()
+        assert self.o.children[0].bound_min.tolist() == [-100, -100, -100]
+        assert self.o.children[0].bound_max.tolist() == [0, 0, 0]
+        assert self.o.children[0b101].bound_min.tolist() == [0, -100, 0]
+        assert self.o.children[0b101].bound_max.tolist() == [100, 0, 100]
 
 
 class TestGetOctant(object):
