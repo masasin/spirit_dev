@@ -27,6 +27,11 @@ class PoseGenerator(object):
                                         PoseStamped, queue_size=1)
         self.tf_pub = tf2_ros.TransformBroadcaster()
         self.rate = rospy.Rate(200)
+        self.n_items = 100000
+        x = np.arange(self.n_items)
+        self.x_pos = np.sin(0.5*x*np.pi/180)
+        self.y_pos = np.sin(1*x*np.pi/180)
+        self.z_pos = np.sin(1.5*x*np.pi/180)
 
     def stream(self):
         """
@@ -37,11 +42,32 @@ class PoseGenerator(object):
 
         while not rospy.is_shutdown():
             sequence += 1
-            pose = self.generate_random_pose(sequence)
+            pose = self.generate_sine_pose(sequence)
 
             self.pose_pub.publish(pose)
             self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone/body"))
             self.rate.sleep()
+
+    def generate_sine_pose(self, sequence=0):
+        """
+        Generate a sinusoidal pose.
+
+        Parameters
+        ----------
+        sequence : int, optional
+            The sequence of the pose. Default is zero.
+
+        Returns
+        -------
+        The generated pose.
+
+        """
+        idx = sequence % self.n_items
+        return pose_from_components(coords=(self.x_pos[idx],
+                                            self.y_pos[idx],
+                                            self.z_pos[idx]),
+                                    orientation=(0.1, 0, 0.1, 0.1),
+                                    sequence=sequence)
 
     @staticmethod
     def generate_random_pose(sequence=0):
@@ -55,7 +81,7 @@ class PoseGenerator(object):
 
         Returns
         -------
-        The random pose.
+        The generated pose.
 
         """
         return pose_from_components(coords=np.random.rand(3) / 100,

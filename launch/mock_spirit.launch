@@ -6,5 +6,6 @@
     <arg name="use_mocap" value="false" />
     <arg name="display_feeds" value="true" />
     <arg name="past_image_eval_method" value="constant_time_delay" />
+    <arg name="past_image_ctime_delay" value="1.5" />
   </include>
 </launch>
