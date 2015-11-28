@@ -94,6 +94,37 @@ def pose_from_components(coords, orientation, sequence=0):
     return pose
 
 
+def pose_from_tf(transform):
+    """
+    Generate a pose from a transform.
+
+    Parameters
+    ----------
+    transform : TransformStamped
+        The transform to be translated.
+
+    Returns
+    -------
+    PoseStamped
+        The pose.
+
+    """
+    pose = PoseStamped()
+    pose.header.stamp = rospy.Time.now()
+    pose.header.frame_id = transform.header.frame_id
+
+    pose.pose.position.x = transform.transform.translation.x
+    pose.pose.position.y = transform.transform.translation.y
+    pose.pose.position.z = transform.transform.translation.z
+
+    pose.pose.orientation.x = transform.transform.rotation.x
+    pose.pose.orientation.y = transform.transform.rotation.y
+    pose.pose.orientation.z = transform.transform.rotation.z
+    pose.pose.orientation.w = transform.transform.rotation.w
+
+    return pose
+
+
 def tf_from_pose(pose, parent="world", child="robot"):
     """
     Generate a transform from a pose.
