@@ -30,7 +30,7 @@ class FramerateReducer(object):
 
         """
         # Publish every fifteenth frame
-        if not self.count % 15:
+        if not self.count % 3:
             self.image_publisher.publish(frame)
         self.count += 1
 
