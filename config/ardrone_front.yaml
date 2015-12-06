@@ -1,6 +1,6 @@
 image_width: 640
 image_height: 360
-camera_name: ardrone/camera
+camera_name: ardrone
 camera_matrix:
   rows: 3
   cols: 3
