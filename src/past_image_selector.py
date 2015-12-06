@@ -54,7 +54,7 @@ class Frame(object):
     def __init__(self, pose, image):
         self.pose = pose
         self.coords_precise, self.orientation = get_pose_components(self.pose)
-        self.coordinates = self.coords_precise // 10 * 100  # Round to 10 cm
+        self.coordinates = self.coords_precise * 1000 // 100  # 10 cm
         self.image = image
         self.stamp = self.pose.header.stamp
         self.stamp_str = strftime("%Y-%m-%d %H:%M:%S",
@@ -265,7 +265,7 @@ class Selector(object):
         self.clear()
         self.current_frame = None
 
-        self.octree = Octree((0, 0, 0), 100000)  # 100 m per side
+        self.octree = Octree((0, 0, 0), 1000)  # 100 m per side
         self.frames = []  # Chronological
 
         method = rospy.get_param("~eval_method")
