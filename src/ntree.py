@@ -162,8 +162,6 @@ class Ntree(object):
     def __init__(self, centre, half_dim, parent=None):
         self.parent = parent
         self.n_dims = len(centre)
-        if self.n_dims < 1:
-            raise NtreeError("A tree must have at least one dimension.")
 
         # Store a set of points for easy retrieval. Can be converted into a
         # numpy array in order to find nearest neighbours.
