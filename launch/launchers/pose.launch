@@ -20,11 +20,6 @@
 	    required="true" >
 	<rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
       </node>
-      <!-- <node name="generate_tf" -->
-	<!-- pkg="spirit" -->
-	<!-- type="publish_transforms.py" -->
-	<!-- output="screen" -->
-	<!-- if="$(arg mock_ardrone)" /> -->
     </group>
 
     <group unless="$(arg use_mocap)" >
