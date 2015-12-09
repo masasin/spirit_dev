@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find spirit)/launch/spirit.launch" >
+  <include file="$(find spirit)/launch/spirit_base.launch" >
     <arg name="mock_ardrone" value="true" />
     <arg name="mock_pose" value="true" />
     <arg name="use_mocap" value="false" />
