@@ -13,7 +13,7 @@
   <group unless="$(arg mock_pose)" >
     <node name="pose_node"
 	  pkg="mocap_optitrack"
-	  type="pose_node"
+	  type="mocap_node"
 	  respawn="false"
 	  launch-prefix=""
 	  required="true"
