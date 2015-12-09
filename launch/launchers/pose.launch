@@ -11,15 +11,21 @@
     if="$(arg mock_pose)" />
 
   <group unless="$(arg mock_pose)" >
-    <node name="pose_node"
-	  pkg="mocap_optitrack"
-	  type="mocap_node"
-	  respawn="false"
-	  launch-prefix=""
-	  required="true"
-	  if="$(arg use_mocap)" >
-      <rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
-    </node>
+    <group if="$(arg use_mocap)" >
+      <node name="pose_node"
+	    pkg="mocap_optitrack"
+	    type="mocap_node"
+	    respawn="false"
+	    launch-prefix=""
+	    required="true" >
+	<rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
+      </node>
+      <!-- <node name="generate_tf" -->
+	<!-- pkg="spirit" -->
+	<!-- type="publish_transforms.py" -->
+	<!-- output="screen" -->
+	<!-- if="$(arg mock_ardrone)" /> -->
+    </group>
 
     <group unless="$(arg use_mocap)" >
       <node name="pose_node"
