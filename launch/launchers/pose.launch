@@ -11,15 +11,16 @@
     if="$(arg mock_pose)" />
 
   <group unless="$(arg mock_pose)" >
-    <node name="pose_node"
-	  pkg="mocap_optitrack"
-	  type="pose_node"
-	  respawn="false"
-	  launch-prefix=""
-	  required="true"
-	  if="$(arg use_mocap)" >
-      <rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
-    </node>
+    <group if="$(arg use_mocap)" >
+      <node name="pose_node"
+	    pkg="mocap_optitrack"
+	    type="mocap_node"
+	    respawn="false"
+	    launch-prefix=""
+	    required="true" >
+	<rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
+      </node>
+    </group>
 
     <group unless="$(arg use_mocap)" >
       <node name="pose_node"
@@ -32,7 +33,7 @@
 	pkg="spirit"
 	type="pose_from_odometry.py"
 	output="screen"
-	if="$(arg mock_ardrone)" />
+	unless="$(arg mock_ardrone)" />
     </group>
   </group>
 

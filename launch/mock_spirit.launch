@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <launch>
-  <include file="$(find spirit)/launch/spirit.launch" >
+  <include file="$(find spirit)/launch/spirit_base.launch" >
     <arg name="mock_ardrone" value="true" />
-    <arg name="mock_pose" value="true" />
-    <arg name="use_mocap" value="false" />
+    <arg name="mock_pose" value="false" />
+    <arg name="use_mocap" value="true" />
     <arg name="display_feeds" value="true" />
     <arg name="past_image_eval_method" value="constant_time_delay" />
-    <arg name="past_image_ctime_delay" value="1.5" />
+    <arg name="past_image_ctime_delay" value="0.5" />
   </include>
 </launch>

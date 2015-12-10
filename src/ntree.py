@@ -1,3 +1,5 @@
+from __future__ import division
+
 import numpy as np
 from scipy.spatial import cKDTree as KDTree
 
@@ -135,8 +137,6 @@ class Ntree(object):
         Half the length of one side of one dimension.
     parent : Ntree, optional
         The parent of the ntree. Default (for the root node) is None.
-    n_dims : int, optional
-        The number of dimensions that the tree has. Default is 2, or a quadtree.
 
     Attributes
     ----------
@@ -145,6 +145,8 @@ class Ntree(object):
     side
     bound_min
     bound_max
+    n_dims : int
+        The number of dimensions of the tree.
     parent : Ntree, optional
         The parent of the ntree. Root nodes have a parent of None.
     children : list of Ntree
@@ -157,9 +159,9 @@ class Ntree(object):
         The data contained in the ntree.
 
     """
-    def __init__(self, centre, half_dim, parent=None, n_dims=2):
+    def __init__(self, centre, half_dim, parent=None):
         self.parent = parent
-        self._n_dims = n_dims
+        self.n_dims = len(centre)
 
         # Store a set of points for easy retrieval. Can be converted into a
         # numpy array in order to find nearest neighbours.
@@ -176,11 +178,11 @@ class Ntree(object):
 
         self._centre = np.asarray(centre)
         self._half_dim = half_dim
-        self._bound_min = self.centre - self.half_dim * np.ones(self._n_dims)
-        self._bound_max = self.centre + self.half_dim * np.ones(self._n_dims)
+        self._bound_min = self._centre - self._half_dim
+        self._bound_max = self._centre + self._half_dim
         self._n_items = 0
 
-        self.children = [None] * 2**self._n_dims
+        self.children = [None] * 2**self.n_dims
         self.data = Data()
 
     def __len__(self):
@@ -192,7 +194,7 @@ class Ntree(object):
                                     0 if self._is_leaf_node() else 1,
                                     self._n_items)
 
-    def _get_octant(self, point):
+    def get_octant(self, point):
         """
         Return the octant that the point is in.
 
@@ -302,29 +304,20 @@ class Ntree(object):
                 # A node may only have data at one position.
                 self.data.append(item)
             else:
-                # Split the node by creating new children.
-                new_half_dim = self.half_dim / 2
-                for pos in range(2**self._n_dims):
-                    new_centre = self.centre.copy()
-                    for i, sign in enumerate(bin(pos)[2:]):
-                        multiplier = 1 if sign == "1" else -1
-                        new_centre[i] += new_half_dim * multiplier
-                    self.children[pos] = self.__class__(new_centre,
-                                                        new_half_dim,
-                                                        parent=self)
+                self.split()  # Split the node by creating new children.
 
                 # The old data contents must be moved into a child node.
-                old_data_octant = self._get_octant(self.data.coordinates)
+                old_data_octant = self.get_octant(self.data.coordinates)
                 self.children[old_data_octant].extend(self.data.contents)
                 self.data.clear()
 
                 # The new data is inserted recursively into the child node.
-                new_data_octant = self._get_octant(item.coordinates)
+                new_data_octant = self.get_octant(item.coordinates)
                 self.children[new_data_octant].insert(item)
 
         else:
             # This is an interior node. We need to go the leaf.
-            octant = self._get_octant(item.coordinates)
+            octant = self.get_octant(item.coordinates)
             self.children[octant].insert(item)
 
         self._n_items += 1
@@ -351,6 +344,20 @@ class Ntree(object):
         for item in items:
             self.insert(item)
 
+    def split(self):
+        """
+        Split the ntree into multiple nodes.
+
+        """
+        half_dim = self.half_dim / 2
+        for pos in range(2**self.n_dims):
+            centre = []
+            for i, sign in enumerate(format(pos, "0{}b".format(self.n_dims))):
+                multiplier = 1 if sign == "1" else -1
+                centre.append(self.centre[i] + half_dim * multiplier)
+
+            self.children[pos] = self.__class__(centre, half_dim, parent=self)
+
     def _get(self, point):
         """
         Retrieve the data at a given point.
@@ -376,13 +383,12 @@ class Ntree(object):
 
         """
         if tuple(point) not in self._points:
-            print(point, self._points)
             raise KeyError("Could not find point.")
 
         if self._is_leaf_node():
             return self.data
 
-        octant = self._get_octant(point)
+        octant = self.get_octant(point)
         return self.children[octant]._get(point)
 
     def get(self, points):
@@ -570,8 +576,8 @@ class Ntree(object):
 
         """
         self._centre = np.asarray(values)
-        self._bound_min = self.centre - self.half_dim * np.ones(self._n_dims)
-        self._bound_max = self.centre + self.half_dim * np.ones(self._n_dims)
+        self._bound_min = self.centre - self.half_dim
+        self._bound_max = self.centre + self.half_dim
 
     @property
     def half_dim(self):
@@ -601,8 +607,8 @@ class Ntree(object):
 
         """
         self._half_dim = value
-        self._bound_min = self.centre - self.half_dim * np.ones(self._n_dims)
-        self._bound_max = self.centre + self.half_dim * np.ones(self._n_dims)
+        self._bound_min = self.centre - self.half_dim
+        self._bound_max = self.centre + self.half_dim
 
     @property
     def side(self):
@@ -713,7 +719,9 @@ class Octree(Ntree):
 
     """
     def __init__(self, centre, half_dim, parent=None):
-        super(Octree, self).__init__(centre, half_dim, parent, n_dims=3)
+        if len(centre) != 3:
+            raise NtreeError("Octrees require exactly three dimensions.")
+        super(Octree, self).__init__(centre, half_dim, parent)
 
 
 if __name__ == "__main__":

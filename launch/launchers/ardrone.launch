@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="use_tum" />
   <arg name="mock_ardrone" />
   <arg name="drone_ip" />
 
@@ -8,28 +9,41 @@
           pkg="ardrone_autonomy"
           type="ardrone_driver"
           output="screen"
-	  args="-ip $(arg drone_ip)" >
+          args="-ip $(arg drone_ip)" >
       <param name="navdata_demo" value="False" />
       <param name="realtime_navdata" value="True" />
       <param name="realtime_video" value="True" />
       <param name="looprate" value="30" />
     </node>
+
+    <node name="drone_autopilot"
+          pkg="tum_ardrone"
+	  type="drone_autopilot"
+	  output="screen"
+	  if="$(arg use_tum)" />
+
+    <node name="drone_gui"
+          pkg="tum_ardrone"
+	  type="drone_gui"
+	  output="screen"
+	  if="$(arg use_tum)" />
   </group>
 
   <group if="$(arg mock_ardrone)">
     <node name="ardrone" pkg="usb_cam" type="usb_cam_node" output="screen" >
       <param name="video_device" value="/dev/video0" />
-      <param name="camera_name" value="ardrone_front" />
+      <param name="camera_name" value="ardrone" />
       <param name="image_width" value="640" />
       <param name="image_height" value="480" />
       <param name="pixel_format" value="yuyv" />
-      <param name="camera_frame_id" value="ardrone/body" />
+      <param name="camera_frame_id" value="ardrone" />
       <param name="io_method" value="mmap"/>
       <param name="camera_info_url"
-	     type="string"
-	     value="file://$(find spirit)/config/ardrone_front.yaml" />
+             type="string"
+             value="file://$(find spirit)/config/ardrone_front.yaml" />
     </node>
   </group>
 
   <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen" />
+  <node ns="ardrone" name="image_proc" pkg="image_proc" type="image_proc" output="screen" />
 </launch>

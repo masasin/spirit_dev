@@ -64,9 +64,9 @@ class PoseGenerator(object):
         """
         idx = sequence % self.n_items
         return pose_from_components(coords=(30*self.x_pos[idx],
-                                            0*self.y_pos[idx],
-                                            0*self.z_pos[idx]),
-                                    orientation=(0, 1, 0, 0.3),
+                                            0,
+                                            0),
+                                    orientation=(0, 1, 0, -0.6),
                                     sequence=sequence)
 
     @staticmethod

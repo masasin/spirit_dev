@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot name="spirit_ardrone" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="PI" value="3.141592653" />
+  <xacro:property name="DEG2RAD" value="0.017453293" />
+  <xacro:property name="RAD2DEG" value="57.295779513" />
+
+  <link name="ardrone">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+  </link>
+
+  <joint name="virtual_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="ardrone" />
+    <child link="ardrone/body" />
+  </joint>
+
+  <link name="ardrone/body">
+    <visual>
+      <origin rpy="${90*DEG2RAD} 0 ${90*DEG2RAD}" xyz="0 0 0" />
+      <geometry>
+	<mesh filename="package://spirit/meshes/drone_small.dae"/>
+      </geometry>
+    </visual>
+  </link>
+</robot>
+
