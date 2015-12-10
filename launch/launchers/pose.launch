@@ -33,7 +33,7 @@
 	pkg="spirit"
 	type="pose_from_odometry.py"
 	output="screen"
-	if="$(arg mock_ardrone)" />
+	unless="$(arg mock_ardrone)" />
     </group>
   </group>
 

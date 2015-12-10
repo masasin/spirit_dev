@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <!-- Flags -->
+  <arg name="use_tum" default="true" doc="Whether to use the tum_ardrone package's GUI" />
   <arg name="mock_ardrone" default="false" doc="Whether to mock the drone camera input" />
   <arg name="mock_pose" default="false" doc="Whether to mock the drone pose" />
 
@@ -26,6 +27,7 @@
 
   -->
   <include file="$(find spirit)/launch/launchers/ardrone.launch" >
+    <arg name="use_tum" value="$(arg use_tum)" />
     <arg name="mock_ardrone" value="$(arg mock_ardrone)" />
     <arg name="drone_ip" value="$(arg drone_ip)" />
   </include>
@@ -64,10 +66,10 @@
   <include file="$(find spirit)/launch/launchers/display.launch" if="$(arg display_feeds)" />
 
   <!-- rviz -->
-  <include file="$(find spirit)/launch/launchers/rviz.launch" >
-    <arg name="urdf_path" value="$(arg urdf_path)" />
-    <arg name="rviz_settings_path" value="$(arg rviz_settings_path)" />
-    <arg name="joint_state_publisher_gui" value="$(arg joint_state_publisher_gui)" />
-  </include>
+  <!-- <include file="$(find spirit)/launch/launchers/rviz.launch" > -->
+  <!--   <arg name="urdf_path" value="$(arg urdf_path)" /> -->
+  <!--   <arg name="rviz_settings_path" value="$(arg rviz_settings_path)" /> -->
+  <!--   <arg name="joint_state_publisher_gui" value="$(arg joint_state_publisher_gui)" /> -->
+  <!-- </include> -->
 </launch>
 

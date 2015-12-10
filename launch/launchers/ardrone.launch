@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="use_tum" />
   <arg name="mock_ardrone" />
   <arg name="drone_ip" />
 
@@ -14,6 +15,18 @@
       <param name="realtime_video" value="True" />
       <param name="looprate" value="30" />
     </node>
+
+    <node name="drone_autopilot"
+          pkg="tum_ardrone"
+	  type="drone_autopilot"
+	  output="screen"
+	  if="$(arg use_tum)" />
+
+    <node name="drone_gui"
+          pkg="tum_ardrone"
+	  type="drone_gui"
+	  output="screen"
+	  if="$(arg use_tum)" />
   </group>
 
   <group if="$(arg mock_ardrone)">
