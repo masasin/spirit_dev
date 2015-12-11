@@ -102,16 +102,11 @@ class Evaluators(object):
     ----------
     evaluate : callable
         The evaluation function to use.
-    save_chrono : bool
-        Whether to save frames chronologically.
-    save_ntree : bool
-        Whether to save frames in an ntree.
 
     """
     def __init__(self, method, parent):
         self._parent = parent
         self.evaluate = self.__getattribute__(method)
-        self.save_chrono = self.save_ntree = False
 
     def constant_time_delay(self, pose):
         """
@@ -120,7 +115,6 @@ class Evaluators(object):
         If the delay has not yet passed, return the first frame.
 
         """
-        self.save_chrono = True
         if len(self._parent.frames):
             optimum_timestamp = pose.header.stamp.to_sec() - self._parent._delay
 
@@ -136,7 +130,6 @@ class Evaluators(object):
         If the distance has not yet been crossed, return the last frame.
 
         """
-        self.save_chrono = True
         if len(self._parent.frames):
             optimum_distance = err_current = err_min = self._parent._distance
             position, orientation = get_pose_components(pose)
@@ -211,8 +204,6 @@ class Evaluators(object):
 
             return score
 
-        self.save_chrono = True
-
         if self._parent.current_frame is None:
             return self._parent.frames[0]
 
@@ -230,7 +221,6 @@ class Evaluators(object):
         def eval_func(pose, frame):
             pass
 
-        self.save_ntree = True
         raise NotImplementedError
 
         position, orientation = get_pose_components(pose)
@@ -275,16 +265,11 @@ class Selector(object):
         self.clear()
         self.current_frame = None
 
-        method = rospy.get_param("~eval_method")
-        _evaluator = Evaluators(method, parent=self)
-        self.save_chrono = _evaluator.save_chrono
-        self.save_ntree = _evaluator.save_ntree
-        self.evaluate = _evaluator.evaluate
+        self.octree = Octree((0, 0, 0), 1000)  # 100 m per side
+        self.frames = []  # Chronological
 
-        if self.save_chrono:
-            self.frames = []  # Chronological
-        if self.save_ntree:
-            self.ntree = Octree((0, 0, 0), 1000)  # 100 m per side
+        method = rospy.get_param("~eval_method")
+        self.evaluate = Evaluators(method, parent=self).evaluate
 
         rospy.Subscriber("/ardrone/slow_image_raw", Image, self.image_callback)
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
@@ -304,10 +289,8 @@ class Selector(object):
         if self.can_make_frame:
             rospy.logdebug("Adding frames to octree and queue")
             frame = Frame(self.pose, self.image)
-            if self.save_chrono:
-                self.frames.append(frame)
-            if self.save_ntree:
-                self.ntree.insert(frame)
+            self.octree.insert(frame)
+            self.frames.append(frame)
             self.clear()
 
     def pose_callback(self, pose):
