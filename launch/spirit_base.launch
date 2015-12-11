@@ -66,10 +66,10 @@
   <include file="$(find spirit)/launch/launchers/display.launch" if="$(arg display_feeds)" />
 
   <!-- rviz -->
-  <!-- <include file="$(find spirit)/launch/launchers/rviz.launch" > -->
-  <!--   <arg name="urdf_path" value="$(arg urdf_path)" /> -->
-  <!--   <arg name="rviz_settings_path" value="$(arg rviz_settings_path)" /> -->
-  <!--   <arg name="joint_state_publisher_gui" value="$(arg joint_state_publisher_gui)" /> -->
-  <!-- </include> -->
+  <include file="$(find spirit)/launch/launchers/rviz.launch" >
+    <arg name="urdf_path" value="$(arg urdf_path)" />
+    <arg name="rviz_settings_path" value="$(arg rviz_settings_path)" />
+    <arg name="joint_state_publisher_gui" value="$(arg joint_state_publisher_gui)" />
+  </include>
 </launch>
 
