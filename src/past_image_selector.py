@@ -265,7 +265,7 @@ class Selector(object):
         self.clear()
         self.current_frame = None
 
-        self.octree = Octree((0, 0, 0), 1000)  # 100 m per side
+        self.ntree = Octree((0, 0, 0), 1000)  # 100 m per side
         self.frames = []  # Chronological
 
         method = rospy.get_param("~eval_method")
@@ -289,7 +289,7 @@ class Selector(object):
         if self.can_make_frame:
             rospy.logdebug("Adding frames to octree and queue")
             frame = Frame(self.pose, self.image)
-            self.octree.insert(frame)
+            self.ntree.insert(frame)
             self.frames.append(frame)
             self.clear()
 
