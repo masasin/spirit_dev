@@ -71,7 +71,6 @@ target/
 *.pch
 
 # Compiled Dynamic libraries
-*.so
 *.dylib
 *.dll
 
@@ -92,9 +91,7 @@ target/
 
 # ROS
 # ================================================================================
-build/
 bin/
-lib/
 msg_gen/
 srv_gen/
 msg/*Action.msg
@@ -124,7 +121,6 @@ CMakeLists.txt.user
 
 srv/_*.py
 *.pcd
-*.pyc
 qtcreator-*
 *.user
 
@@ -140,9 +136,8 @@ qtcreator-*
 # Emacs
 .#*
 
+# Pycharm
+.idea/
+
 # Catkin custom files
 CATKIN_IGNORE
-
-# Pycharm
-.cache/
-.idea/
