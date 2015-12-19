@@ -355,6 +355,11 @@ class Selector(object):
         """
         Check if we can make a frame.
 
+        Returns
+        -------
+        bool
+            Whether we can make a frame.
+
         """
         return self.image and self.pose and self.tracked
 

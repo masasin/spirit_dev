@@ -112,10 +112,10 @@ class Verifier(object):
     @tracking.setter
     def tracking(self, value):
         """
-        Change the value of the tracking, and publish the new state.
+        Change the value of the tracking.
 
-        Depending on the value and other class attributes, additional actions
-        may be taken.
+        When setting the parameter, it checks for changes in status and notifies
+        the user.
 
         Parameters
         ----------

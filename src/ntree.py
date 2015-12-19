@@ -107,11 +107,22 @@ class Data(object):
         self.contents.append(item)
 
     def pop(self):
-        """Return and remove the last item in `contents`."""
+        """
+        Remove and return the last item in `contents`.
+
+        Returns
+        -------
+        Frame
+            The last item in `contents`.
+
+        """
         return self.contents.pop()
 
     def clear(self):
-        """Reset the `Data` object to its default state."""
+        """
+        Reset the `Data` object to its default state.
+
+        """
         self.coordinates = None
         self.contents = []
 
