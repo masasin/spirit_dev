@@ -135,7 +135,7 @@ class Ntree(object):
         The coordinates of the centre of the ntree.
     half_dim : float
         Half the length of one side of one dimension.
-    parent : Ntree (optional)
+    parent : Optional[Ntree]
         The parent of the ntree. Default (for the root node) is None.
 
     Attributes
@@ -147,7 +147,7 @@ class Ntree(object):
     bound_max
     n_dims : int
         The number of dimensions of the tree.
-    parent : Ntree (optional)
+    parent : Ntree
         The parent of the ntree. Root nodes have a parent of None.
     children : list[Ntree]
         The list of children, one at each octant. The binary value of the list
@@ -454,7 +454,7 @@ class Ntree(object):
         ----------
         point : np.ndarray
             The coordinates of the point to be removed.
-        clear : bool (optional)
+        clear : Optional[bool]
             If True, empties the contents of the data at the point. Default is
             False.
 
@@ -719,7 +719,7 @@ class Octree(Ntree):
         The coordinates of the centre of the ntree.
     half_dim : float
         Half the length of one side of one dimension.
-    parent : Ntree (optional)
+    parent : Optional[Ntree]
         The parent of the ntree. Default (for the root node) is None.
 
     Attributes
@@ -729,7 +729,7 @@ class Octree(Ntree):
     side
     bound_min
     bound_max
-    parent : Ntree (optional)
+    parent : Ntree
         The parent of the ntree. Root nodes have a parent of None.
     children : list[Ntree]
         The list of children, one at each octant. The binary value of the list

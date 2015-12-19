@@ -54,7 +54,7 @@ class PoseGenerator(object):
 
         Parameters
         ----------
-        sequence : int, optional
+        sequence : Optional[int]
             The sequence of the pose. Default is zero.
 
         Returns
@@ -76,7 +76,7 @@ class PoseGenerator(object):
 
         Parameters
         ----------
-        sequence : int, optional
+        sequence : Optional[int]
             The sequence of the pose. Default is zero.
 
         Returns
@@ -84,7 +84,7 @@ class PoseGenerator(object):
         The generated pose.
 
         """
-        return pose_from_components(coords=np.random.rand(3) / 100,
+        return pose_from_components(coords=np.random.rand(1, 3) / 100,
                                     orientation=(0.1, 0, 0.1, 0.1),
                                     sequence=sequence)
 

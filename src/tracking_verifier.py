@@ -33,7 +33,7 @@ class Verifier(object):
     connected : bool
         Whether a connection has been established.
     last_updated : rospy.rostime.Time
-        The time at which the last change in pose occured.
+        The time at which the last change in pose occurred.
     tracking : bool
         Whether the drone is being tracked. Initially, its value is None.
 

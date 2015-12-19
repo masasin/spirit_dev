@@ -41,9 +41,9 @@ def get_pose_components(pose):
 
     Returns
     -------
-    coords : ndsarray
+    coords : np.ndarray
         The x, y, and z coordinates contained in the pose.
-    orientation : ndarray
+    orientation : np.ndarray
         The x, y, z, and w quaternion contained in the pose.
 
     """
@@ -65,11 +65,11 @@ def pose_from_components(coords, orientation, sequence=0):
 
     Parameters
     ----------
-    coords : ndarray
+    coords : tuple | np.ndarray
         The x, y, and z coordinates of the pose.
-    orientation : ndarray
+    orientation : tuple | np.ndarray
         The x, y, z, and w quaternion of the pose.
-    sequence : int, optional
+    sequence : Optional[int]
         The sequence number of the pose.
 
     Returns
@@ -133,9 +133,9 @@ def tf_from_pose(pose, parent="world", child="robot"):
     ----------
     pose : Pose(WithCovariance)?(Stamped)?
         The pose to be translated.
-    parent : str, optional
+    parent : Optional[str]
         The frame_id of the transform. Default is "world"
-    child : str, optional
+    child : Optional[str]
         The child_frame_id of the transform. Default is "robot"
 
     Returns

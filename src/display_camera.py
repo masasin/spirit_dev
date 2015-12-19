@@ -26,19 +26,23 @@ class Display(object):
         self.bridge = CvBridge()
         self.contents = rospy.get_param("~window_name", "camera")
 
-    def callback(self, ros_data):
+    def callback(self, image):
         """
         Display the image.
+
+        Parameters
+        ----------
+        image : Image
+            The image to display.
 
         """
         # Convert to CV2.
         try:
-            image = self.bridge.imgmsg_to_cv2(ros_data, "bgr8")
+            cv2_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
+            cv2.imshow(self.contents.capitalize(), cv2_image)
+            cv2.waitKey(1)
         except CvBridgeError as e:
             rospy.logerr(e)
-
-        cv2.imshow(self.contents.capitalize(), image)
-        cv2.waitKey(1)
 
 
 def shutdown_hook():
