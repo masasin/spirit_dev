@@ -24,14 +24,6 @@ TIMEOUT = 0.25  # seconds
 SPIRIT_ROOT = rospkg.RosPack().get_path("spirit")
 
 
-def beep():
-    """
-    Plays an audio file containing a beep.
-
-    """
-    pygame.mixer.music.play()
-
-
 class Verifier(object):
     """
     Verify tracking.
@@ -62,6 +54,14 @@ class Verifier(object):
         self._start_time = rospy.Time.now()
 
         rospy.loginfo("Waiting for a connection")
+
+    @staticmethod
+    def beep():
+        """
+        Plays an audio file containing a beep.
+
+        """
+        pygame.mixer.music.play()
 
     def callback(self, pose):
         """
@@ -129,7 +129,7 @@ class Verifier(object):
                               "Please check your setup.")
             else:
                 rospy.logwarn("Tracking lost!")
-                beep()
+                self.beep()
         elif self.connected:
             if self.tracking is None:
                 rospy.loginfo("Tracking acquired")

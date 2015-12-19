@@ -32,8 +32,7 @@ class TestVerifier(object):
         tracking_verifier.TIMEOUT = self.timeout
         self.tracking_verifier = tracking_verifier.Verifier()
 
-    @staticmethod
-    def create_pose():
+    def create_pose(self):
         pose = PoseStamped()
         pose.header.stamp = rospy.Time.now()
         return pose
@@ -45,7 +44,7 @@ class TestVerifier(object):
         pose = self.create_pose()
         self.tracking_verifier.callback(pose)
 
-    @mock.patch.object(tracking_verifier, "beep", autospec=True)
+    @mock.patch.object(tracking_verifier.Verifier, "beep", autospec=True)
     def test_changing_pose_steady_state(self, mock_beep):
         self.make_steady_state()
 
@@ -59,7 +58,7 @@ class TestVerifier(object):
         assert self.tracking_verifier.tracking
         assert self.tracking_verifier.last_updated == pose.header.stamp
 
-    @mock.patch.object(tracking_verifier, "beep", autospec=True)
+    @mock.patch.object(tracking_verifier.Verifier, "beep", autospec=True)
     def test_not_changing_pose_steady_state(self, mock_beep):
         self.make_steady_state()
         last_change_time = self.tracking_verifier.last_updated
@@ -72,7 +71,7 @@ class TestVerifier(object):
         assert not self.tracking_verifier.tracking
         assert self.tracking_verifier.last_updated == last_change_time
 
-    @mock.patch.object(tracking_verifier, "beep", autospec=True)
+    @mock.patch.object(tracking_verifier.Verifier, "beep", autospec=True)
     def test_tracking_reacquired_steady_state(self, mock_beep):
         self.make_steady_state()
         self.tracking_verifier._tracking = False
@@ -85,7 +84,7 @@ class TestVerifier(object):
         assert not mock_beep.called
         assert self.tracking_verifier.tracking
 
-    @mock.patch.object(tracking_verifier, "beep", autospec=True)
+    @mock.patch.object(tracking_verifier.Verifier, "beep", autospec=True)
     def test_changing_pose_at_start(self, mock_beep):
         pose = self.create_pose()
         self.tracking_verifier.callback(pose)
@@ -103,7 +102,7 @@ class TestVerifier(object):
         assert self.tracking_verifier.tracking
         assert self.tracking_verifier.last_updated == pose.header.stamp
 
-    @mock.patch.object(tracking_verifier, "beep", autospec=True)
+    @mock.patch.object(tracking_verifier.Verifier, "beep", autospec=True)
     def test_not_changing_pose_at_start(self, mock_beep):
         pose = self.create_pose()
         self.tracking_verifier.callback(pose)
@@ -116,7 +115,7 @@ class TestVerifier(object):
         assert self.tracking_verifier.tracking is False
         assert self.tracking_verifier.last_updated is None
 
-    @mock.patch.object(tracking_verifier, "beep", autospec=True)
+    @mock.patch.object(tracking_verifier.Verifier, "beep", autospec=True)
     def test_tracking_reacquired_after_bad_start(self, mock_beep):
         pose = self.create_pose()
         self.tracking_verifier.callback(pose)
@@ -133,7 +132,7 @@ class TestVerifier(object):
         assert not mock_beep.called
         assert self.tracking_verifier.tracking
 
-    @mock.patch.object(tracking_verifier, "beep", autospec=True)
+    @mock.patch.object(tracking_verifier.Verifier, "beep", autospec=True)
     def test_empty_pose(self, mock_beep):
         self.tracking_verifier.callback(None)
 
