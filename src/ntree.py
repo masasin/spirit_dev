@@ -27,7 +27,7 @@ class Frame(object):
 
     Parameters
     ----------
-    coordinates : list | tuple | np.ndarray
+    coordinates : Sequence[float]
         The coordinates at which the frame was taken.
     contents : any
         Any content.
@@ -58,7 +58,7 @@ class Data(object):
     Attributes
     ----------
     is_empty
-    coordinates : np.ndarray
+    coordinates : Sequence[float]
         The coordinates of the data stored at the node.
     contents : list[Frame]
         A list of all frames added to the ntree at this point, in the order
@@ -142,7 +142,7 @@ class Ntree(object):
 
     Parameters
     ----------
-    centre : list | tuple | np.ndarray
+    centre : Sequence[float]
         The coordinates of the centre of the ntree.
     half_dim : float
         Half the length of one side of one dimension.
@@ -211,7 +211,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        point : np.ndarray
+        point : Sequence[float]
             The coordinates of the point whose quadrant is to be found.
 
         Returns
@@ -264,9 +264,9 @@ class Ntree(object):
 
         Parameters
         ----------
-        bound_min : np.ndarray
+        bound_min : Sequence[float]
             The minimum bound.
-        bound_max : np.ndarray
+        bound_max : Sequence[float]
             The maximum bound.
 
         Returns
@@ -286,9 +286,9 @@ class Ntree(object):
         ----------
         node : Ntree
             A node to verify.
-        bound_min : np.ndarray
+        bound_min : Sequence[float]
             The minimum bound.
-        bound_max : np.ndarray
+        bound_max : Sequence[float]
             The maximum bound.
 
         Returns
@@ -399,7 +399,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        point : np.ndarray
+        point : Sequence[float]
             The coordinates of the point whose data is to be retrieved.
 
         Returns
@@ -428,11 +428,11 @@ class Ntree(object):
 
     def get_point_data(self, points):
         """
-        Get a sequence of items.
+        Get the data for a sequence of points.
 
         Parameters
         ----------
-        points : iterable of np.ndarray
+        points : Sequence[float] | Sequence[Sequence[float]]
             A list of the coordinates of the points whose data is to be
             retrieved.
 
@@ -448,7 +448,7 @@ class Ntree(object):
             If any point does not exist.
 
         """
-        if isinstance(points[0], tuple):
+        if isinstance(points[0], (list, tuple, np.ndarray)):
             data = []
             for point in points:
                 data.append(self._extract_data(point))
@@ -463,7 +463,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        point : np.ndarray
+        point : Sequence[float]
             The coordinates of the point to be removed.
         clear : Optional[bool]
             If True, empties the contents of the data at the point. Default is
@@ -505,9 +505,9 @@ class Ntree(object):
 
         Parameters
         ----------
-        bound_min : list | tuple | np.ndarray
+        bound_min : Sequence[float]
             The coordinates of the vertex with the minimum values.
-        bound_max : list | tuple | np.ndarray
+        bound_max : Sequence[float]
             The coordinates of the vertex with the maximum values.
 
         Yields
@@ -543,7 +543,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        point : np.ndarray
+        point : Sequence[float]
             The coordinates of the point.
         k : int
             The number of neighbours to find.
@@ -605,7 +605,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        values : np.ndarray
+        values : Sequence[float]
             The coordinates of the centre.
 
         """
@@ -679,7 +679,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        values : np.ndarray
+        values : Sequence[float]
             The coordinates of the vertex with the minimum values.
 
         """
@@ -709,7 +709,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        values : np.ndarray
+        values : Sequence[float]
             The coordinates of the vertex with the maximum values.
 
         """
@@ -726,7 +726,7 @@ class Octree(Ntree):
 
     Parameters
     ----------
-    centre : list | tuple | np.ndarray
+    centre : Sequence[float]
         The coordinates of the centre of the ntree.
     half_dim : float
         Half the length of one side of one dimension.

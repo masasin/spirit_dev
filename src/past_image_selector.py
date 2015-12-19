@@ -39,11 +39,11 @@ class Frame(object):
         The pose of the drone at which the image was taken.
     image : Image
         The image that was taken.
-    coordinates : ndarray
+    coordinates : np.ndarray
         The rounded x, y, and z coordinates of the pose.
-    coords_precise : ndarray
+    coords_precise : np.ndarray
         The x, y, and z coordinates of the pose.
-    orientation : ndarray
+    orientation : np.ndarray
         The x, y, z, w values of the quaternion
     stamp : rospy.rostime.Time
         The timestamp of the pose.

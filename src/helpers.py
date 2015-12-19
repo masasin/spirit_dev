@@ -14,12 +14,12 @@ def normalize_vector(v):
 
     Parameters
     ----------
-    v : ndarray
+    v : np.ndarray
         A vector to be normalized.
 
     Returns
     -------
-    ndarray
+    np.ndarray
         The normalized vector.
 
     """
@@ -36,7 +36,7 @@ def get_pose_components(pose):
 
     Parameters
     ----------
-    pose : Pose(WithCovariance)?(Stamped)?
+    pose : Pose | PoseWithCovariance | PoseStamped | PoseWithCovarianceStamped
         The pose to be decomposed.
 
     Returns
@@ -65,9 +65,9 @@ def pose_from_components(coords, orientation, sequence=0):
 
     Parameters
     ----------
-    coords : tuple | np.ndarray
+    coords : Sequence[float]
         The x, y, and z coordinates of the pose.
-    orientation : tuple | np.ndarray
+    orientation : Sequence[float]
         The x, y, z, and w quaternion of the pose.
     sequence : Optional[int]
         The sequence number of the pose.
