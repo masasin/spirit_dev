@@ -87,9 +87,9 @@ def forward_multicast():
 
             logging.debug("Connecting to multicast")
             group = socket.inet_aton(MULTICAST_IP)
-            mreq = struct.pack("4sL", group, socket.INADDR_ANY)
+            request = struct.pack("4sL", group, socket.INADDR_ANY)
             receiver.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP,
-                                mreq)
+                                request)
 
             logging.info("Forwarding")
             while True:

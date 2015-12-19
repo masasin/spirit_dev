@@ -114,6 +114,11 @@ class Evaluators(object):
 
         If the delay has not yet passed, return the first frame.
 
+        Parameters
+        ----------
+        pose : PoseStamped
+            A pose message.
+
         """
         if len(self._parent.frames):
             optimum_timestamp = pose.header.stamp.to_sec() - self._parent._delay
@@ -129,21 +134,31 @@ class Evaluators(object):
 
         If the distance has not yet been crossed, return the last frame.
 
+        Parameters
+        ----------
+        pose : PoseStamped
+            A pose message.
+
         """
         if len(self._parent.frames):
-            optimum_distance = err_current = err_min = self._parent._distance
+            optimum_distance = err_min = self._parent._distance
             position, orientation = get_pose_components(pose)
             for frame in reversed(self._parent.frames):
                 frame_distance = norm(frame.coords_precise - position)
                 if frame_distance > optimum_distance:
                     err_current = abs(frame_distance - optimum_distance)
-                    if (err_current < err_min):
+                    if err_current < err_min:
                         return frame
             return self._parent.frames[-1]
 
     def murata(self, pose):
         """
         Use the evaluation function from Murata's thesis. [#]_
+
+        Parameters
+        ----------
+        pose : PoseStamped
+            A pose message.
 
         Notes
         -----
@@ -153,14 +168,14 @@ class Evaluators(object):
             E = a_1 ((z_{camera} - z_{ref})/z_{ref})^2 +
                 a_2 (β_{xy}/(π / 2))^2 +
                 a_3 (α/φ_v)^2 +
-                a_4 ((|\mathbf{a}| - L)/L)^2 +
+                a_4 ((|\mathbf{a}| - l)/l)^2 +
                 a_5 (|\mathbf{x}^v - \mathbf{x}^v_{curr}|/
                      |\mathbf{x}^v_{curr}|)^2
 
         where :math:`a_1` through :math:`a_4` are coefficients, :math:`z` is the
         difference in height of the drone, :math:`α` is the tilt angle,
         :math:`β` is the difference in yaw, :math:`\mathbf{a}` is the distance
-        vector, :math:`L` is the optimal distance, and :math:`φ_v` is the angle
+        vector, :math:`l` is the optimal distance, and :math:`φ_v` is the angle
         of the vertical field of view.
 
         :math:`φ_v` is calculated using :math:`φ_h`, the angle of the horizontal
@@ -177,7 +192,7 @@ class Evaluators(object):
                過去画像履歴を用いた移動マニピュレータの遠隔操作システム
 
         """
-        def eval_func(pose, frame):
+        def eval_func(pose):
             coords, orientation = get_pose_components(pose)
             best_state_vector = np.hstack((coords, orientation))
             old_state_vector = np.hstack(
@@ -194,12 +209,12 @@ class Evaluators(object):
             fov_v = np.pi / 3
 
             a_mag = norm(coords - self._parent.current_frame.coords_precise)
-            L_ref = 1
+            l_ref = 1
 
-            score = (a1 * ((z_camera - z_ref)/z_ref) ** 2 +
+            score = (a1 * ((z_camera - z_ref) / z_ref) ** 2 +
                      a2 * (beta / (np.pi / 2)) ** 2 +
                      a3 * (alpha / fov_v) ** 2 +
-                     a4 * ((a_mag - L_ref)/L_ref) ** 2 +
+                     a4 * ((a_mag - l_ref) / l_ref) ** 2 +
                      a5 * (change / old_state_vector) ** 2)
 
             return score
@@ -210,12 +225,18 @@ class Evaluators(object):
         if len(self._parent.frames):
             results = {}
             for frame in reversed(self._parent.frames):
-                results[frame] = eval_func(pose, frame)
+                results[frame] = eval_func(pose)
             return min(results, key=results.get)
 
+    # noinspection PyUnreachableCode
     def spirit(self, pose):
         """
         Not implemented yet.
+
+        Parameters
+        ----------
+        pose : PoseStamped
+            A pose message.
 
         """
         def eval_func(pose, frame):
@@ -244,7 +265,7 @@ class Selector(object):
     can_make_frame
     current_frame : Frame
         The current frame which is being shown.
-    octree : Octree
+    ntree : Octree
         The octree holding all frames according to their position in 3D.
     frames : list of Frame
         A chronological list of frames.
@@ -252,7 +273,7 @@ class Selector(object):
         The evaluation function to use.
     past_image_pub : rospy.Publisher
         The publisher for the past images.
-    tf2_pub : tf2_ros.TransformBroadcaster
+    tf_pub : tf2_ros.TransformBroadcaster
         The publisher for TF.
 
     Raises
@@ -283,6 +304,11 @@ class Selector(object):
         """
         Update `image`, and store frames if all the data is available.
 
+        Parameters
+        ----------
+        image : Image
+            An image message.
+
         """
         rospy.logdebug("New image")
         self.image = image
@@ -297,6 +323,11 @@ class Selector(object):
         """
         Update tf and `pose`, and select the best past image.
 
+        Parameters
+        ----------
+        pose : PoseStamped
+            A pose message.
+
         """
         rospy.logdebug("New pose")
         self.pose = pose
@@ -310,6 +341,11 @@ class Selector(object):
     def tracked_callback(self, tracked):
         """
         Update the `tracked` variable.
+
+        Parameters
+        ----------
+        tracked : Bool
+            Whether the drone is being tracked.
 
         """
         self.tracked = tracked.data

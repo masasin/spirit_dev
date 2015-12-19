@@ -6,6 +6,8 @@
 Reduce /ardrone/image_color framerate from 30 Hz to 2 Hz.
 
 """
+from __future__ import division
+
 import rospy
 from sensor_msgs.msg import Image
 
@@ -22,15 +24,22 @@ class FramerateReducer(object):
         self.image_publisher = rospy.Publisher("/ardrone/slow_image_raw",
                                                Image, queue_size=1)
         rospy.logdebug("Subscribed to /ardrone/image_color")
+        target_frequency = rospy.get_param("slow_frequency", 2)  # Hz
+        self.period = 30 // target_frequency
         self.count = 0
 
     def frame_callback(self, frame):
         """
         Publish at a reduced rate.
 
+        Parameters
+        ----------
+        frame : Image
+            A newly arrived image.
+
         """
         # Publish every fifteenth frame
-        if not self.count % 3:
+        if not self.count % self.period:
             self.image_publisher.publish(frame)
         self.count += 1
 

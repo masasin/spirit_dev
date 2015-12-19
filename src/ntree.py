@@ -27,14 +27,14 @@ class Frame(object):
 
     Parameters
     ----------
-    coordinates : ndarray
+    coordinates : list | tuple | np.ndarray
         The coordinates at which the frame was taken.
     contents : any
         Any content.
 
     Attributes
     ----------
-    coordinates : ndarray
+    coordinates : np.ndarray
         The coordinates at which the frame was taken.
     contents : any
         Any content.
@@ -58,9 +58,9 @@ class Data(object):
     Attributes
     ----------
     is_empty
-    coordinates : ndarray
+    coordinates : np.ndarray
         The coordinates of the data stored at the node.
-    contents : list of Frame
+    contents : list[Frame]
         A list of all frames added to the ntree at this point, in the order
         they were added. A full implementation might sort the frames by
         quality.
@@ -102,7 +102,7 @@ class Data(object):
         """
         if self.coordinates is None:
             self.coordinates = np.asarray(item.coordinates)
-        elif any(item.coordinates != self.coordinates):
+        elif np.any(item.coordinates != self.coordinates):
             raise NtreeError("Wrong coordinates")
         self.contents.append(item)
 
@@ -131,11 +131,11 @@ class Ntree(object):
 
     Parameters
     ----------
-    centre : ndarray
+    centre : list | tuple | np.ndarray
         The coordinates of the centre of the ntree.
     half_dim : float
         Half the length of one side of one dimension.
-    parent : Ntree, optional
+    parent : Ntree (optional)
         The parent of the ntree. Default (for the root node) is None.
 
     Attributes
@@ -147,9 +147,9 @@ class Ntree(object):
     bound_max
     n_dims : int
         The number of dimensions of the tree.
-    parent : Ntree, optional
+    parent : Ntree (optional)
         The parent of the ntree. Root nodes have a parent of None.
-    children : list of Ntree
+    children : list[Ntree]
         The list of children, one at each octant. The binary value of the list
         index represents the x, y, and z coordinates respectively.  If a
         coordinate's value is less than the centre's, its index will have a
@@ -200,7 +200,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        point : ndarray
+        point : np.ndarray
             The coordinates of the point whose quadrant is to be found.
 
         Returns
@@ -232,29 +232,53 @@ class Ntree(object):
         """
         Check whether a point's coordinates are within the node boundaries.
 
+        Parameters
+        ----------
+        point : tuple
+            Coordinates of a point.
+
         Returns
         -------
         bool
             True if the point is within the bounding box.
 
         """
+        # noinspection PyTypeChecker
         return self._point_in_box(point, self.bound_min, self.bound_max)
 
-    def _point_in_box(self, point, bound_min, bound_max):
+    @staticmethod
+    def _point_in_box(point, bound_min, bound_max):
         """
         Check whether a point's coordinates are within a box boundaries.
 
+        Parameters
+        ----------
+        bound_min : np.ndarray
+            The minimum bound.
+        bound_max : np.ndarray
+            The maximum bound.
+
         Returns
         -------
         bool
             True if the point is within the bounding box.
 
         """
-        return all(point >= bound_min) and all(point <= bound_max)
+        return np.all(point >= bound_min) and np.all(point <= bound_max)
 
-    def _node_outside_box(self, node, bound_min, bound_max):
+    @staticmethod
+    def _node_outside_box(node, bound_min, bound_max):
         """
         Check whether a node is completely outside a box boundaries.
+
+        Parameters
+        ----------
+        node : Ntree
+            A node to verify.
+        bound_min : np.ndarray
+            The minimum bound.
+        bound_max : np.ndarray
+            The maximum bound.
 
         Returns
         -------
@@ -262,9 +286,9 @@ class Ntree(object):
             True if a node is completely outside the box boundaries.
 
         """
-        node_bmin = node.bound_min
-        node_bmax = node.bound_max
-        return all(node_bmin > bound_max) or all(node_bmax < bound_min)
+        node_min = node.bound_min
+        node_max = node.bound_max
+        return all(node_min > bound_max) or all(node_max < bound_min)
 
     def insert(self, item):
         """
@@ -299,8 +323,8 @@ class Ntree(object):
                 self._points_array_up_to_date = False
 
             # Data can be added.
-            if self.data.is_empty or all(self.data.coordinates ==
-                                         item.coordinates):
+            if self.data.is_empty or np.all(self.data.coordinates ==
+                                            item.coordinates):
                 # A node may only have data at one position.
                 self.data.append(item)
             else:
@@ -331,7 +355,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        items : list of Frame
+        items : list[Frame]
             An iterable of items to be added.
 
         Raises
@@ -358,13 +382,13 @@ class Ntree(object):
 
             self.children[pos] = self.__class__(centre, half_dim, parent=self)
 
-    def _get(self, point):
+    def _extract_data(self, point):
         """
         Retrieve the data at a given point.
 
         Parameters
         ----------
-        point : ndarray
+        point : np.ndarray
             The coordinates of the point whose data is to be retrieved.
 
         Returns
@@ -389,21 +413,21 @@ class Ntree(object):
             return self.data
 
         octant = self.get_octant(point)
-        return self.children[octant]._get(point)
+        return self.children[octant]._extract_data(point)
 
-    def get(self, points):
+    def get_point_data(self, points):
         """
         Get a sequence of items.
 
         Parameters
         ----------
-        point : iterable of ndarray
+        points : iterable of np.ndarray
             A list of the coordinates of the points whose data is to be
             retrieved.
 
         Returns
         -------
-        Data or list of Data
+        Data | list[Data]
             The data requested. If only a single point is requested, the data
             will not be added to the list.
 
@@ -413,13 +437,12 @@ class Ntree(object):
             If any point does not exist.
 
         """
-        try:
-            points[0][0]  # Check to see if list of lists. Assumes no strings.
+        if isinstance(points[0], tuple):
             data = []
             for point in points:
-                data.append(self._get(point))
-        except (TypeError, IndexError):
-            data = self._get(points)
+                data.append(self._extract_data(point))
+        else:
+            data = self._extract_data(points)
 
         return data
 
@@ -429,9 +452,9 @@ class Ntree(object):
 
         Parameters
         ----------
-        point : ndarray
+        point : np.ndarray
             The coordinates of the point to be removed.
-        clear : bool, optional
+        clear : bool (optional)
             If True, empties the contents of the data at the point. Default is
             False.
 
@@ -441,7 +464,7 @@ class Ntree(object):
             If the data does not exist.
 
         """
-        data = self.get(point)
+        data = self.get_point_data(point)
         node = self
 
         if clear:
@@ -471,9 +494,9 @@ class Ntree(object):
 
         Parameters
         ----------
-        bound_min : ndarray
+        bound_min : list | tuple | np.ndarray
             The coordinates of the vertex with the minimum values.
-        bound_max : ndarray
+        bound_max : list | tuple | np.ndarray
             The coordinates of the vertex with the maximum values.
 
         Yields
@@ -509,17 +532,17 @@ class Ntree(object):
 
         Parameters
         ----------
-        point : ndarray
+        point : np.ndarray
             The coordinates of the point.
         k : int
             The number of neighbours to find.
 
         Returns
         -------
-        distances : list of float
+        distances : list[float]
             A list of the distance to the point of each of the respective
             `nearest` data points.
-        nearest : list of Data
+        nearest : list[Data]
             A sorted list of the data at the nearest populated locations.
 
         Raises
@@ -545,7 +568,7 @@ class Ntree(object):
 
         nearest = []
         for index in indices:
-            nearest.append(self.get(tree.data[index]))
+            nearest.append(self.get_point_data(tree.data[index]))
 
         return distances, nearest
 
@@ -556,7 +579,7 @@ class Ntree(object):
 
         Returns
         -------
-        ndarray
+        np.ndarray
             The coordinates of the centre of the ntree.
 
         """
@@ -571,7 +594,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        values : ndarray
+        values : np.ndarray
             The coordinates of the centre.
 
         """
@@ -630,7 +653,7 @@ class Ntree(object):
 
         Returns
         -------
-        ndarray
+        np.ndarray
             The coordinates of the vertex with the minimum values.
 
         """
@@ -645,7 +668,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        values : ndarray
+        values : np.ndarray
             The coordinates of the vertex with the minimum values.
 
         """
@@ -660,7 +683,7 @@ class Ntree(object):
 
         Returns
         -------
-        ndarray
+        np.ndarray
             The coordinates of the vertex with the maximum values.
 
         """
@@ -675,7 +698,7 @@ class Ntree(object):
 
         Parameters
         ----------
-        values : ndarray
+        values : np.ndarray
             The coordinates of the vertex with the maximum values.
 
         """
@@ -692,11 +715,11 @@ class Octree(Ntree):
 
     Parameters
     ----------
-    centre : ndarray
+    centre : list | tuple | np.ndarray
         The coordinates of the centre of the ntree.
     half_dim : float
         Half the length of one side of one dimension.
-    parent : Ntree, optional
+    parent : Ntree (optional)
         The parent of the ntree. Default (for the root node) is None.
 
     Attributes
@@ -706,9 +729,9 @@ class Octree(Ntree):
     side
     bound_min
     bound_max
-    parent : Ntree, optional
+    parent : Ntree (optional)
         The parent of the ntree. Root nodes have a parent of None.
-    children : list of Ntree
+    children : list[Ntree]
         The list of children, one at each octant. The binary value of the list
         index represents the x, y, and z coordinates respectively.  If a
         coordinate's value is less than the centre's, its index will have a

@@ -94,7 +94,7 @@ class TestGetting(object):
 
     def test_get_empty_tree(self):
         with pytest.raises(KeyError):
-            self.o.get((20, 30, 40))
+            self.o.get_point_data((20, 30, 40))
 
     def test_get_nonexistent_item(self):
         self.o.insert(self.item1)
@@ -102,14 +102,14 @@ class TestGetting(object):
         self.o.insert(self.item2)
         self.o.insert(self.item3)
         with pytest.raises(KeyError):
-            self.o.get((20, 90, 40))
+            self.o.get_point_data((20, 90, 40))
 
     def test_get_existing_item(self):
         self.o.insert(self.item1)
         self.o.insert(self.item1_copy)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get((40, 30, 40))
+        data = self.o.get_point_data((40, 30, 40))
         assert data.contents == [self.item3]
 
     def test_get_existing_multiple_item(self):
@@ -117,14 +117,14 @@ class TestGetting(object):
         self.o.insert(self.item1_copy)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get([(40, 30, 40), [30, 30, 40]])
+        data = self.o.get_point_data([(40, 30, 40), [30, 30, 40]])
         assert data[0].contents == [self.item3]
         assert data[1].contents == [self.item2]
 
     def test_get_item_pair(self):
         self.o.insert(self.item1)
         self.o.insert(self.item1_copy)
-        data = self.o.get((20, 30, 40))
+        data = self.o.get_point_data((20, 30, 40))
         assert data.contents == [self.item1, self.item1_copy]
 
     def test_get_existing_item_list(self):
@@ -132,7 +132,7 @@ class TestGetting(object):
         self.o.insert(self.item1_copy)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get((20, 30, 40))
+        data = self.o.get_point_data((20, 30, 40))
         assert data.contents == [self.item1, self.item1_copy]
 
     def test_get_existing_item_list_after_split(self):
@@ -140,7 +140,7 @@ class TestGetting(object):
         self.o.insert(self.item2)
         self.o.insert(self.item3)
         self.o.insert(self.item1_copy)
-        data = self.o.get((20, 30, 40))
+        data = self.o.get_point_data((20, 30, 40))
         assert data.contents == [self.item1, self.item1_copy]
 
     def test_get_nearest_empty(self):
@@ -207,7 +207,7 @@ class TestRemoval(object):
         self.o.insert(self.item1_copy)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get((40, 30, 40))
+        data = self.o.get_point_data((40, 30, 40))
         self.o.remove((40, 30, 40))
         assert data.contents == []
         assert data.coordinates is None
@@ -218,7 +218,7 @@ class TestRemoval(object):
         self.o.insert(self.item1_copy)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get((20, 30, 40))
+        data = self.o.get_point_data((20, 30, 40))
         self.o.remove((20, 30, 40))
         assert data.contents == [self.item1]
         assert len(self.o) == 3
@@ -228,7 +228,7 @@ class TestRemoval(object):
         self.o.insert(self.item1_copy)
         self.o.insert(self.item2)
         self.o.insert(self.item3)
-        data = self.o.get((20, 30, 40))
+        data = self.o.get_point_data((20, 30, 40))
         self.o.remove((20, 30, 40), clear=True)
         assert data.contents == []
         assert len(self.o) == 2
@@ -278,4 +278,4 @@ class TestPointGathering(object):
         self.o.insert(self.item2)
         self.o.insert(self.item3)
         nearest = self.o.get_nearest((15, 30, 35))
-        assert nearest == self.o.get((20, 30, 40))
+        assert nearest == self.o.get_point_data((20, 30, 40))

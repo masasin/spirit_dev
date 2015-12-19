@@ -31,6 +31,11 @@ class PoseObtainer(object):
         """
         Publish pose.
 
+        Parameters
+        ----------
+        odom : Odometry
+            Odometry message.
+
         """
         pose = PoseStamped()
         pose.header = odom.header

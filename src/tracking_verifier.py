@@ -55,7 +55,8 @@ class Verifier(object):
 
         rospy.loginfo("Waiting for a connection")
 
-    def beep(self):
+    @staticmethod
+    def beep():
         """
         Plays an audio file containing a beep.
 
