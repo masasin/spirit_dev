@@ -108,41 +108,32 @@ class Evaluators(object):
         self._parent = parent
         self.evaluate = self.__getattribute__(method)
 
-    def constant_time_delay(self, pose):
+    def constant_time_delay(self):
         """
         Return the frame delayed by a fixed amount.
 
         If the delay has not yet passed, return the first frame.
 
-        Parameters
-        ----------
-        pose : PoseStamped
-            A pose message.
-
         """
         if len(self._parent.frames):
-            optimum_timestamp = pose.header.stamp.to_sec() - self._parent._delay
+            optimum_timestamp = (self._parent.pose.header.stamp.to_sec() - 
+                                 self._parent._delay)
 
             for frame in reversed(self._parent.frames):
                 if frame.stamp.to_sec() < optimum_timestamp:
                     return frame
             return self._parent.frames[0]
 
-    def constant_distance(self, pose):
+    def constant_distance(self):
         """
         Return the frame a fixed distance away.
 
         If the distance has not yet been crossed, return the last frame.
 
-        Parameters
-        ----------
-        pose : PoseStamped
-            A pose message.
-
         """
         if len(self._parent.frames):
             optimum_distance = err_min = self._parent._distance
-            position, orientation = get_pose_components(pose)
+            position, orientation = get_pose_components(self._parent.pose)
             for frame in reversed(self._parent.frames):
                 frame_distance = norm(frame.coords_precise - position)
                 if frame_distance > optimum_distance:
@@ -151,14 +142,9 @@ class Evaluators(object):
                         return frame
             return self._parent.frames[-1]
 
-    def murata(self, pose):
+    def murata(self):
         """
         Use the evaluation function from Murata's thesis. [#]_
-
-        Parameters
-        ----------
-        pose : PoseStamped
-            A pose message.
 
         Notes
         -----
@@ -225,18 +211,13 @@ class Evaluators(object):
         if len(self._parent.frames):
             results = {}
             for frame in reversed(self._parent.frames):
-                results[frame] = eval_func(pose)
+                results[frame] = eval_func(self._parent.pose)
             return min(results, key=results.get)
 
     # noinspection PyUnreachableCode
-    def spirit(self, pose):
+    def spirit(self):
         """
         Not implemented yet.
-
-        Parameters
-        ----------
-        pose : PoseStamped
-            A pose message.
 
         """
         def eval_func(pose, frame):
@@ -244,12 +225,12 @@ class Evaluators(object):
 
         raise NotImplementedError
 
-        position, orientation = get_pose_components(pose)
+        position, orientation = get_pose_components(self._parent.pose)
         nearest_ten = self._parent.octree.get_nearest(position, k=10)
         results = {}
         for location in nearest_ten:
             for frame in location:
-                results[frame] = eval_func(pose, frame)
+                results[frame] = eval_func(self._parent.pose, frame)
         return min(results, key=results.get)
 
 
@@ -333,7 +314,7 @@ class Selector(object):
         self.pose = pose
         self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone"))
 
-        best_frame = self.evaluate(pose)
+        best_frame = self.evaluate()
         if best_frame is not None:
             self.current_frame = best_frame
             self.past_image_pub.publish(best_frame.image)
