@@ -20,6 +20,11 @@
 	    required="true" >
 	<rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
       </node>
+      <node name="mocap_pose_tf"
+	pkg="spirit"
+	type="mocap_pose_tf.py"
+	output="screen" >
+      </node>
     </group>
 
     <group unless="$(arg use_mocap)" >
@@ -37,5 +42,12 @@
     </group>
   </group>
 
+  <!-- <node pkg="tf" type="static_transform_publisher" name="ardrone_base_frontcam2ardrone" args="0 0 0 0 0 0 1 ardrone_base_frontcam ardrone 100" /> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="ardrone_base_bottomcam2ardrone" args="0 0 0 0 0 0 1 ardrone_base_bottomcam ardrone 100" /> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="ardrone_base_link2ardrone" args="0 0 0 0 0 0 1 ardrone_base_link ardrone 100" /> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="odom2ardrone" args="0 0 0 0 0 0 1 odom ardrone 100" /> -->
+
   <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
+
 </launch>
+

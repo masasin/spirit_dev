@@ -1,24 +1,81 @@
 <?xml version="1.0"?>
 <robot name="spirit_ardrone" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:property name="PI" value="3.141592653" />
-  <xacro:property name="DEG2RAD" value="0.017453293" />
+  <xacro:property name="DEG2RAD" value="0.0017453293" />
   <xacro:property name="RAD2DEG" value="57.295779513" />
 
   <link name="ardrone">
     <origin rpy="0 0 0" xyz="0 0 0" />
   </link>
 
-  <joint name="virtual_joint" type="fixed">
+  <joint name="virtual_1" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0" />
     <parent link="ardrone" />
     <child link="ardrone/body" />
   </joint>
 
+  <joint name="virtual_2" type="fixed">
+    <origin rpy="${90*DEG2RAD} ${180*DEG2RAD} ${180*DEG2RAD}" xyz="0 0 0" />
+    <parent link="ardrone" />
+    <child link="ardrone_base_frontcam" />
+  </joint>
+
+  <joint name="virtual_3" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="ardrone" />
+    <child link="ardrone_base_bottomcam" />
+  </joint>
+
+  <joint name="virtual_4" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="ardrone" />
+    <child link="ardrone_base_link" />
+  </joint>
+
+  <joint name="virtual_5" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <parent link="ardrone" />
+    <child link="odom" />
+  </joint>
+
   <link name="ardrone/body">
     <visual>
-      <origin rpy="${90*DEG2RAD} 0 ${90*DEG2RAD}" xyz="0 0 0" />
+      <origin rpy="0 0 ${180*DEG2RAD}" xyz="0 0 0" />
       <geometry>
 	<mesh filename="package://spirit/meshes/drone_small.dae"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="ardrone_base_frontcam">
+    <visual>
+      <origin rpy="0 0 {90*DEG2RAD}" xyz="0 0 0" />
+      <geometry>
+	<box size="0.001 0.001 0.001" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="ardrone_base_bottomcam">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+	<box size="0.001 0.001 0.001" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="ardrone_base_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+	<box size="0.001 0.001 0.001" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="odom">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+	<box size="0.001 0.001 0.001" />
       </geometry>
     </visual>
   </link>
