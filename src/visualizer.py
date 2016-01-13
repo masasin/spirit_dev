@@ -47,13 +47,16 @@ class Drone(Shape):
 
         self.arrow_vertices = np.array([
             (-1, 1, 1), (0, 1, -1), (1, 1, 1), (0, 1, 0),
+            (-1, -1, 1), (0, -1, -1), (1, -1, 1), (0, -1, 0),
         ]) * size
         self.arrow_vertices[:, 1] *= height  # / 2
         self.arrow_colors = ((1, 0, 0), (1, 1, 1), (0, 1, 0), (1, 0.5, 0))
         self.arrow_edges = (
             (0, 1), (1, 2), (2, 3), (0, 3),
         )
-        self.arrow_surface = range(4)
+        self.arrow_surfaces = (
+            (0, 1, 2, 3),
+        )
 
     def draw(self, quaternion=(0, 0, 0, 1)):
         super(Drone, self).draw(quaternion)
@@ -62,9 +65,10 @@ class Drone(Shape):
         vertices = np.dot(self.arrow_vertices, rotation_matrix(quaternion).T)
 
         with gl_primitive(gl.GL_QUADS):
-            for i, vertex in enumerate(self.arrow_surface):
-                gl.glColor3fv(self.arrow_colors[i % len(self.arrow_colors)])
-                gl.glVertex3fv(vertices[vertex])
+            for surface in self.arrow_surfaces:
+                for i, vertex in enumerate(surface):
+                    gl.glColor3fv(self.arrow_colors[i % len(self.arrow_colors)])
+                    gl.glVertex3fv(vertices[vertex])
         gl.glColor3fv((1, 1, 1))
 
         with gl_primitive(gl.GL_LINES):
