@@ -2,10 +2,10 @@ from __future__ import division, print_function
 
 from contextlib import contextmanager
 
+import numpy as np
 from OpenGL import GL as gl
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
-import numpy as np
 import pygame as pg
 
 from helpers import (get_pose_components, pose_from_components, quat2axis,
