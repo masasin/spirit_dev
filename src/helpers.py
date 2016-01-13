@@ -24,10 +24,7 @@ def normalize_vector(v):
 
     """
     norm = np.linalg.norm(v)
-    if norm == 0:
-        return v
-    else:
-        return v / norm
+    return (v / norm) if norm else v
 
 
 def get_pose_components(pose):
