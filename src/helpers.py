@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Helper functions for vector, pose, and tf shenanigans.
 
@@ -165,6 +166,20 @@ def tf_from_pose(pose, parent="world", child="robot"):
 
 
 def quat2axis(quaternion):
+    """
+    Change a quaternion to an axis-angle representation.
+
+    Parameters
+    ----------
+    quaternion : np.ndarray
+        A quaternion in the order of x, y, z, w.
+
+    Returns
+    -------
+    tuple
+        The angle in axis-angle representation, with the order of θ, x, y, z
+
+    """
     x, y, z, w = normalize_vector(quaternion)
     angle = np.rad2deg(2 * np.arccos(w))
 
@@ -180,6 +195,20 @@ def quat2axis(quaternion):
 
 
 def rotation_matrix(quaternion):
+    """
+    Create the rotation matrix of a quaternion.
+
+    Parameters
+    ----------
+    quaternion : np.ndarray
+        A quaternion in the order of x, y, z, w.
+
+    Returns
+    -------
+    np.ndarray
+        A 3x3 rotation matrix representing the quaternion.
+
+    """
     # https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
     x, y, z, w = quaternion
     n = sum(i**2 for i in quaternion)
