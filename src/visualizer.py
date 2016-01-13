@@ -2,91 +2,14 @@ from __future__ import division, print_function
 
 from contextlib import contextmanager
 
-from geometry_msgs.msg import PoseStamped
 from OpenGL import GL as gl
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 import numpy as np
 import pygame as pg
 
-
-# Import this from helpers.py
-def get_pose_components(pose):
-    coords = np.array([pose.pose.position.x,
-                       pose.pose.position.y,
-                       pose.pose.position.z])
-
-    orientation = np.array([pose.pose.orientation.x,
-                            pose.pose.orientation.y,
-                            pose.pose.orientation.z,
-                            pose.pose.orientation.w])
-
-    return coords, orientation
-
-
-# Import this from helpers.py
-def pose_from_components(coords, orientation, sequence=0):
-    pose = PoseStamped()
-    pose.header.seq = sequence
-    # pose.header.stamp = rospy.Time.now()
-
-    pose.pose.position.x = coords[0]
-    pose.pose.position.y = coords[1]
-    pose.pose.position.z = coords[2]
-
-    pose.pose.orientation.x = orientation[0]
-    pose.pose.orientation.y = orientation[1]
-    pose.pose.orientation.z = orientation[2]
-    pose.pose.orientation.w = orientation[3]
-
-    return pose
-
-
-# Add this to helpers.py
-def quat2axis(quaternion):
-    x, y, z, w = normalize(quaternion)
-    angle = np.rad2deg(2 * np.arccos(w))
-
-    if angle == 0:
-        return angle, 1, 0, 0
-    elif angle % 180 == 0:
-        return angle, x, y, z
-    else:
-        axis_x = x / np.sqrt(1 - w**2)
-        axis_y = y / np.sqrt(1 - w**2)
-        axis_z = z / np.sqrt(1 - w**2)
-        return angle, axis_x, axis_y, axis_z
-
-
-# Add this to helpers.py
-def normalize(array):
-    array = np.array(array)
-    norm = np.linalg.norm(array)
-    return (array / norm) if norm else 0
-
-
-# Add this to helpers.py
-def rotation_matrix(quaternion):
-    # https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
-    x, y, z, w = quaternion
-    n = sum(i**2 for i in quaternion)
-    s = 0 if n == 0 else 2 / n
-
-    wx = s * w * x
-    wy = s * w * y
-    wz = s * w * z
-
-    xx = s * x * x
-    xy = s * x * y
-    xz = s * x * z
-
-    yy = s * y * y
-    yz = s * y * z
-    zz = s * z * z
-
-    return np.array([[1 - (yy + zz), xy - wz, wy],
-                     [wz, 1 - (xx + zz), yz - wx],
-                     [xz - wy, yz + wx, 1 - (xx + yy)]])
+from helpers import (get_pose_components, pose_from_components, quat2axis,
+                     rotation_matrix)
 
 
 @contextmanager

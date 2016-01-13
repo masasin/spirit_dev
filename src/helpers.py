@@ -77,7 +77,10 @@ def pose_from_components(coords, orientation, sequence=0):
     """
     pose = PoseStamped()
     pose.header.seq = sequence
-    pose.header.stamp = rospy.Time.now()
+    try:
+        pose.header.stamp = rospy.Time.now()
+    except rospy.exceptions.ROSInitException:
+        pass
 
     pose.pose.position.x = coords[0]
     pose.pose.position.y = coords[1]
@@ -107,7 +110,10 @@ def pose_from_tf(transform):
 
     """
     pose = PoseStamped()
-    pose.header.stamp = rospy.Time.now()
+    try:
+        pose.header.stamp = rospy.Time.now()
+    except rospy.exceptions.ROSInitException:
+        pass
     pose.header.frame_id = transform.header.frame_id
 
     pose.pose.position.x = transform.transform.translation.x
@@ -156,3 +162,41 @@ def tf_from_pose(pose, parent="world", child="robot"):
     transform.transform.rotation.w = pose.pose.orientation.w
 
     return transform
+
+
+def quat2axis(quaternion):
+    x, y, z, w = normalize_vector(quaternion)
+    angle = np.rad2deg(2 * np.arccos(w))
+
+    if angle == 0:
+        return angle, 1, 0, 0
+    elif angle % 180 == 0:
+        return angle, x, y, z
+    else:
+        axis_x = x / np.sqrt(1 - w**2)
+        axis_y = y / np.sqrt(1 - w**2)
+        axis_z = z / np.sqrt(1 - w**2)
+        return angle, axis_x, axis_y, axis_z
+
+
+def rotation_matrix(quaternion):
+    # https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+    x, y, z, w = quaternion
+    n = sum(i**2 for i in quaternion)
+    s = 0 if n == 0 else 2 / n
+
+    wx = s * w * x
+    wy = s * w * y
+    wz = s * w * z
+
+    xx = s * x * x
+    xy = s * x * y
+    xz = s * x * z
+
+    yy = s * y * y
+    yz = s * y * z
+    zz = s * z * z
+
+    return np.array([[1 - (yy + zz), xy - wz, wy],
+                     [wz, 1 - (xx + zz), yz - wx],
+                     [xz - wy, yz + wx, 1 - (xx + yy)]])
