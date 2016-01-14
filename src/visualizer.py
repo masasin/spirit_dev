@@ -14,6 +14,38 @@ from opengl_helpers import gl_flag, gl_ortho, gl_primitive, Shape
 
 
 class Drone(Shape):
+    """
+    A shape representing the drone.
+
+    This assumes that the drone is square-shaped, with a set height. An arrow is
+    drawn at the top of the drone, and coloured with navigation lights. (i.e.
+    there is a red light on the left, and a green light on the right.)
+
+    Parameters
+    ----------
+    size : Optional[float]
+        The side of each of the drone's square sides. Default is 50 cm.
+    height : Optional[float]
+        The height of the drone. Default is 15 cm.
+
+    Attributes
+    ----------
+    vertices
+    colours
+    edges
+    surfaces
+    arrow_vertices : Sequence[Sequence[float]]
+        A sequence of 3D coordinates representing the vertices on the arrow.
+    arrow_colours : Sequence[Sequence[float]]
+        A sequence of RGB values between 0 and 1, assigned to arrow vertices.
+    arrow_edges : Sequence[Sequence[int]]
+        A sequence of 2-tuple representing the indices of the arrow vertices to
+        be joined.
+    arrow_surfaces : Sequence[Sequence[int]]
+        A sequence of the list of indices of vertices forming the arrow, in
+        order.
+
+    """
     def __init__(self, size=0.5, height=0.15):
         vertices = np.array([
             (1, -1, -1), (1, 1, -1),
@@ -23,7 +55,7 @@ class Drone(Shape):
         ]) * size
         vertices[:, 1] *= height
 
-        colors = (
+        colours = (
             (0.5, 0.5, 0.5),
         )
 
@@ -43,14 +75,19 @@ class Drone(Shape):
             (4, 0, 3, 6),
         )
 
-        super(Drone, self).__init__(vertices, edges, surfaces, colors)
+        super(Drone, self).__init__(vertices, colours, edges, surfaces)
 
         self.arrow_vertices = np.array([
             (-1, 1, 1), (0, 1, -1), (1, 1, 1), (0, 1, 0),
             (-1, -1, 1), (0, -1, -1), (1, -1, 1), (0, -1, 0),
         ]) * size
-        self.arrow_vertices[:, 1] *= height  # / 2
-        self.arrow_colors = ((1, 0, 0), (1, 1, 1), (0, 1, 0), (1, 0.5, 0))
+        self.arrow_vertices[:, 1] *= height
+        self.arrow_colours = (
+            (1, 0, 0),  # Red on left
+            (1, 1, 1),  # White in front
+            (0, 1, 0),  # Green on right
+            (1, 0.5, 0)  # Orange in back
+        )
         self.arrow_edges = (
             (0, 1), (1, 2), (2, 3), (0, 3),
         )
@@ -67,7 +104,8 @@ class Drone(Shape):
         with gl_primitive(gl.GL_QUADS):
             for surface in self.arrow_surfaces:
                 for i, vertex in enumerate(surface):
-                    gl.glColor3fv(self.arrow_colors[i % len(self.arrow_colors)])
+                    gl.glColor3fv(self.arrow_colours[i %
+                                                     len(self.arrow_colours)])
                     gl.glVertex3fv(vertices[vertex])
         gl.glColor3fv((1, 1, 1))
 

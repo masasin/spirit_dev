@@ -94,35 +94,35 @@ class Shape(object):
     Parameters
     ----------
     vertices : Sequence[Sequence[float]]
-        A sequence of 3D points representing the vertices on the shape.
+        A sequence of 3D coordinates representing the vertices on the shape.
+    colours : Sequence[Sequence[float]]
+        A sequence of RGB values between 0 and 1, assigned to vertices.
     edges : Sequence[Sequence[int]]
         A sequence of 2-tuple representing the indices of the vertices to be
         joined.
     surfaces : Sequence[Sequence[int]]
         A sequence of the list of indices of vertices forming a surface,
         in order.
-    colours : Sequence[Sequence[float]]
-        A sequence of RGB values between 0 and 1, assigned to vertices.
 
     Attributes
     ----------
     vertices : Sequence[Sequence[float]]
-        A sequence of 3D points representing the vertices on the shape.
+        A sequence of 3D coordinates representing the vertices on the shape.
+    colours : Sequence[Sequence[float]]
+        A sequence of RGB values between 0 and 1, assigned to vertices.
     edges : Sequence[Sequence[int]]
         A sequence of 2-tuple representing the indices of the vertices to be
         joined.
     surfaces : Sequence[Sequence[int]]
         A sequence of the list of indices of vertices forming a surface,
         in order.
-    colours : Sequence[Sequence[float]]
-        A sequence of RGB values between 0 and 1, assigned to vertices.
 
     """
-    def __init__(self, vertices, edges, surfaces, colours):
+    def __init__(self, vertices, colours, edges, surfaces):
         self.vertices = vertices
+        self.colours = colours
         self.edges = edges
         self.surfaces = surfaces
-        self.colours = colours
 
     def draw(self, quaternion=(0, 0, 0, 1), edge_colour=(1, 1, 1)):
         """
@@ -168,18 +168,22 @@ class Cube(Shape):
     Attributes
     ----------
     vertices
+    colours
     edges
     surfaces
-    colours
 
     """
-    def __init__(self, scale=1):
+    def __init__(self, vertices):
         vertices = np.array([
             (1, -1, -1), (1, 1, -1),
             (-1, 1, -1), (-1, -1, -1),
             (1, -1, 1), (1, 1, 1),
             (-1, -1, 1), (-1, 1, 1),
         ]) * 0.5 * scale
+
+        colours = (
+            (0.5, 0.5, 0.5),
+        )
 
         edges = (
             (0, 1), (0, 3), (0, 4),
@@ -197,8 +201,4 @@ class Cube(Shape):
             (4, 0, 3, 6),
         )
 
-        colours = (
-            (0.5, 0.5, 0.5),
-        )
-
-        super(Cube, self).__init__(vertices, edges, surfaces, colours)
+        super(Cube, self).__init__(vertices, colours, edges, surfaces)
