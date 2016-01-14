@@ -402,7 +402,7 @@ class Screen(object):
 
         # Set camera position.
         # Convert position to OpenGL coordinate frame.
-        rel_pos[2] *= -1
+        rel_pos[1], rel_pos[2] = rel_pos[2], -rel_pos[1]
 
         # Move camera position.
         gl.glTranslate(*(rel_pos - self._old_rel_pos))
@@ -439,9 +439,9 @@ def main():
     screen.select_texture(0)
     screen.set_perspective()
 
-    pos_cam = [-1.5, 4, -4]
+    pos_cam = [-1.5, -4, 4]
     rot_cam = [-0.1, 0, 0, 1]
-    pos_drone = [-1.4, 3.9, -1]
+    pos_drone = [-1.4, -1, 3.9]
     rot_drone = [-0.3, 0, 0, 1]
     pose_cam = pose_from_components(pos_cam, rot_cam)
     pose_drone = pose_from_components(pos_drone, rot_drone)
