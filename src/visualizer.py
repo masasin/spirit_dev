@@ -311,7 +311,8 @@ class Screen(object):
                         gl.glTexCoord2f(x, y)
                         gl.glVertex3f(self.width * x, self.height * y, 0)
 
-    def write_text(self, text, x=None, y=None, font=gl_font("fixed", 15)):
+    def write_text(self, text, x=None, y=None, font=gl_font("fixed", 13),
+                   colour=(1, 1, 1)):
         """
         Write text on the screen.
 
@@ -327,7 +328,9 @@ class Screen(object):
             The vertical position, in pixels, of the lower left pixel of the
             first line of the string. Default is 80% of the screen above centre.
         font : Optional[ctypes.c_void_p]
-            The font to use. Default is Fixed 15-point.
+            The font to use. Default is 13-point Fixed.
+        colour : Optional[Sequence[float]]
+            The text colour, as RGB values between 0 and 1. Default is white.
 
         """
         if x is None:
