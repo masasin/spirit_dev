@@ -1,7 +1,10 @@
 from __future__ import division, print_function
 
+from collections import deque
 from contextlib import contextmanager
+import os
 
+from cv_bridge import CvBridge
 import numpy as np
 from OpenGL import GL as gl
 from OpenGL import GLU as glu
@@ -11,6 +14,7 @@ import pygame as pg
 import rospy
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
+from std_msgs.msg import Bool
 
 from helpers import (get_pose_components, pose_from_components, quat2axis,
                      rotation_matrix)
@@ -182,7 +186,7 @@ class Screen(object):
             raise TypeError("Enter only one value for field of view size.")
 
         self.size = self.width, self.height = size
-        pg.display.set_mode(size, pg.DOUBLEBUF | pg.OPENGL)
+        pg.display.set_mode(size, pg.OPENGL)
 
         if fov_vertical is not None:
             self.fov_y = fov_vertical
@@ -192,9 +196,10 @@ class Screen(object):
             self.fov_y = 45
 
         self.model = model
-        self.textures = []
+        self.textures = deque(maxlen=3)
         self._old_rel_pos = np.array([0, 0, 0])
         self._old_rot_cam = (0, 0, 0, 0)
+        self.bridge = CvBridge()
 
     def fov_diagonal2vertical(self, fov_diagonal):
         """
@@ -216,14 +221,81 @@ class Screen(object):
         return 2 * np.rad2deg(np.arctan(np.tan(np.deg2rad(fov_diagonal) / 2) /
                                         ratio_diagonal))
 
-    def add_textures(self, *filenames):
+    def add_textures(self, *images):
         """
         Add images to the list of usable textures.
 
         Parameters
         ----------
-        filenames : Sequence[str]
-            A list of filenames of images to load.
+        images : Sequence[str | Image]
+            A list of filenames or images to load.
+
+        Raises
+        ------
+        pygame.error
+            If the image cannot be loaded, or if the image format is not
+            supported.
+        TypeError
+            If the input type is unsupported.
+
+        """
+        for texture_data, width, height in self._load_images(images):
+            self.textures.append(gl.glGenTextures(1))
+            self._init_texture(texture_data, width, height)
+
+    def _load_images(self, images):
+        """
+        Load images.
+
+        Parameters
+        ----------
+        images : Sequence[str | Image]
+            A list of filenames or images to load.
+
+        Yields
+        ------
+        str
+            The image data.
+        int
+            The width of the image.
+        int
+            The height of the image.
+
+        Raises
+        ------
+        pygame.error
+            If the image cannot be loaded, or if the image format is not
+            supported.
+        TypeError
+            If the input type is unsupported.
+
+        """
+        for image in images:
+            if isinstance(image, str):
+                yield self._load_image_from_file(image)
+            elif isinstance(image, Image):
+                yield self._load_image_from_ros(image)
+            else:
+                raise TypeError("Cannot load image.")
+
+    @staticmethod
+    def _load_image_from_file(filename):
+        """
+        Load image from file.
+
+        Parameters
+        ----------
+        filename : str
+            The name of the file to be loaded.
+
+        Returns
+        -------
+        str
+            The image data.
+        int
+            The width of the image.
+        int
+            The height of the image.
 
         Raises
         ------
@@ -232,15 +304,49 @@ class Screen(object):
             supported.
 
         """
-        for filename in filenames:
-            self.textures.append(gl.glGenTextures(1))
-            img = pg.image.load(filename)
-            texture_data = pg.image.tostring(img, "RGB", 1)
-            width = img.get_width()
-            height = img.get_height()
-            self._init_texture(texture_data, width, height)
+        img = pg.image.load(filename)
+        texture_data = pg.image.tostring(img, "RGB", True)
+        return texture_data, img.get_width(), img.get_height()
+
+    def _load_image_from_ros(self, image):
+        """
+        Load image from a ROS topic.
+
+        Parameters
+        ----------
+        image : Image
+            The Image to be loaded.
+
+        Returns
+        -------
+        str
+            The image data.
+        int
+            The width of the image.
+        int
+            The height of the image.
+
+        """
+        cv2_img = self.bridge.imgmsg_to_cv2(image, "rgb8")
+        return cv2_img, image.width, image.height
 
     def _init_texture(self, texture_data, width, height, texture_number=-1):
+        """
+        Initialize a texture.
+
+        Parameters
+        ----------
+        texture_data : Sequence
+            The image data.
+        width : int
+            The width of the image.
+        height : int
+            The height of the image.
+        texture_number : Optional[int]
+            The number of the texture, by the order it was added. Default is
+            the latest texture.
+
+        """
         self.select_texture(texture_number)
         gl.glTexParameter(target=gl.GL_TEXTURE_2D,
                           pname=gl.GL_TEXTURE_MIN_FILTER,
@@ -292,7 +398,7 @@ class Screen(object):
         """
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
-    def draw_background(self, texture_number=0):
+    def draw_background(self, texture_number=-1):
         """
         Draw the background image.
 
@@ -300,7 +406,7 @@ class Screen(object):
         ----------
         texture_number : Optional[int]
             The number of the texture, by the order it was added. Default is
-            the first texture added.
+            the latest texture added.
 
         """
         self.select_texture(texture_number)
@@ -435,6 +541,34 @@ class Screen(object):
 
 class Visualizer(object):
     def __init__(self):
+        rospy.Subscriber("/ardrone/past_image", Image, self.bg_callback,
+                         queue_size=1)
+        rospy.Subscriber("/ardrone/past_pose", PoseStamped,
+                         self.pose_cam_callback, queue_size=1)
+        rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_drone_callback,
+                         queue_size=1)
+        rospy.Subscriber("/ardrone/tracked", Bool, self.tracked_callback,
+                         queue_size=1)
+
+        self.screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
+        self.screen.set_perspective()
+
+    def bg_callback(self, background):
+        pass
+
+    def pose_cam_callback(self, pose_cam):
+        self.pose_cam = pose_cam
+
+    def pose_drone_callback(self, pose_drone):
+        self.pose_drone = pose_drone
+
+        with self.screen.step():
+            self.screen.render(self.pose_cam, self.pose_drone)
+            if not self.tracked:
+                self.screen.write_text("Not tracking!", colour=(1, 0, 0))
+
+    def tracked_callback(self, tracked):
+        self.tracked = tracked.data
 
 
 def test():
@@ -462,5 +596,46 @@ def main():
     rospy.spin()
 
 
+class TestVisualizer(object):
+    def __init__(self):
+        # rospy.Subscriber("/ardrone/image_raw", Image, self.dummy,
+        rospy.Subscriber("/ardrone/image_raw", Image, self.bg_callback,
+                         queue_size=1)
+
+        self.screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
+        self.screen.set_perspective()
+        pos_cam = [-1.5, -4, 4]
+        rot_cam = [-0.1, 0, 0, 1]
+        pos_drone = [-1.4, -1, 3.9]
+        rot_drone = [-0.3, 0, 0, 1]
+        self.pose_cam = pose_from_components(pos_cam, rot_cam)
+        self.pose_drone = pose_from_components(pos_drone, rot_drone)
+
+    def dummy(self, x):
+        pass
+
+    def bg_callback(self, background):
+        self.screen.add_textures("bird.jpg")
+        # self.screen.add_textures(background)
+        try:
+            with self.screen.step(wait=1000):
+                self.screen.render(self.pose_cam, self.pose_drone)
+        except pg.error:
+            os._exit(0)
+
+    def loop(self):
+        self.screen.add_textures("bird.jpg")
+        with self.screen.step(wait=1000):
+            self.screen.render(self.pose_cam, self.pose_drone)
+
+
+def shutdown_hook():
+    pg.quit()
+
+
 if __name__ == '__main__':
-    main()
+    rospy.init_node("visualizer", anonymous=True)
+    rospy.on_shutdown(shutdown_hook)
+    TestVisualizer()
+    rospy.loginfo("Started visualizer")
+    rospy.spin()
