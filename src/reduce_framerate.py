@@ -38,7 +38,7 @@ class FramerateReducer(object):
             A newly arrived image.
 
         """
-        # Publish every fifteenth frame
+        # Publish at the reduced rate.
         if not self.count % self.period:
             self.image_publisher.publish(frame)
         self.count += 1

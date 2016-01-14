@@ -8,6 +8,10 @@ from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 import pygame as pg
 
+import rospy
+from geometry_msgs.msg import PoseStamped
+from sensor_msgs.msg import Image
+
 from helpers import (get_pose_components, pose_from_components, quat2axis,
                      rotation_matrix)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
@@ -433,7 +437,11 @@ class Screen(object):
         pg.time.wait(wait)
 
 
-def main():
+class Visualizer(object):
+    def __init__(self):
+
+
+def test():
     screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
     screen.add_textures("background.bmp", "bird.jpg")
     screen.select_texture(0)
@@ -449,6 +457,13 @@ def main():
     while True:
         with screen.step():
             screen.render(pose_cam, pose_drone)
+
+
+def main():
+    rospy.init_node("visualizer", anonymous=True)
+    Visualizer()
+    rospy.loginfo("Started visualizer")
+    rospy.spin()
 
 
 if __name__ == '__main__':
