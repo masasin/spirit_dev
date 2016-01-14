@@ -279,6 +279,8 @@ class Selector(object):
 
         self.past_image_pub = rospy.Publisher("/ardrone/past_image", Image,
                                               queue_size=1)
+        self.past_pose_pub = rospy.Publisher("/ardrone/past_pose", PoseStamped,
+                                             queue_size=1)
         self.tf_pub = tf2_ros.TransformBroadcaster()
 
     def image_callback(self, image):
@@ -318,6 +320,7 @@ class Selector(object):
         if best_frame is not None:
             self.current_frame = best_frame
             self.past_image_pub.publish(best_frame.image)
+            self.past_pose_pub.publish(best_frame.pose)
 
     def tracked_callback(self, tracked):
         """
