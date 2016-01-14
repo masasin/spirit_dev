@@ -3,8 +3,67 @@ from contextlib import contextmanager
 import numpy as np
 from OpenGL import GL as gl
 from OpenGL import GLU as glu
+from OpenGL import GLUT as glut
 
 from helpers import rotation_matrix
+
+
+def gl_font(name, height):
+    """
+    Return a handle to a bitmapped OpenGL font.
+
+    Parameters
+    ----------
+    name : str
+        The name of the font. The following fonts are available:
+
+        - "fixed" for Fixed
+        - "times" for Times Roman
+        - "helvetica" for Helvetica
+
+    height : int
+        The height of the fonts, in points. The following heights are possible
+        for each font:
+
+        - "fixed": 13 or 15 points.
+        - "times": 10 or 24 points.
+        - "helvetica": 10, 12, or 18 points.
+
+    Returns
+    -------
+    ctypes.c_void_p
+        A handle to the requested font.
+
+    Raises
+    ------
+    ValueError
+        If a bad font/size combination is requested.
+
+    """
+    name = name.lower()
+
+    if name not in ("fixed", "times", "helvetica"):
+        raise ValueError("Unknown font requested.")
+
+    if name == "fixed":
+        if height == 13:
+            return glut.GLUT_BITMAP_8_BY_13
+        elif height == 15:
+            return glut.GLUT_BITMAP_9_BY_15
+        else:
+            raise ValueError("The Fixed font can only be 13 or 15 points high.")
+
+    elif name == "times":
+        if height not in (10, 24):
+            raise ValueError("The Times Roman font can only be 10 or 24 points "
+                             "high.")
+        return getattr(glut, "GLUT_BITMAP_TIMES_ROMAN_{}".format(height))
+
+    elif name == "helvetica":
+        if height not in (10, 12, 18):
+            raise ValueError("The Helvetica font can only be 10, 12, or 18 "
+                             "points high.")
+        return getattr(glut, "GLUT_BITMAP_HELVETICA_{}".format(height))
 
 
 @contextmanager
@@ -202,3 +261,5 @@ class Cube(Shape):
         )
 
         super(Cube, self).__init__(vertices, colours, edges, surfaces)
+
+

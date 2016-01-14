@@ -10,7 +10,7 @@ import pygame as pg
 
 from helpers import (get_pose_components, pose_from_components, quat2axis,
                      rotation_matrix)
-from opengl_helpers import gl_flag, gl_ortho, gl_primitive, Shape
+from opengl_helpers import gl_font, gl_flag, gl_ortho, gl_primitive, Shape
 
 
 class Drone(Shape):
@@ -156,7 +156,7 @@ class Screen(object):
         The width of the display, in pixels.
     height : int
         The height of the display, in pixels.
-    fov : float
+    fov_y : float
         The vertical field of view, in degrees.
     model : Shape
         The model to draw.
@@ -180,11 +180,11 @@ class Screen(object):
         pg.display.set_mode(size, pg.DOUBLEBUF | pg.OPENGL)
 
         if fov_vertical is not None:
-            self.fov = fov_vertical
+            self.fov_y = fov_vertical
         elif fov_diagonal is not None:
-            self.fov = self.fov_diagonal2vertical(fov_diagonal)
+            self.fov_y = self.fov_diagonal2vertical(fov_diagonal)
         else:
-            self.fov = 45
+            self.fov_y = 45
 
         self.model = model
         self.textures = []
@@ -212,38 +212,97 @@ class Screen(object):
                                         ratio_diagonal))
 
     def add_textures(self, *filenames):
+        """
+        Add images to the list of usable textures.
+
+        Parameters
+        ----------
+        filenames : Sequence[str]
+            A list of filenames of images to load.
+
+        Raises
+        ------
+        pygame.error
+            If the image cannot be loaded, or if the image format is not
+            supported.
+
+        """
         n_files = len(filenames)
         textures = gl.glGenTextures(n_files)
         if n_files == 1:
             textures = [textures]
         self.textures.extend(textures)
 
-        for i, filename in enumerate(filenames):
+        for filename, texture in zip(filenames, textures):
             img = pg.image.load(filename)
             texture_data = pg.image.tostring(img, "RGB", 1)
             width = img.get_width()
             height = img.get_height()
 
-            gl.glBindTexture(gl.GL_TEXTURE_2D, textures[i])
-            gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER,
-                               gl.GL_LINEAR)
+            gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
+            gl.glTexParameter(target=gl.GL_TEXTURE_2D,
+                              pname=gl.GL_TEXTURE_MIN_FILTER,
+                              parameter=gl.GL_LINEAR)
+
+            # Implementation does not accept kwargs. Order is target, level,
+            # internalFormat, width, height, border, format, type, and pixels.
             gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
                             gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
 
-    def select_texture(self, number):
+    def select_texture(self, number=-1):
+        """
+        Bind a known texture for use.
+
+        Parameters
+        ----------
+        number : Optional[int]
+            The number of the texture, by the order it was added. Default is
+            the latest texture.
+
+        Raises
+        ------
+        IndexError
+            If `number` is larger than the number of available textures.
+
+        """
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[number])
 
-    def set_perspective(self, fov=None, near=0.1, far=100):
-        if fov is None:
-            fov = self.fov
-        glu.gluPerspective(fov, self.width / self.height, near, far)
+    def set_perspective(self, near=0.1, far=100):
+        """
+        Set up the perspective projection matrix.
+
+        Parameters
+        ----------
+        near : Optional[float]
+            The distance to the near clipping plane in the z-direction. Default
+            is 10 cm.
+        far : Optional[float]
+            The distance to the far clipping plane in the z-direction. Default
+            is 100 m.
+
+        """
+        glu.gluPerspective(self.fov_y, self.width / self.height, near, far)
 
     @staticmethod
     def clear():
+        """
+        Reset OpenGL buffers to preset values.
+
+        """
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
-    def draw_background(self):
-        self.select_texture(0)
+    def draw_background(self, texture_number=0):
+        """
+        Draw the background image.
+
+        Parameters
+        ----------
+        texture_number : Optional[int]
+            The number of the texture, by the order it was added. Default is
+            the first texture added.
+
+        """
+        self.select_texture(texture_number)
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
                 gl.glTranslatef(-self.width / 2, -self.height / 2, 0)
@@ -252,7 +311,29 @@ class Screen(object):
                         gl.glTexCoord2f(x, y)
                         gl.glVertex3f(self.width * x, self.height * y, 0)
 
-    def write_text(self, text, x, y, font=glut.GLUT_BITMAP_HELVETICA_18):
+    def write_text(self, text, x=None, y=None, font=gl_font("fixed", 15)):
+        """
+        Write text on the screen.
+
+        Parameters
+        ----------
+        text : str
+            The text to write.
+        x : Optional[int]
+            The horizontal position, in pixels, of the lower left pixel of the
+            first line of the string. Default is 40% of the screen right of
+            centre.
+        y : Optional[int]
+            The vertical position, in pixels, of the lower left pixel of the
+            first line of the string. Default is 80% of the screen above centre.
+        font : Optional[ctypes.c_void_p]
+            The font to use. Default is Fixed 15-point.
+
+        """
+        if x is None:
+            x = self.width * 0.2
+        if y is None:
+            y = self.height * 0.4
         with gl_ortho(self.width, self.height):
             gl.glRasterPos2f(x, y)
             glut.glutBitmapString(font, text)
@@ -312,6 +393,7 @@ def main():
     while True:
         with screen.step():
             screen.render(pose_cam, pose_drone)
+            screen.write_text("Hello")
 
 
 if __name__ == '__main__':
