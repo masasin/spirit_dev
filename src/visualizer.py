@@ -138,6 +138,8 @@ class Screen(object):
     ----------
     size : Sequence[int]
         The width and height of the display, in pixels.
+    model : Shape
+        The model to be drawn.
     fov_vertical : Optional[float]
         The vertical size of the field of view, in degrees.
     fov_diagonal : Optional[float]
@@ -170,7 +172,7 @@ class Screen(object):
     pg.init()
     glut.glutInit()
 
-    def __init__(self, size, fov_vertical=None, fov_diagonal=None):
+    def __init__(self, size, model, fov_vertical=None, fov_diagonal=None):
         if fov_diagonal and fov_vertical:
             raise TypeError("Enter only one value for field of view size.")
 
@@ -184,7 +186,7 @@ class Screen(object):
         else:
             self.fov = 45
 
-        self.model = None
+        self.model = model
         self.textures = []
         self._old_rel_pos = np.array([0, 0, 0])
         self._old_rot_cam = (0, 0, 0, 0)
@@ -208,9 +210,6 @@ class Screen(object):
         ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
         return 2 * np.rad2deg(np.arctan(np.tan(np.deg2rad(fov_diagonal) / 2) /
                                         ratio_diagonal))
-
-    def set_model(self, model):
-        self.model = model
 
     def add_textures(self, *filenames):
         n_files = len(filenames)
@@ -298,8 +297,7 @@ class Screen(object):
 
 
 def main():
-    screen = Screen((640, 360), fov_diagonal=92)
-    screen.set_model(Drone())
+    screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
     screen.add_textures("background.bmp", "bird.jpg")
     screen.select_texture(0)
     screen.set_perspective()
