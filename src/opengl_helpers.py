@@ -125,6 +125,17 @@ def gl_primitive(gl_mode):
 
 
 @contextmanager
+def new_state():
+    """
+    Context manager for temporarily changing parameters.
+
+    """
+    gl.glPushAttrib(gl.GL_CURRENT_BIT)
+    yield
+    gl.glPopAttrib(gl.GL_CURRENT_BIT)
+
+
+@contextmanager
 def new_matrix(mode_start=None, mode_end=None):
     """
     Context manager for temporarily working with a new matrix.
