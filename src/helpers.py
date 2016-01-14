@@ -184,14 +184,15 @@ def quat2axis(quaternion):
     angle = np.rad2deg(2 * np.arccos(w))
 
     if angle == 0:
-        return angle, 1, 0, 0
+        axis_x = 1
+        axis_y = axis_z = 0
     elif angle % 180 == 0:
-        return angle, x, y, z
+        axis_x, axis_y, axis_z = x, y, z
     else:
         axis_x = x / np.sqrt(1 - w**2)
         axis_y = y / np.sqrt(1 - w**2)
         axis_z = z / np.sqrt(1 - w**2)
-        return angle, axis_x, axis_y, axis_z
+    return angle, axis_x, axis_y, axis_z
 
 
 def rotation_matrix(quaternion):
