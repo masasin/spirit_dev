@@ -173,7 +173,7 @@ class Cube(Shape):
     surfaces
 
     """
-    def __init__(self, vertices):
+    def __init__(self, scale=1):
         vertices = np.array([
             (1, -1, -1), (1, 1, -1),
             (-1, 1, -1), (-1, -1, -1),
