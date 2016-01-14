@@ -45,6 +45,10 @@ class Drone(Shape):
         A sequence of the list of indices of vertices forming the arrow, in
         order.
 
+    See Also
+    --------
+    Shape
+
     """
     def __init__(self, size=0.5, height=0.15):
         vertices = np.array([
@@ -95,8 +99,19 @@ class Drone(Shape):
             (0, 1, 2, 3),
         )
 
-    def draw(self, quaternion=(0, 0, 0, 1)):
-        super(Drone, self).draw(quaternion)
+    def draw(self, quaternion=(0, 0, 0, 1), edge_colour=(1, 1, 1)):
+        """
+        Draw the drone.
+
+        Parameters
+        ----------
+        quaternion : Optional[Sequence[float]]
+            The x, y, z, and w quaternion of the pose. Default is no rotation.
+        edge_colour : Optional[Sequence[float]]
+            The colour to draw the edges in. Default is white.
+
+        """
+        super(Drone, self).draw(quaternion, edge_colour)
 
         # Draw arrow
         vertices = np.dot(self.arrow_vertices, rotation_matrix(quaternion).T)
@@ -107,7 +122,7 @@ class Drone(Shape):
                     gl.glColor3fv(self.arrow_colours[i %
                                                      len(self.arrow_colours)])
                     gl.glVertex3fv(vertices[vertex])
-        gl.glColor3fv((1, 1, 1))
+        gl.glColor3fv(edge_colour)
 
         with gl_primitive(gl.GL_LINES):
             for edge in self.arrow_edges:
