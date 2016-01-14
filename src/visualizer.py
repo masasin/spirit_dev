@@ -143,10 +143,29 @@ class Screen(object):
     fov_diagonal : Optional[float]
         The diagonal size of the field of view, in degrees.
 
-    Notes
-    -----
-    `fov_vertical` and `fov_diagonal` are mutually exclusive, but at least one
-    must be provided.
+    `fov_vertical` and `fov_diagonal` are mutually exclusive. If neither is
+    specified, the default vertical field of view is set to 45 degrees.
+
+    Attributes
+    ----------
+    size : Sequence[int]
+        The width and height of the display, in pixels.
+    width : int
+        The width of the display, in pixels.
+    height : int
+        The height of the display, in pixels.
+    fov : float
+        The vertical field of view, in degrees.
+    model : Shape
+        The model to draw.
+    textures : Sequence[gl.GLuint]
+        A list of usable textures.
+
+    Raises
+    ------
+    TypeError
+        If both `fov_vertical` and `fov_diagonal` are provided.
+
     """
     pg.init()
     glut.glutInit()
@@ -171,6 +190,20 @@ class Screen(object):
         self._old_rot_cam = (0, 0, 0, 0)
 
     def fov_diagonal2vertical(self, fov_diagonal):
+        """
+        Convert a diagonal field of view to vertical.
+
+        Parameters
+        ----------
+        fov_diagonal : float
+            The diagonal field of view.
+
+        Returns
+        -------
+        float
+            The vertical field of view.
+
+        """
         aspect_ratio = self.width / self.height
         ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
         return 2 * np.rad2deg(np.arctan(np.tan(np.deg2rad(fov_diagonal) / 2) /

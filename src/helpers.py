@@ -208,8 +208,12 @@ def rotation_matrix(quaternion):
     np.ndarray
         A 3x3 rotation matrix representing the quaternion.
 
+    References
+    ----------
+    .. [1] Wikipedia, Rotation Matrix.
+           https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+
     """
-    # https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
     x, y, z, w = quaternion
     n = sum(i**2 for i in quaternion)
     s = 0 if n == 0 else 2 / n
