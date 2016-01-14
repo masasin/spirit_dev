@@ -130,8 +130,8 @@ class Shape(object):
 
         Parameters
         ----------
-        quaternion : Sequence[float]
-            The x, y, z, and w quaternion of the pose.
+        quaternion : Optional[Sequence[float]]
+            The x, y, z, and w quaternion of the pose. Default is no rotation.
         edge_colour : Optional[Sequence[float]]
             The colour to draw the edges in. Default is white.
 
