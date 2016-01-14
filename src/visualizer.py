@@ -203,10 +203,6 @@ class Screen(object):
                         gl.glTexCoord2f(x, y)
                         gl.glVertex3f(self.width * x, self.height * y, 0)
 
-    @staticmethod
-    def draw_teapot(scale=0.5):
-        glut.glutSolidTeapot(scale)
-
     def write_text(self, text, x, y, font=glut.GLUT_BITMAP_HELVETICA_18):
         with gl_ortho(self.width, self.height):
             gl.glRasterPos2f(x, y)
