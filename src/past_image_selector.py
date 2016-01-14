@@ -146,8 +146,8 @@ class Evaluators(object):
         """
         Use the evaluation function from Murata's thesis. [#]_
 
-        Notes
-        -----
+        Extended Notes
+        --------------
         The evaluation function is:
 
         .. math::

@@ -131,12 +131,29 @@ class Drone(Shape):
 
 
 class Screen(object):
+    """
+    Class for displaying and updating the screen.
+
+    Parameters
+    ----------
+    size : Sequence[int]
+        The width and height of the display, in pixels.
+    fov_vertical : Optional[float]
+        The vertical size of the field of view, in degrees.
+    fov_diagonal : Optional[float]
+        The diagonal size of the field of view, in degrees.
+
+    Notes
+    -----
+    `fov_vertical` and `fov_diagonal` are mutually exclusive, but at least one
+    must be provided.
+    """
     pg.init()
     glut.glutInit()
 
     def __init__(self, size, fov_vertical=None, fov_diagonal=None):
         if fov_diagonal and fov_vertical:
-            raise ValueError("Enter only one value for field of view")
+            raise TypeError("Enter only one value for field of view size.")
 
         self.size = self.width, self.height = size
         pg.display.set_mode(size, pg.DOUBLEBUF | pg.OPENGL)
