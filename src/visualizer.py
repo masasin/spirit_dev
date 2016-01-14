@@ -10,7 +10,8 @@ import pygame as pg
 
 from helpers import (get_pose_components, pose_from_components, quat2axis,
                      rotation_matrix)
-from opengl_helpers import gl_font, gl_flag, gl_ortho, gl_primitive, Shape
+from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
+                            new_state, Shape)
 
 
 class Drone(Shape):
@@ -312,7 +313,7 @@ class Screen(object):
                         gl.glVertex3f(self.width * x, self.height * y, 0)
 
     def write_text(self, text, x=None, y=None, font=gl_font("fixed", 13),
-                   colour=(1, 1, 1)):
+                   colour=(0, 1, 0)):
         """
         Write text on the screen.
 
@@ -330,7 +331,7 @@ class Screen(object):
         font : Optional[ctypes.c_void_p]
             The font to use. Default is 13-point Fixed.
         colour : Optional[Sequence[float]]
-            The text colour, as RGB values between 0 and 1. Default is white.
+            The text colour, as RGB values between 0 and 1. Default is green.
 
         """
         if x is None:
@@ -338,35 +339,90 @@ class Screen(object):
         if y is None:
             y = self.height * 0.4
         with gl_ortho(self.width, self.height):
-            gl.glRasterPos2f(x, y)
-            glut.glutBitmapString(font, text)
+            with new_state():
+                gl.glColor3fv(colour)
+                gl.glRasterPos2f(x, y)
+                glut.glutBitmapString(font, text)
 
     @staticmethod
     def _find_relative(pose_cam, pose_drone):
+        """
+        Find the relative positions and orientations of the camera and the
+        drone.
+
+        Parameters
+        ----------
+        pose_cam : PoseStamped
+            The pose of the drone when the background image was taken.
+        pose_drone : PoseStamped
+            The current pose of the drone.
+
+        Returns
+        -------
+        rel_pos : np.ndarray
+            A 3-array with the x, y, and z positions of the relative positions
+            of the drone, converted to the OpenGL coordinate system.
+        rot_cam : np.ndarray
+            A quaternion representing the orientation of the camera, in x, y, z,
+            w format.
+        rot_drone : np.ndarray
+            A quaternion representing the orientation of the drone, in x, y, z,
+            w format.
+
+        """
         coords_cam, rot_cam = get_pose_components(pose_cam)
         coords_drone, rot_drone = get_pose_components(pose_drone)
         rel_pos = coords_drone - coords_cam
-        rel_pos[2] *= -1
         return rel_pos, rot_cam, rot_drone
 
-    def render(self, pose_cam, pose_drone, background=True):
+    def render(self, pose_cam, pose_drone, draw_background=True):
+        """
+        Render the scene.
+
+        Parameters
+        ----------
+        pose_cam : PoseStamped
+            The pose of the drone when the background image was taken.
+        pose_drone : PoseStamped
+            The current pose of the drone.
+        draw_background : Optional[bool]
+            Whether to draw the background. Default is True.
+
+        """
         rel_pos, rot_cam, rot_drone = self._find_relative(pose_cam, pose_drone)
 
-        gl.glRotatef(*self._old_rot_cam)
+        # Set camera orientation.
+        # Reset camera orientation.
+        gl.glRotate(*self._old_rot_cam)
         self._old_rot_cam = quat2axis(-rot_cam)
 
-        rot_cam[:3] *= -1
+        # Set new camera orientation.
+        rot_cam[:3] *= -1  # z-axis is with respect to origin, not camera.
         gl.glRotate(*quat2axis(rot_cam))
 
-        gl.glTranslatef(*(rel_pos - self._old_rel_pos))
+        # Set camera position.
+        # Convert position to OpenGL coordinate frame.
+        rel_pos[2] *= -1
+
+        # Move camera position.
+        gl.glTranslate(*(rel_pos - self._old_rel_pos))
         self._old_rel_pos = rel_pos
 
-        if background:
+        if draw_background:
             self.draw_background()
         self.model.draw(rot_drone)
 
     @contextmanager
     def step(self, wait=10):
+        """
+        Context manager for displaying a single frame.
+
+        Parameters
+        ----------
+        wait : Optional[int]
+            The time to wait before the next step, in milliseconds.
+
+        """
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
@@ -375,9 +431,6 @@ class Screen(object):
         yield
         pg.display.flip()
         pg.time.wait(wait)
-
-    def __del__(self):
-        pg.quit()
 
 
 def main():
@@ -396,7 +449,6 @@ def main():
     while True:
         with screen.step():
             screen.render(pose_cam, pose_drone)
-            screen.write_text("Hello")
 
 
 if __name__ == '__main__':
