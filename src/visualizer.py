@@ -232,27 +232,23 @@ class Screen(object):
             supported.
 
         """
-        n_files = len(filenames)
-        textures = gl.glGenTextures(n_files)
-        if n_files == 1:
-            textures = [textures]
-        self.textures.extend(textures)
-
-        for filename, texture in zip(filenames, textures):
+        for filename in filenames:
+            self.textures.append(gl.glGenTextures(1))
             img = pg.image.load(filename)
             texture_data = pg.image.tostring(img, "RGB", 1)
             width = img.get_width()
             height = img.get_height()
+            self._init_texture(texture_data, width, height)
 
-            gl.glBindTexture(gl.GL_TEXTURE_2D, texture)
-            gl.glTexParameter(target=gl.GL_TEXTURE_2D,
-                              pname=gl.GL_TEXTURE_MIN_FILTER,
-                              parameter=gl.GL_LINEAR)
-
-            # Implementation does not accept kwargs. Order is target, level,
-            # internalFormat, width, height, border, format, type, and pixels.
-            gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
-                            gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
+    def _init_texture(self, texture_data, width, height, texture_number=-1):
+        self.select_texture(texture_number)
+        gl.glTexParameter(target=gl.GL_TEXTURE_2D,
+                          pname=gl.GL_TEXTURE_MIN_FILTER,
+                          parameter=gl.GL_LINEAR)
+        # Implementation does not accept kwargs. Order is target, level,
+        # internalFormat, width, height, border, format, type, and pixels.
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
+                        gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
 
     def select_texture(self, number=-1):
         """
