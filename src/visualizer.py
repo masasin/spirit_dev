@@ -3,8 +3,11 @@ from __future__ import division, print_function
 from collections import deque
 from contextlib import contextmanager
 import os
+import time
+import threading
 
-from cv_bridge import CvBridge
+import cv2
+from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 from OpenGL import GL as gl
 from OpenGL import GLU as glu
@@ -19,7 +22,10 @@ from std_msgs.msg import Bool
 from helpers import (get_pose_components, pose_from_components, quat2axis,
                      rotation_matrix)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
-                            new_state, Shape)
+                            new_matrix, new_state, Shape)
+
+
+lock = threading.Lock()
 
 
 class Drone(Shape):
@@ -178,15 +184,11 @@ class Screen(object):
         If both `fov_vertical` and `fov_diagonal` are provided.
 
     """
-    pg.init()
-    glut.glutInit()
-
     def __init__(self, size, model, fov_vertical=None, fov_diagonal=None):
         if fov_diagonal and fov_vertical:
             raise TypeError("Enter only one value for field of view size.")
 
         self.size = self.width, self.height = size
-        pg.display.set_mode(size, pg.OPENGL)
 
         if fov_vertical is not None:
             self.fov_y = fov_vertical
@@ -200,6 +202,29 @@ class Screen(object):
         self._old_rel_pos = np.array([0, 0, 0])
         self._old_rot_cam = (0, 0, 0, 0)
         self.bridge = CvBridge()
+
+        # threading.Thread(target=self._run_gui).start()
+
+    def _run_gui(self):
+        # pg.init()
+        glut.glutInit()
+
+        # pg.display.set_mode(size, pg.OPENGL)
+        glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGB |
+                                 glut.GLUT_DEPTH)
+        glut.glutInitWindowSize(self.width, self.height)
+        glut.glutCreateWindow("Hello world!")
+
+        glut.glutDisplayFunc(self._display)
+        self.set_perspective()
+        glut.glutMainLoop()
+
+    def _display(self):
+        print("Displaying")
+        with lock:
+            self.clear()
+            self.render(self.pose_cam, self.pose_drone)
+            glut.glutSwapBuffers()
 
     def fov_diagonal2vertical(self, fov_diagonal):
         """
@@ -239,6 +264,7 @@ class Screen(object):
             If the input type is unsupported.
 
         """
+        print("Adding texture")
         for texture_data, width, height in self._load_images(images):
             self.textures.append(gl.glGenTextures(1))
             self._init_texture(texture_data, width, height)
@@ -304,9 +330,11 @@ class Screen(object):
             supported.
 
         """
-        img = pg.image.load(filename)
-        texture_data = pg.image.tostring(img, "RGB", True)
-        return texture_data, img.get_width(), img.get_height()
+        # img = pg.image.load(filename)
+        # texture_data = pg.image.tostring(img, "RGB", True)
+        # return texture_data, img.get_width(), img.get_height()
+        cv2_img = cv2.imread(filename)
+        return cv2_img, cv2_img.shape[1], cv2_img.shape[0]
 
     def _load_image_from_ros(self, image):
         """
@@ -327,7 +355,10 @@ class Screen(object):
             The height of the image.
 
         """
-        cv2_img = self.bridge.imgmsg_to_cv2(image, "rgb8")
+        try:
+            cv2_img = self.bridge.imgmsg_to_cv2(image, "rgb8")
+        except CvBridgeError as e:
+            rospy.logerr(e)
         return cv2_img, image.width, image.height
 
     def _init_texture(self, texture_data, width, height, texture_number=-1):
@@ -354,7 +385,7 @@ class Screen(object):
         # Implementation does not accept kwargs. Order is target, level,
         # internalFormat, width, height, border, format, type, and pixels.
         gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
-                        gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
+                        gl.GL_BGR, gl.GL_UNSIGNED_BYTE, texture_data[::-1])
 
     def select_texture(self, number=-1):
         """
@@ -389,6 +420,9 @@ class Screen(object):
 
         """
         glu.gluPerspective(self.fov_y, self.width / self.height, near, far)
+        # glu.gluLookAt(0, 0, 10,
+        #               0, 0, 0,
+        #               0, 1, 0)
 
     @staticmethod
     def clear():
@@ -409,7 +443,12 @@ class Screen(object):
             the latest texture added.
 
         """
-        self.select_texture(texture_number)
+        try:
+            self.select_texture(texture_number)
+            print("Selection complete")
+        except IndexError:
+            return
+
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
                 gl.glTranslatef(-self.width / 2, -self.height / 2, 0)
@@ -529,14 +568,14 @@ class Screen(object):
             The time to wait before the next step, in milliseconds.
 
         """
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                pg.quit()
-                quit()
+        # for event in pg.event.get():
+        #     if event.type == pg.QUIT:
+        #         pg.quit()
+        #         quit()
         self.clear()
         yield
-        pg.display.flip()
-        pg.time.wait(wait)
+        # pg.display.flip()
+        # pg.time.wait(wait)
 
 
 class Visualizer(object):
@@ -573,20 +612,31 @@ class Visualizer(object):
 
 def test():
     screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
-    screen.add_textures("background.bmp", "bird.jpg")
-    screen.select_texture(0)
-    screen.set_perspective()
+    # screen.add_textures("background.bmp", "bird.jpg")
+    # screen.select_texture(0)
+    # screen.set_perspective()
 
     pos_cam = [-1.5, -4, 4]
     rot_cam = [-0.1, 0, 0, 1]
     pos_drone = [-1.4, -1, 3.9]
     rot_drone = [-0.3, 0, 0, 1]
-    pose_cam = pose_from_components(pos_cam, rot_cam)
-    pose_drone = pose_from_components(pos_drone, rot_drone)
+    screen.pose_cam = pose_from_components(pos_cam, rot_cam)
+    screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
-    while True:
-        with screen.step():
-            screen.render(pose_cam, pose_drone)
+    threading.Thread(target=screen._run_gui).start()
+    time.sleep(1)
+    # screen._run_gui()
+    screen.add_textures("background.bmp", "bird.jpg")
+    pos_drone = [-1.9, -1, 3.9]
+    screen.pose_drone = pose_from_components(pos_drone, rot_drone)
+    # glut.glutMainLoop()
+
+    # glut.glutMainLoop()
+
+    # while True:
+        # screen._display()
+        #with screen.step():
+            #screen.render(pose_cam, pose_drone)
 
 
 def main():
@@ -608,20 +658,26 @@ class TestVisualizer(object):
         rot_cam = [-0.1, 0, 0, 1]
         pos_drone = [-1.4, -1, 3.9]
         rot_drone = [-0.3, 0, 0, 1]
-        self.pose_cam = pose_from_components(pos_cam, rot_cam)
-        self.pose_drone = pose_from_components(pos_drone, rot_drone)
+        self.screen.pose_cam = pose_from_components(pos_cam, rot_cam)
+        self.screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
     def dummy(self, x):
         pass
 
     def bg_callback(self, background):
-        self.screen.add_textures("bird.jpg")
+        # self.screen.add_textures("bird.jpg")
         # self.screen.add_textures(background)
-        try:
-            with self.screen.step(wait=1000):
-                self.screen.render(self.pose_cam, self.pose_drone)
-        except pg.error:
-            os._exit(0)
+        # try:
+        #     with self.screen.step(wait=1000):
+        #         self.screen.render(self.pose_cam, self.pose_drone)
+        # except pg.error:
+        #     os._exit(0)
+
+        with lock:
+            self.screen.add_textures("bird.jpg")
+        # self.screen._display()
+        # with self.screen.step(wait=1000):
+        #     self.screen.render(self.pose_cam, self.pose_drone)
 
     def loop(self):
         self.screen.add_textures("bird.jpg")
@@ -630,12 +686,14 @@ class TestVisualizer(object):
 
 
 def shutdown_hook():
-    pg.quit()
+    # pg.quit()
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    rospy.init_node("visualizer", anonymous=True)
-    rospy.on_shutdown(shutdown_hook)
-    TestVisualizer()
-    rospy.loginfo("Started visualizer")
-    rospy.spin()
+    # rospy.init_node("visualizer", anonymous=True)
+    # rospy.on_shutdown(shutdown_hook)
+    # TestVisualizer()
+    # rospy.loginfo("Started visualizer")
+    # rospy.spin()
+    test()
