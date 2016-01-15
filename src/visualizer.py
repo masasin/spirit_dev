@@ -2,16 +2,13 @@ from __future__ import division, print_function
 
 from collections import deque
 from contextlib import contextmanager
-import os
-import sys
 import time
 import threading
 
 from cv_bridge import CvBridge
 import numpy as np
-from OpenGL import GL as gl
-from OpenGL import GLU as glu
-from OpenGL import GLUT as glut
+from OpenGL import GL, GLU, GLUT
+
 import pygame as pg
 
 import rospy
@@ -23,6 +20,11 @@ from helpers import (get_pose_components, pose_from_components, quat2axis,
                      rotation_matrix)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_state, Shape)
+
+
+gl = GL
+glu = GLU
+glut = GLUT
 
 
 class Drone(Shape):
@@ -199,9 +201,11 @@ class Screen(object):
         self.text = deque(maxlen=3)
         self.bridge = CvBridge()
 
+        self._pose_cam = self._pose_drone = None
         self._old_rel_pos = np.array([0, 0, 0])
         self._old_rot_cam = (0, 0, 0, 0)
         self._no_texture = False
+        self._latest_texture = deque(maxlen=1)
 
         # self.visualize()
 
@@ -210,20 +214,21 @@ class Screen(object):
         glut.glutInit()
         pg.display.set_mode(self.size, pg.OPENGL)
         self.set_perspective()
-        # self.add_textures("background.bmp")
 
         while True:
-            print("Visualizing")
+            try:
+                texture_data, width, height = self._latest_texture.pop()
+                self.textures.append(gl.glGenTextures(1))
+                self._init_texture(texture_data, width, height)
+            except IndexError:
+                pass
+
             with self.step():
                 try:
-                    print("Rendering")
-                    self.render(self.pose_cam, self.pose_drone)
-                    print("Rendered")
+                    self.render(self._pose_cam, self._pose_drone)
                 except AttributeError:
-                    print("No poses")
                     self.write_text("No data yet", colour=(1, 0, 0))
                     continue
-                print("Writing")
                 for text, position, colour in self.text:
                     kwargs = {"text": text,
                               "position": position,
@@ -231,7 +236,6 @@ class Screen(object):
                     kwargs = {k: v for k, v in kwargs.items()
                               if v is not None}
                     self.write_text(**kwargs)
-                print("Wrote")
 
     def fov_diagonal2vertical(self, fov_diagonal):
         """
@@ -272,8 +276,7 @@ class Screen(object):
 
         """
         for texture_data, width, height in self._load_images(images):
-            self.textures.append(gl.glGenTextures(1))
-            self._init_texture(texture_data, width, height)
+            self._latest_texture.append((texture_data, width, height))
 
     def _load_images(self, images):
         """
@@ -442,14 +445,11 @@ class Screen(object):
 
         """
         try:
-            print("Selecting texture")
             self.select_texture(texture_number)
-            print("Selected texture")
             if self._no_texture:
                 self._no_texture = False
                 self.text.pop()
         except IndexError:
-            print("No textures yet")
             if not self._no_texture:
                 self.text.append(("No textures yet", None, (1, 0, 0)))
                 self._no_texture = True
@@ -598,44 +598,42 @@ class Visualizer(object):
         self.screen.set_perspective()
 
     def bg_callback(self, background):
-        pass
+        self.screen.add_textures(background)
 
     def pose_cam_callback(self, pose_cam):
-        self.pose_cam = pose_cam
+        self.screen._pose_cam = pose_cam
 
     def pose_drone_callback(self, pose_drone):
-        self.pose_drone = pose_drone
-
-        with self.screen.step():
-            self.screen.render(self.pose_cam, self.pose_drone)
-            if not self.tracked:
-                self.screen.write_text("Not tracking!", colour=(1, 0, 0))
+        self.screen._pose_drone = pose_drone
 
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
+        if not self.tracked:
+            self.screen.text.append("Not tracking!", None, (1, 0, 0))
 
 
 def test():
     screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
     threading.Thread(target=screen.visualize).start()
-    # screen.set_perspective()
-    # screen.add_textures("background.bmp")
 
     time.sleep(2)
     pos_cam = [-1.5, -4, 4]
     rot_cam = [-0.1, 0, 0, 1]
     pos_drone = [-1.4, -1, 3.9]
     rot_drone = [-0.3, 0, 0, 1]
-    screen.pose_cam = pose_from_components(pos_cam, rot_cam)
-    screen.pose_drone = pose_from_components(pos_drone, rot_drone)
+    screen._pose_cam = pose_from_components(pos_cam, rot_cam)
+    screen._pose_drone = pose_from_components(pos_drone, rot_drone)
 
     time.sleep(2)
     screen.add_textures("bird.jpg")
 
     time.sleep(3)
+    screen.add_textures("background.bmp")
     screen.text.append(("Help", None, None))
     time.sleep(1)
     screen.text.pop()
+    pos_drone = [-1.9, -1, 3.9]
+    screen._pose_drone = pose_from_components(pos_drone, rot_drone)
 
 
 def main():
@@ -647,35 +645,21 @@ def main():
 
 class TestVisualizer(object):
     def __init__(self):
-        # rospy.Subscriber("/ardrone/image_raw", Image, self.dummy,
         rospy.Subscriber("/ardrone/image_raw", Image, self.bg_callback,
                          queue_size=1)
 
         self.screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
+        threading.Thread(target=self.screen.visualize).start()
         self.screen.set_perspective()
         pos_cam = [-1.5, -4, 4]
         rot_cam = [-0.1, 0, 0, 1]
         pos_drone = [-1.4, -1, 3.9]
         rot_drone = [-0.3, 0, 0, 1]
-        self.pose_cam = pose_from_components(pos_cam, rot_cam)
-        self.pose_drone = pose_from_components(pos_drone, rot_drone)
-
-    def dummy(self, x):
-        pass
+        self.screen._pose_cam = pose_from_components(pos_cam, rot_cam)
+        self.screen._pose_drone = pose_from_components(pos_drone, rot_drone)
 
     def bg_callback(self, background):
-        self.screen.add_textures("bird.jpg")
-        # self.screen.add_textures(background)
-        try:
-            with self.screen.step(wait=1000):
-                self.screen.render(self.pose_cam, self.pose_drone)
-        except pg.error:
-            os._exit(0)
-
-    def loop(self):
-        self.screen.add_textures("bird.jpg")
-        with self.screen.step(wait=1000):
-            self.screen.render(self.pose_cam, self.pose_drone)
+        self.screen.add_textures(background)
 
 
 def shutdown_hook():
@@ -683,9 +667,8 @@ def shutdown_hook():
 
 
 if __name__ == '__main__':
-    # rospy.init_node("visualizer", anonymous=True)
-    # rospy.on_shutdown(shutdown_hook)
-    # TestVisualizer()
-    # rospy.loginfo("Started visualizer")
-    # rospy.spin()
-    test()
+    rospy.init_node("visualizer", anonymous=True)
+    rospy.on_shutdown(shutdown_hook)
+    TestVisualizer()
+    rospy.loginfo("Started visualizer")
+    rospy.spin()
