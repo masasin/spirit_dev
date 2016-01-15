@@ -3,6 +3,9 @@ from __future__ import division, print_function
 from collections import deque
 from contextlib import contextmanager
 import os
+import sys
+import time
+import threading
 
 from cv_bridge import CvBridge
 import numpy as np
@@ -178,15 +181,11 @@ class Screen(object):
         If both `fov_vertical` and `fov_diagonal` are provided.
 
     """
-    pg.init()
-    glut.glutInit()
-
     def __init__(self, size, model, fov_vertical=None, fov_diagonal=None):
         if fov_diagonal and fov_vertical:
             raise TypeError("Enter only one value for field of view size.")
 
         self.size = self.width, self.height = size
-        pg.display.set_mode(size, pg.OPENGL)
 
         if fov_vertical is not None:
             self.fov_y = fov_vertical
@@ -197,9 +196,42 @@ class Screen(object):
 
         self.model = model
         self.textures = deque(maxlen=3)
+        self.text = deque(maxlen=3)
+        self.bridge = CvBridge()
+
         self._old_rel_pos = np.array([0, 0, 0])
         self._old_rot_cam = (0, 0, 0, 0)
-        self.bridge = CvBridge()
+        self._no_texture = False
+
+        # self.visualize()
+
+    def visualize(self):
+        pg.init()
+        glut.glutInit()
+        pg.display.set_mode(self.size, pg.OPENGL)
+        self.set_perspective()
+        # self.add_textures("background.bmp")
+
+        while True:
+            print("Visualizing")
+            with self.step():
+                try:
+                    print("Rendering")
+                    self.render(self.pose_cam, self.pose_drone)
+                    print("Rendered")
+                except AttributeError:
+                    print("No poses")
+                    self.write_text("No data yet", colour=(1, 0, 0))
+                    continue
+                print("Writing")
+                for text, position, colour in self.text:
+                    kwargs = {"text": text,
+                              "position": position,
+                              "colour": colour}
+                    kwargs = {k: v for k, v in kwargs.items()
+                              if v is not None}
+                    self.write_text(**kwargs)
+                print("Wrote")
 
     def fov_diagonal2vertical(self, fov_diagonal):
         """
@@ -409,7 +441,20 @@ class Screen(object):
             the latest texture added.
 
         """
-        self.select_texture(texture_number)
+        try:
+            print("Selecting texture")
+            self.select_texture(texture_number)
+            print("Selected texture")
+            if self._no_texture:
+                self._no_texture = False
+                self.text.pop()
+        except IndexError:
+            print("No textures yet")
+            if not self._no_texture:
+                self.text.append(("No textures yet", None, (1, 0, 0)))
+                self._no_texture = True
+            return
+
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
                 gl.glTranslatef(-self.width / 2, -self.height / 2, 0)
@@ -418,7 +463,7 @@ class Screen(object):
                         gl.glTexCoord2f(x, y)
                         gl.glVertex3f(self.width * x, self.height * y, 0)
 
-    def write_text(self, text, x=None, y=None, font=gl_font("fixed", 13),
+    def write_text(self, text, position=None, font=gl_font("fixed", 13),
                    colour=(0, 1, 0)):
         """
         Write text on the screen.
@@ -427,23 +472,22 @@ class Screen(object):
         ----------
         text : str
             The text to write.
-        x : Optional[int]
-            The horizontal position, in pixels, of the lower left pixel of the
-            first line of the string. Default is 40% of the screen right of
-            centre.
-        y : Optional[int]
-            The vertical position, in pixels, of the lower left pixel of the
-            first line of the string. Default is 80% of the screen above centre.
+        position : Optional[Sequence[int]]
+            A sequence containing the horizontal and vertical positions, in
+            pixels, of the lower left pixel of the first line of the text.
+            Default is 40% of the screen right of centre, and 80% of the screen
+            above centre.
         font : Optional[ctypes.c_void_p]
             The font to use. Default is 13-point Fixed.
         colour : Optional[Sequence[float]]
             The text colour, as RGB values between 0 and 1. Default is green.
 
         """
-        if x is None:
+        if position is None:
             x = self.width * 0.2
-        if y is None:
             y = self.height * 0.4
+        else:
+            x, y = position
         with gl_ortho(self.width, self.height):
             with new_state():
                 gl.glColor3fv(colour)
@@ -573,20 +617,25 @@ class Visualizer(object):
 
 def test():
     screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
-    screen.add_textures("background.bmp", "bird.jpg")
-    screen.select_texture(0)
-    screen.set_perspective()
+    threading.Thread(target=screen.visualize).start()
+    # screen.set_perspective()
+    # screen.add_textures("background.bmp")
 
+    time.sleep(2)
     pos_cam = [-1.5, -4, 4]
     rot_cam = [-0.1, 0, 0, 1]
     pos_drone = [-1.4, -1, 3.9]
     rot_drone = [-0.3, 0, 0, 1]
-    pose_cam = pose_from_components(pos_cam, rot_cam)
-    pose_drone = pose_from_components(pos_drone, rot_drone)
+    screen.pose_cam = pose_from_components(pos_cam, rot_cam)
+    screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
-    while True:
-        with screen.step():
-            screen.render(pose_cam, pose_drone)
+    time.sleep(2)
+    screen.add_textures("bird.jpg")
+
+    time.sleep(3)
+    screen.text.append(("Help", None, None))
+    time.sleep(1)
+    screen.text.pop()
 
 
 def main():
@@ -634,8 +683,9 @@ def shutdown_hook():
 
 
 if __name__ == '__main__':
-    rospy.init_node("visualizer", anonymous=True)
-    rospy.on_shutdown(shutdown_hook)
-    TestVisualizer()
-    rospy.loginfo("Started visualizer")
-    rospy.spin()
+    # rospy.init_node("visualizer", anonymous=True)
+    # rospy.on_shutdown(shutdown_hook)
+    # TestVisualizer()
+    # rospy.loginfo("Started visualizer")
+    # rospy.spin()
+    test()
