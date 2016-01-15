@@ -363,7 +363,7 @@ class Screen(object):
 
         """
         cv2_img = self.bridge.imgmsg_to_cv2(image, "rgb8")
-        return cv2_img, image.width, image.height
+        return cv2_img[::-1], image.width, image.height
 
     def _init_texture(self, texture_data, width, height, texture_number=-1):
         """
