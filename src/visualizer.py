@@ -163,6 +163,8 @@ class Screen(object):
         The vertical size of the field of view, in degrees.
     fov_diagonal : Optional[float]
         The diagonal size of the field of view, in degrees.
+    wait : Optional[int]
+        The time to wait before the next step, in milliseconds. Default is 10.
 
     `fov_vertical` and `fov_diagonal` are mutually exclusive. If neither is
     specified, the default vertical field of view is set to 45 degrees.
@@ -181,6 +183,8 @@ class Screen(object):
         The model to draw.
     textures : Sequence[gl.GLuint]
         A list of usable textures.
+    wait : int
+        The time to wait before the next step, in milliseconds.
 
     Raises
     ------
@@ -188,7 +192,8 @@ class Screen(object):
         If both `fov_vertical` and `fov_diagonal` are provided.
 
     """
-    def __init__(self, size, model, fov_vertical=None, fov_diagonal=None):
+    def __init__(self, size, model, fov_vertical=None, fov_diagonal=None,
+                 wait=10):
         if fov_diagonal and fov_vertical:
             raise TypeError("Enter only one value for field of view size.")
 
@@ -206,20 +211,16 @@ class Screen(object):
         self.text = deque(maxlen=3)
         self.bridge = CvBridge()
         self.pose_cam = self.pose_drone = None
+        self.wait = wait
 
         self._old_rel_pos = np.array([0, 0, 0])
         self._old_rot_cam = (0, 0, 0, 0)
         self._no_texture = False
         self._latest_texture = deque(maxlen=1)
 
-    def run(self, wait=10):
+    def run(self):
         """
         Run the display.
-
-        Parameters
-        ----------
-        wait : Optional[int]
-            The time to wait before the next step, in milliseconds.
 
         """
         pg.init()
@@ -229,7 +230,7 @@ class Screen(object):
 
         while True:
             self.step()
-            pg.time.wait(wait)
+            pg.time.wait(self.wait)
 
     def step(self):
         """
