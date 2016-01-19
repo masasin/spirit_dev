@@ -712,12 +712,12 @@ def shutdown_hook():
 
 
 if __name__ == '__main__':
-    # test()
-    rospy.init_node("visualizer", anonymous=True)
-    rospy.on_shutdown(shutdown_hook)
-    TestVisualizer()
-    rospy.loginfo("Started visualizer")
-    while is_active:
-        pass
-    rospy.signal_shutdown("Done!")
+    test()
+    # rospy.init_node("visualizer", anonymous=True)
+    # rospy.on_shutdown(shutdown_hook)
+    # TestVisualizer()
+    # rospy.loginfo("Started visualizer")
+    # while is_active:
+    #     pass
+    # rospy.signal_shutdown("Done!")
 
