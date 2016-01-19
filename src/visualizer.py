@@ -663,10 +663,10 @@ def test(size=(640, 480)):
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
-    time.sleep(2)
+    time.sleep(1)
     screen.add_textures("../media/bird.jpg")
 
-    time.sleep(3)
+    time.sleep(1)
     screen.add_textures("../media/background.bmp")
     screen.text.append(("Help", None, None))
     time.sleep(1)
