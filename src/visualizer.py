@@ -202,7 +202,7 @@ class Screen(object):
         if fov_vertical is not None:
             self.fov_y = fov_vertical
         elif fov_diagonal is not None:
-            self.fov_y = self.fov_diagonal2vertical(fov_diagonal)
+            self.fov_y = self._fov_diagonal2vertical(fov_diagonal)
         else:
             self.fov_y = 45
 
@@ -260,7 +260,7 @@ class Screen(object):
             self.write_text(**kwargs)
         pg.display.flip()
 
-    def fov_diagonal2vertical(self, fov_diagonal):
+    def _fov_diagonal2vertical(self, fov_diagonal):
         """
         Convert a diagonal field of view to vertical.
 
