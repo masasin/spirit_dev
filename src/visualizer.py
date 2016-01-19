@@ -617,8 +617,6 @@ class Screen(object):
         gl.glTranslate(*(rel_pos - self._old_rel_pos))
         self._old_rel_pos = rel_pos
 
-        gl.glTranslate(0, 0, -0.1)
-
         if draw_background:
             self.draw_background()
         self.model.draw(rot_drone)
