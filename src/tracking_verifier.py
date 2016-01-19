@@ -40,7 +40,7 @@ class Verifier(object):
     """
     def __init__(self):
         pygame.init()
-        pygame.mixer.music.load(os.path.join(SPIRIT_ROOT, "audio/beep.wav"))
+        pygame.mixer.music.load(os.path.join(SPIRIT_ROOT, "media/beep.wav"))
 
         self.subscriber = rospy.Subscriber("/ardrone/pose", PoseStamped,
                                            self.callback, queue_size=1)
