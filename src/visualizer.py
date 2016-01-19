@@ -228,9 +228,14 @@ class Screen(object):
         self.set_perspective()
 
         while True:
-            self.step(wait)
+            self.step()
+            pg.time.wait(wait)
 
-    def step(self, wait=10):
+    def step(self):
+        """
+        Show one frame.
+
+        """
         try:
             texture_data, width, height = self._latest_texture.pop()
             self.textures.append(gl.glGenTextures(1))
@@ -253,7 +258,6 @@ class Screen(object):
                       if v is not None}
             self.write_text(**kwargs)
         pg.display.flip()
-        pg.time.wait(wait)
 
     def fov_diagonal2vertical(self, fov_diagonal):
         """
