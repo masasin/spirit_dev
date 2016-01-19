@@ -2,6 +2,7 @@ from __future__ import division, print_function
 
 from collections import deque
 from contextlib import contextmanager
+from itertools import cycle
 import os
 import time
 import threading
@@ -201,7 +202,7 @@ class Screen(object):
             self.fov_y = 45
 
         self.model = model
-        self.textures = deque(maxlen=3)
+        self.textures = deque(maxlen=1)
         self.text = deque(maxlen=3)
         self.bridge = CvBridge()
         self.pose_cam = self.pose_drone = None
@@ -560,6 +561,8 @@ class Screen(object):
         gl.glTranslate(*(rel_pos - self._old_rel_pos))
         self._old_rel_pos = rel_pos
 
+        gl.glTranslate(0, 0, -0.1)
+
         if draw_background:
             self.draw_background()
         self.model.draw(rot_drone)
@@ -575,16 +578,28 @@ class Screen(object):
             The time to wait before the next step, in milliseconds.
 
         """
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
+        global is_active
+        try:
+            try:
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        is_active = False
+                        # quit()
+                        os._exit(0)
+            except pg.error():
                 pg.quit()
-                global is_active
                 is_active = False
-                quit()
-        self.clear()
-        yield
-        pg.display.flip()
-        pg.time.wait(wait)
+                os._exit(1)
+            self.clear()
+            yield
+            pg.display.flip()
+            pg.time.wait(wait)
+        except pg.error():
+            pg.quit()
+            is_active = False
+            # quit()
+            os._exit(1)
 
 
 class Visualizer(object):
@@ -664,6 +679,10 @@ class TestVisualizer(object):
         self.screen.pose_cam = pose_from_components(pos_cam, rot_cam)
         self.screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
+        for pos_drone in cycle(([-1.9, -1, 3.9], [-1.4, -1, 3.9])):
+            time.sleep(3)
+            self.screen.pose_drone = pose_from_components(pos_drone, rot_drone)
+
     def bg_callback(self, background):
         self.screen.add_textures(background)
 
@@ -673,6 +692,7 @@ def shutdown_hook():
 
 
 if __name__ == '__main__':
+    # test()
     rospy.init_node("visualizer", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
     TestVisualizer()
@@ -680,3 +700,4 @@ if __name__ == '__main__':
     while is_active:
         pass
     rospy.signal_shutdown("Done!")
+
