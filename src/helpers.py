@@ -216,7 +216,7 @@ def rotation_matrix(quaternion):
 
     """
     x, y, z, w = quaternion
-    n = sum(i**2 for i in quaternion)
+    n = sum(quaternion**2)
 
     if n == 0:
         return np.identity(3)
