@@ -389,7 +389,7 @@ class Screen(object):
 
     def _init_texture(self, texture_data, width, height, texture_number=-1):
         """
-        Initialize a texture.
+        Initialize a texture for first use.
 
         Parameters
         ----------
@@ -403,6 +403,11 @@ class Screen(object):
             The number of the texture, by the order it was added. Default is
             the latest texture.
 
+        Raises
+        ------
+        IndexError
+            If `texture_number` is larger than the number of available textures.
+
         """
         self.select_texture(texture_number)
         gl.glTexParameter(target=gl.GL_TEXTURE_2D,
@@ -413,23 +418,23 @@ class Screen(object):
         gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
                         gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
 
-    def select_texture(self, number=-1):
+    def select_texture(self, texture_number=-1):
         """
         Bind a known texture for use.
 
         Parameters
         ----------
-        number : Optional[int]
+        texture_number : Optional[int]
             The number of the texture, by the order it was added. Default is
             the latest texture.
 
         Raises
         ------
         IndexError
-            If `number` is larger than the number of available textures.
+            If `texture_number` is larger than the number of available textures.
 
         """
-        gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[number])
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[texture_number])
 
     def set_perspective(self, near=0.1, far=100):
         """
