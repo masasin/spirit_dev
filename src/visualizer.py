@@ -212,33 +212,48 @@ class Screen(object):
         self._no_texture = False
         self._latest_texture = deque(maxlen=1)
 
-    def show(self):
+    def run(self, wait=10):
+        """
+        Run the display.
+
+        Parameters
+        ----------
+        wait : Optional[int]
+            The time to wait before the next step, in milliseconds.
+
+        """
         pg.init()
         glut.glutInit()
         pg.display.set_mode(self.size, pg.OPENGL)
         self.set_perspective()
 
         while True:
-            try:
-                texture_data, width, height = self._latest_texture.pop()
-                self.textures.append(gl.glGenTextures(1))
-                self._init_texture(texture_data, width, height)
-            except IndexError:
-                pass
+            self.step(wait)
 
-            with self.step():
-                try:
-                    self.render(self.pose_cam, self.pose_drone)
-                except AttributeError:
-                    self.write_text("No data yet", colour=(1, 0, 0))
-                    continue
-                for text, position, colour in self.text:
-                    kwargs = {"text": text,
-                              "position": position,
-                              "colour": colour}
-                    kwargs = {k: v for k, v in kwargs.items()
-                              if v is not None}
-                    self.write_text(**kwargs)
+    def step(self, wait=10):
+        try:
+            texture_data, width, height = self._latest_texture.pop()
+            self.textures.append(gl.glGenTextures(1))
+            self._init_texture(texture_data, width, height)
+        except IndexError:
+            pass
+
+        self.clear()
+        try:
+            self.render(self.pose_cam, self.pose_drone)
+        except AttributeError:
+            self.write_text("No data yet", colour=(1, 0, 0))
+            return
+
+        for text, position, colour in self.text:
+            kwargs = {"text": text,
+                      "position": position,
+                      "colour": colour}
+            kwargs = {k: v for k, v in kwargs.items()
+                      if v is not None}
+            self.write_text(**kwargs)
+        pg.display.flip()
+        pg.time.wait(wait)
 
     def fov_diagonal2vertical(self, fov_diagonal):
         """
@@ -567,38 +582,6 @@ class Screen(object):
             self.draw_background()
         self.model.draw(rot_drone)
 
-    @contextmanager
-    def step(self, wait=10):
-        """
-        Context manager for displaying a single frame.
-
-        Parameters
-        ----------
-        wait : Optional[int]
-            The time to wait before the next step, in milliseconds.
-
-        """
-        global is_active
-        try:
-            try:
-                for event in pg.event.get():
-                    if event.type == pg.QUIT:
-                        pg.quit()
-                        is_active = False
-                        os._exit(0)
-            except pg.error():
-                pg.quit()
-                is_active = False
-                os._exit(1)
-            self.clear()
-            yield
-            pg.display.flip()
-            pg.time.wait(wait)
-        except pg.error():
-            pg.quit()
-            is_active = False
-            os._exit(1)
-
 
 class Visualizer(object):
     def __init__(self):
@@ -631,7 +614,7 @@ class Visualizer(object):
 
 def test(size=(640, 480)):
     screen = Screen(size, model=Drone(), fov_diagonal=92)
-    threading.Thread(target=screen.show).start()
+    threading.Thread(target=screen.run).start()
 
     time.sleep(2)
     pos_cam = [-1.5, -4, 4]
@@ -667,7 +650,7 @@ class TestVisualizer(object):
                          queue_size=1)
 
         self.screen = Screen((640, 480), model=Drone(), fov_diagonal=92)
-        threading.Thread(target=self.screen.show).start()
+        threading.Thread(target=self.screen.run).start()
         self.screen.set_perspective()
 
         pos_cam = [-1.5, -4, 4]
