@@ -239,8 +239,10 @@ class Screen(object):
         """
         try:
             texture_data, width, height = self._latest_texture.pop()
-            self.textures.append(gl.glGenTextures(1))
-            self._init_texture(texture_data, width, height)
+            if self.textures:
+                self.update_texture(texture_data, width, height)
+            else:
+                self.init_texture(texture_data, width, height)
         except IndexError:
             pass
 
@@ -388,7 +390,7 @@ class Screen(object):
         cv2_img = self.bridge.imgmsg_to_cv2(image, "rgb8")
         return cv2_img[::-1], image.width, image.height
 
-    def _init_texture(self, texture_data, width, height, texture_number=-1):
+    def init_texture(self, texture_data, width, height, texture_number=-1):
         """
         Initialize a texture for first use.
 
@@ -401,8 +403,8 @@ class Screen(object):
         height : int
             The height of the image.
         texture_number : Optional[int]
-            The number of the texture, by the order it was added. Default is
-            the latest texture.
+            The number of the texture, by the order it was added. Default is the
+            latest texture.
 
         Raises
         ------
@@ -410,6 +412,7 @@ class Screen(object):
             If `texture_number` is larger than the number of available textures.
 
         """
+        self.textures.append(gl.glGenTextures(1))
         self.select_texture(texture_number)
         gl.glTexParameter(target=gl.GL_TEXTURE_2D,
                           pname=gl.GL_TEXTURE_MIN_FILTER,
@@ -426,8 +429,8 @@ class Screen(object):
         Parameters
         ----------
         texture_number : Optional[int]
-            The number of the texture, by the order it was added. Default is
-            the latest texture.
+            The number of the texture, by the order it was added. Default is the
+            latest texture.
 
         Raises
         ------
@@ -436,6 +439,34 @@ class Screen(object):
 
         """
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[texture_number])
+
+    def update_texture(self, texture_data, width, height, texture_number=-1):
+        """
+        Update a known texture.
+
+        Parameters
+        ----------
+        texture_data : Sequence
+            The image data.
+        width : int
+            The width of the image.
+        height : int
+            The height of the image.
+        texture_number : Optional[int]
+            The number of the texture, by the order it was added. Default is the
+            latest texture.
+
+        Raises
+        ------
+        IndexError
+            If `texture_number` is larger than the number of available textures.
+
+        """
+        self.select_texture(texture_number)
+        # Implementation does not accept kwargs. Order is target, level,
+        # xoffset, yoffset, width, height, format, type, and pixels.
+        gl.glTexSubImage2D(gl.GL_TEXTURE_2D, 0, 0, 0, width, height,
+                           gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
 
     def set_perspective(self, near=0.1, far=100):
         """
