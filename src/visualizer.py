@@ -585,7 +585,6 @@ class Screen(object):
                     if event.type == pg.QUIT:
                         pg.quit()
                         is_active = False
-                        # quit()
                         os._exit(0)
             except pg.error():
                 pg.quit()
@@ -598,7 +597,6 @@ class Screen(object):
         except pg.error():
             pg.quit()
             is_active = False
-            # quit()
             os._exit(1)
 
 
