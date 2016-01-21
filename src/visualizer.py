@@ -651,7 +651,7 @@ class Visualizer(object):
             self.screen.text.append("Not tracking!", None, (1, 0, 0))
 
 
-def test(size=(640, 480)):
+def test_offline(size=(640, 480)):
     screen = Screen(size, model=Drone(), fov_diagonal=92)
     threading.Thread(target=screen.run).start()
 
@@ -707,17 +707,20 @@ class TestVisualizer(object):
         self.screen.add_textures(background)
 
 
+def test_live():
+    rospy.init_node("visualizer", anonymous=True)
+    rospy.on_shutdown(shutdown_hook)
+    TestVisualizer()
+    rospy.loginfo("Started visualizer")
+    while is_active:
+        pass
+    rospy.signal_shutdown("Done!")
+
+
 def shutdown_hook():
     pg.quit()
 
 
 if __name__ == '__main__':
-    test()
-    # rospy.init_node("visualizer", anonymous=True)
-    # rospy.on_shutdown(shutdown_hook)
-    # TestVisualizer()
-    # rospy.loginfo("Started visualizer")
-    # while is_active:
-    #     pass
-    # rospy.signal_shutdown("Done!")
-
+    test_offline()
+    # test_live()
