@@ -525,25 +525,10 @@ class Screen(object):
             rotation.
 
         """
-        def sign(value):
-            return 1 if value else -1
-
-        def locate(value, scale):
-            if value:
-                return scale
-            else:
-                return 1 - scale
-
         def find_vertices(x, y):
-            if x:
-                tx = w/2 - s*(cx-w)
-            else:
-                tx = w/2 - s*cx
-            if y:
-                ty = h/2 - s*(cy-h)
-            else:
-                ty = h/2 - s*cy
-            return tx, ty
+            vertex_x = self.width/2 - scale*(centre_x - self.width * x)
+            vertex_y = self.height/2 - scale*(centre_y - self.height * y)
+            return vertex_x, vertex_y
 
         try:
             self.select_texture(texture_number)
@@ -558,55 +543,17 @@ class Screen(object):
 
         if centre is None:
             centre = self.width / 2, self.height / 2
-        cx, cy = centre
-        cx, cy = 500, 200
-        dx = cx - self.width / 2
-        dy = cy - self.height / 2
-        w, h = self.width, self.height
-        s = scale
-        rx, ry = cx/w, cy/h
+        centre_x, centre_y = centre
 
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
                 gl.glRotate(rotation, 0, 0, 1)
-                # gl.glTranslate(-cx, -cy, 0)
-                gl.glTranslate(-w/2, -h/2, 0)
-                # gl.glTranslate(-self.width/2, -self.height/2, 0)
+                gl.glTranslate(-self.width/2, -self.height/2, 0)
                 with gl_primitive(gl.GL_QUADS):
-                    # gl.glTexCoord2f(0, 0)
-                    # gl.glVertex3f(120, 120, 0)
-                    # gl.glTexCoord2f(0, 1)
-                    # gl.glVertex3f(120, 360, 0)
-                    # gl.glTexCoord2f(1, 1)
-                    # gl.glVertex3f(440, 360, 0)
-                    # gl.glTexCoord2f(1, 0)
-                    # gl.glVertex3f(440, 120, 0)
-
-                    # gl.glTexCoord2f(0, 0)
-                    # gl.glVertex3f(-dx, -dy, 0)
-                    # gl.glTexCoord2f(0, 1)
-                    # gl.glVertex3f(-dx, h-dy, 0)
-                    # gl.glTexCoord2f(1, 1)
-                    # gl.glVertex3f(w-dx, h-dy, 0)
-                    # gl.glTexCoord2f(1, 0)
-                    # gl.glVertex3f(w-dx, -dy, 0)
-
-                    # gl.glTexCoord2f(0, 0)
-                    # gl.glVertex3f(w * locate(0, s), h * locate(0, s), 0)
-                    # gl.glTexCoord2f(0, 1)
-                    # gl.glVertex3f(w * locate(0, s), h * locate(1, s), 0)
-                    # gl.glTexCoord2f(1, 1)
-                    # gl.glVertex3f(w * locate(1, s), h * locate(1, s), 0)
-                    # gl.glTexCoord2f(1, 0)
-                    # gl.glVertex3f(w * locate(1, s), h * locate(0, s), 0)
-
                     for x, y in ((0, 0), (0, 1), (1, 1), (1, 0)):
                         gl.glTexCoord2f(x, y)
                         tx, ty = find_vertices(x, y)
                         gl.glVertex(tx, ty, 0)
-                        # gl.glVertex3f(self.width/2 * sign(x),
-                        #               self.height/2 * sign(y),
-                        #               0)
 
     def write_text(self, text, position=None, font=gl_font("fixed", 13),
                    colour=(0, 1, 0)):
@@ -742,7 +689,7 @@ class Visualizer(object):
 
 
 def test_offline(size=(640, 480)):
-    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=3)
+    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=5)
     threading.Thread(target=screen.run).start()
 
     # time.sleep(2)
@@ -759,7 +706,7 @@ def test_offline(size=(640, 480)):
     # time.sleep(1)
     # screen.add_textures("../media/background.bmp")
     # screen.text.append(("Help", None, None))
-    for distance in cycle([2, 3]):
+    for distance in cycle([3, 5]):
         time.sleep(3)
         screen.distance = distance
         if not screen.is_active:
