@@ -545,6 +545,7 @@ class Screen(object):
             centre = self.width / 2, self.height / 2
         centre_x, centre_y = centre
 
+        # TODO: Clear previous image first.
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
                 gl.glRotate(rotation, 0, 0, 1)
