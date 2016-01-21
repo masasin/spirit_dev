@@ -18,7 +18,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 from helpers import (get_pose_components, pose_from_components, quat2axis,
-                     rotation_matrix)
+                     rotation_matrix, normalize)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_state, Shape)
 
@@ -613,6 +613,10 @@ class Screen(object):
         """
         rel_pos, rot_cam, rot_drone = self._find_relative(pose_cam, pose_drone)
 
+        if self.distance:
+            scale = np.linalg.norm(rel_pos) / self.distance
+            rel_pos = normalize(rel_pos) * self.distance
+
         # Set camera orientation.
         # Reset camera orientation.
         gl.glRotate(*self._old_rot_cam)
@@ -665,25 +669,25 @@ class Visualizer(object):
 
 
 def test_offline(size=(640, 480)):
-    screen = Screen(size, model=Drone(), fov_diagonal=92)
+    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=3)
     threading.Thread(target=screen.run).start()
 
-    time.sleep(2)
+    # time.sleep(2)
     pos_cam = [-1.5, -4, 4]
     rot_cam = [-0.1, 0, 0, 1]
-    pos_drone = [-1.4, -1, 3.9]
+    pos_drone = [-1.5, -1, 4]
     rot_drone = [-0.3, 0, 0, 1]
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
-    time.sleep(1)
+    # time.sleep(1)
     screen.add_textures("../media/bird.jpg")
 
-    time.sleep(1)
-    screen.add_textures("../media/background.bmp")
-    screen.text.append(("Help", None, None))
-    time.sleep(1)
-    screen.text.pop()
+    # time.sleep(1)
+    # screen.add_textures("../media/background.bmp")
+    # screen.text.append(("Help", None, None))
+    time.sleep(3)
+    # screen.text.pop()
     pos_drone = [-1.9, -1, 3.9]
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
