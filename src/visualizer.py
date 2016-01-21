@@ -505,7 +505,8 @@ class Screen(object):
         """
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
-    def draw_background(self, texture_number=-1):
+    def draw_background(self, texture_number=-1, scale=1, centre=None,
+                        rotation=0):
         """
         Draw the background image.
 
@@ -514,8 +515,19 @@ class Screen(object):
         texture_number : Optional[int]
             The number of the texture, by the order it was added. Default is
             the latest texture added.
+        scale : Optional[float]
+            The amount of zoom applied to the image. Default is no zoom.
+        centre : Optional[tuple[int]]
+            The coordinates of the centre of zoom. Default is the centre of the
+            image.
+        rotation : Optional[float]
+            The amount of clockwise rotation, in degrees. Default is no
+            rotation.
 
         """
+        def sign(value):
+            return 1 if value else -1
+
         try:
             self.select_texture(texture_number)
             if self._no_texture:
@@ -527,13 +539,24 @@ class Screen(object):
                 self._no_texture = True
             return
 
+        if centre is None:
+            centre = self.width / 2, self.height / 2
+        centre_x, centre_y = centre
+
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
-                gl.glTranslatef(-self.width / 2, -self.height / 2, 0)
+                gl.glRotate(rotation, 0, 0, 1)
+                gl.glTranslate(-self.width / 2, -self.height / 2, 0)
+                # gl.glTranslate(-centre_x - self.width / 2,
+                #                -centre_y - self.height / 2,
+                #                0)
                 with gl_primitive(gl.GL_QUADS):
                     for x, y in ((0, 0), (0, 1), (1, 1), (1, 0)):
                         gl.glTexCoord2f(x, y)
                         gl.glVertex3f(self.width * x, self.height * y, 0)
+                        # gl.glVertex3f((centre_x + sign(x) * self.width / 2),
+                        #               (centre_y + sign(y) * self.height / 2),
+                        #               0)
 
     def write_text(self, text, position=None, font=gl_font("fixed", 13),
                    colour=(0, 1, 0)):
@@ -635,7 +658,7 @@ class Screen(object):
         self._old_rel_pos = rel_pos
 
         if draw_background:
-            self.draw_background()
+            self.draw_background(scale=scale)
         self.model.draw(rot_drone)
 
 
@@ -669,7 +692,7 @@ class Visualizer(object):
 
 
 def test_offline(size=(640, 480)):
-    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=3)
+    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=2)
     threading.Thread(target=screen.run).start()
 
     # time.sleep(2)
