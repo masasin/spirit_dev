@@ -1,9 +1,7 @@
 from __future__ import division, print_function
 
 from collections import deque
-from contextlib import contextmanager
 from itertools import cycle
-import os
 import time
 import threading
 import sys
