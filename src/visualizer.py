@@ -6,6 +6,7 @@ from itertools import cycle
 import os
 import time
 import threading
+import sys
 
 from cv_bridge import CvBridge
 import numpy as np
@@ -27,9 +28,6 @@ from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
 gl = GL
 glu = GLU
 glut = GLUT
-
-
-is_active = True
 
 
 class Drone(Shape):
@@ -217,6 +215,7 @@ class Screen(object):
         self._old_rot_cam = (0, 0, 0, 0)
         self._no_texture = False
         self._latest_texture = deque(maxlen=1)
+        self.is_active = True
 
     def run(self):
         """
@@ -228,15 +227,22 @@ class Screen(object):
         pg.display.set_mode(self.size, pg.OPENGL)
         self.set_perspective()
 
-        while True:
+        while self.is_active:
             self.step()
             pg.time.wait(self.wait)
+        sys.exit(0)
 
     def step(self):
         """
         Show one frame.
 
         """
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                self.is_active = False
+                return
+
         try:
             texture_data, width, height = self._latest_texture.pop()
             if self.textures:
@@ -703,6 +709,10 @@ class TestVisualizer(object):
             time.sleep(3)
             self.screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
+    @property
+    def is_active(self):
+        return self.screen.is_active
+
     def bg_callback(self, background):
         self.screen.add_textures(background)
 
@@ -710,9 +720,9 @@ class TestVisualizer(object):
 def test_live():
     rospy.init_node("visualizer", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
-    TestVisualizer()
+    visualizer = TestVisualizer()
     rospy.loginfo("Started visualizer")
-    while is_active:
+    while visualizer.is_active:
         pass
     rospy.signal_shutdown("Done!")
 
@@ -724,3 +734,4 @@ def shutdown_hook():
 if __name__ == '__main__':
     test_offline()
     # test_live()
+    # main()
