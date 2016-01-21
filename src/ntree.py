@@ -4,9 +4,8 @@ import numpy as np
 from scipy.spatial import cKDTree as KDTree
 
 
-# TODO (masasin):
-#     - Allow dynamic expansion of Ntree
-#     - Merge empty sibling leaves
+# TODO: Allow dynamic expansion of Ntree
+# TODO: Merge empty sibling leaves
 
 
 class NtreeError(Exception):

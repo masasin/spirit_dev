@@ -161,6 +161,9 @@ class Screen(object):
         The diagonal size of the field of view, in degrees.
     wait : Optional[int]
         The time to wait before the next step, in milliseconds. Default is 10.
+    distance : Optional [float]
+        The distance at which to draw. If provided, the visualization can be
+        zoomed in or out. Default is to have no zoom.
 
     `fov_vertical` and `fov_diagonal` are mutually exclusive. If neither is
     specified, the default vertical field of view is set to 45 degrees.
@@ -181,6 +184,9 @@ class Screen(object):
         A list of usable textures.
     wait : int
         The time to wait before the next step, in milliseconds.
+    distance : float
+        The distance at which to draw. If provided, the visualization can be
+        zoomed in or out.
 
     Raises
     ------
@@ -188,8 +194,10 @@ class Screen(object):
         If both `fov_vertical` and `fov_diagonal` are provided.
 
     """
+    # TODO: Allow rotation of background.
+    # TODO: Zoom only in, or both in and out.
     def __init__(self, size, model, fov_vertical=None, fov_diagonal=None,
-                 wait=10):
+                 wait=10, distance=None):
         if fov_diagonal and fov_vertical:
             raise TypeError("Enter only one value for field of view size.")
 
@@ -208,6 +216,7 @@ class Screen(object):
         self.bridge = CvBridge()
         self.pose_cam = self.pose_drone = None
         self.wait = wait
+        self.distance = distance
 
         self._old_rel_pos = np.array([0, 0, 0])
         self._old_rot_cam = (0, 0, 0, 0)
