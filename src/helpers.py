@@ -9,7 +9,7 @@ import rospy
 from geometry_msgs.msg import PoseStamped, TransformStamped
 
 
-def normalize_vector(v):
+def normalize(v):
     """
     Change the length of the vector to unity in the same direction.
 
@@ -180,7 +180,7 @@ def quat2axis(quaternion):
         The angle in axis-angle representation, with the order of θ, x, y, z
 
     """
-    x, y, z, w = normalize_vector(quaternion)
+    x, y, z, w = normalize(quaternion)
     angle = np.rad2deg(2 * np.arccos(w))
 
     if angle == 0:
