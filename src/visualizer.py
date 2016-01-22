@@ -23,9 +23,12 @@ from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_state, Shape)
 
 
+# Convenience
 gl = GL
 glu = GLU
 glut = GLUT
+d2r = np.deg2rad
+r2d = np.rad2deg
 
 
 class Drone(Shape):
@@ -176,6 +179,8 @@ class Screen(object):
         The width of the display, in pixels.
     height : int
         The height of the display, in pixels.
+    fov_x : float
+        The horizontal field of view, in degrees.
     fov_y : float
         The vertical field of view, in degrees.
     model : Shape
@@ -209,6 +214,7 @@ class Screen(object):
             self.fov_y = self._fov_diagonal2vertical(fov_diagonal)
         else:
             self.fov_y = 45
+        self.fov_x = self._fov_vertical_to_horizontal(self.fov_y)
 
         self.model = model
         self.textures = deque(maxlen=1)
@@ -292,8 +298,25 @@ class Screen(object):
         """
         aspect_ratio = self.width / self.height
         ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
-        return 2 * np.rad2deg(np.arctan(np.tan(np.deg2rad(fov_diagonal) / 2) /
-                                        ratio_diagonal))
+        return 2*r2d(np.arctan(np.tan(d2r(fov_diagonal) / 2) / ratio_diagonal))
+
+    def _fov_vertical_to_horizontal(self, fov_vertical):
+        """
+        Convert a vertical field of view to horizontal.
+
+        Parameters
+        ----------
+        fov_vertical : float
+            The vertical field of view.
+
+        Returns
+        -------
+        float
+            The horizontal field of view.
+
+        """
+        aspect_ratio = self.width / self.height
+        return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
 
     def add_textures(self, *images):
         """
@@ -690,7 +713,7 @@ class Visualizer(object):
 
 
 def test_offline(size=(640, 480)):
-    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=5)
+    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=3)
     threading.Thread(target=screen.run).start()
 
     # time.sleep(2)
@@ -707,7 +730,7 @@ def test_offline(size=(640, 480)):
     # time.sleep(1)
     # screen.add_textures("../media/background.bmp")
     # screen.text.append(("Help", None, None))
-    for distance in cycle([3, 5]):
+    for distance in cycle([1.5, 3]):
         time.sleep(3)
         screen.distance = distance
         if not screen.is_active:
