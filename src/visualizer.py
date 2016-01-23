@@ -215,6 +215,7 @@ class Screen(object):
         else:
             self.fov_y = 45
         self.fov_x = self._fov_vertical_to_horizontal(self.fov_y)
+        self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
 
         self.model = model
         self.textures = deque(maxlen=1)
@@ -641,6 +642,30 @@ class Screen(object):
         rel_pos = coords_drone - coords_cam
         return rel_pos, rot_cam, rot_drone
 
+    # TODO: Consider rotation of the camera
+    def _find_drone_on_image(self, rel_pos):
+        """
+        Find the location of the drone on the image.
+
+        Parameters
+        ----------
+        rel_pos : np.ndarray
+            A 3-array with the x, y, and z positions of the relative positions
+            of the drone, without conversion.
+
+        Returns
+        -------
+        centre_x : float
+            The horizontal location of the drone, in pixels
+        centre_y : float
+            The vertical location of the drone, in pixels
+
+        """
+        dx, dy, dz = rel_pos
+        centre_x = self._image_distance * dx / dy + self.width / 2
+        centre_y = self._image_distance * dz / dy + self.height / 2
+        return centre_x, centre_y
+
     def render(self, pose_cam, pose_drone, draw_background=True):
         """
         Render the scene.
@@ -660,6 +685,9 @@ class Screen(object):
         if self.distance:
             scale = np.linalg.norm(rel_pos) / self.distance
             rel_pos = normalize(rel_pos) * self.distance
+        else:
+            scale = 1
+        centre = self._find_drone_on_image(rel_pos)
 
         # Set camera orientation.
         # Reset camera orientation.
@@ -679,7 +707,7 @@ class Screen(object):
         self._old_rel_pos = rel_pos
 
         if draw_background:
-            self.draw_background(scale=scale)
+            self.draw_background(scale=scale, centre=centre)
         self.model.draw(rot_drone)
 
 
@@ -718,8 +746,8 @@ def test_offline(size=(640, 480)):
 
     # time.sleep(2)
     pos_cam = [-1.5, -4, 4]
-    rot_cam = [-0.1, 0, 0, 1]
-    pos_drone = [-1.5, -1, 4]
+    rot_cam = [0, 0, 0, 1]
+    pos_drone = [-1.1, -1, 4]
     rot_drone = [-0.3, 0, 0, 1]
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
@@ -758,7 +786,7 @@ class TestVisualizer(object):
         self.screen.set_perspective()
 
         pos_cam = [-1.5, -4, 4]
-        rot_cam = [-0.1, 0, 0, 1]
+        rot_cam = [-0.1, 0, 0.3, 1]
         pos_drone = [-1.4, -1, 3.9]
         rot_drone = [-0.3, 0, 0, 1]
         self.screen.pose_cam = pose_from_components(pos_cam, rot_cam)
