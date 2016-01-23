@@ -218,7 +218,7 @@ class Screen(object):
         self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
 
         self.model = model
-        self.textures = deque(maxlen=1)
+        self.textures = deque(maxlen=2)
         self.text = deque(maxlen=3)
         self.bridge = CvBridge()
         self.pose_cam = self.pose_drone = None
@@ -230,6 +230,7 @@ class Screen(object):
         self._no_texture = False
         self._latest_texture = deque(maxlen=1)
         self.is_active = True
+        self._bg_initialized = False
 
     def run(self):
         """
@@ -240,6 +241,9 @@ class Screen(object):
         glut.glutInit()
         pg.display.set_mode(self.size, pg.OPENGL)
         self.set_perspective()
+
+        self.add_textures("../media/blank.png")
+        self.init_texture(*self._latest_texture.pop(), texture_number=0)
 
         while self.is_active:
             self.step()
@@ -258,11 +262,11 @@ class Screen(object):
                 return
 
         try:
-            texture_data, width, height = self._latest_texture.pop()
-            if self.textures:
-                self.update_texture(texture_data, width, height)
+            if self._bg_initialized:
+                self.update_texture(*self._latest_texture.pop())
             else:
-                self.init_texture(texture_data, width, height)
+                self.init_texture(*self._latest_texture.pop())
+                self._bg_initialized = True
         except IndexError:
             pass
 
@@ -427,7 +431,7 @@ class Screen(object):
         cv2_img = self.bridge.imgmsg_to_cv2(image, "rgb8")
         return cv2_img[::-1], image.width, image.height
 
-    def init_texture(self, texture_data, width, height, texture_number=-1):
+    def init_texture(self, texture_data, width, height, texture_number=1):
         """
         Initialize a texture for first use.
 
@@ -459,7 +463,7 @@ class Screen(object):
         gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
                         gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
 
-    def select_texture(self, texture_number=-1):
+    def select_texture(self, texture_number=1):
         """
         Bind a known texture for use.
 
@@ -477,7 +481,7 @@ class Screen(object):
         """
         gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[texture_number])
 
-    def update_texture(self, texture_data, width, height, texture_number=-1):
+    def update_texture(self, texture_data, width, height, texture_number=1):
         """
         Update a known texture.
 
@@ -529,7 +533,7 @@ class Screen(object):
         """
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
-    def draw_background(self, texture_number=-1, scale=1, centre=None,
+    def draw_background(self, texture_number=1, scale=1, centre=None,
                         rotation=0):
         """
         Draw the background image.
@@ -554,6 +558,10 @@ class Screen(object):
             vertex_y = self.height/2 - scale*(centre_y - self.height * y)
             return vertex_x, vertex_y
 
+        # Clear background
+        if texture_number != 0:
+            self.draw_background(texture_number=0)
+
         try:
             self.select_texture(texture_number)
             if self._no_texture:
@@ -569,7 +577,6 @@ class Screen(object):
             centre = self.width / 2, self.height / 2
         centre_x, centre_y = centre
 
-        # TODO: Clear previous image first.
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
                 gl.glRotate(rotation, 0, 0, 1)
@@ -747,12 +754,12 @@ def test_offline(size=(640, 480)):
     # time.sleep(2)
     pos_cam = [-1.5, -4, 4]
     rot_cam = [0, 0, 0, 1]
-    pos_drone = [-1.1, -1, 4]
+    pos_drone = [-1.3, -1, 4]
     rot_drone = [-0.3, 0, 0, 1]
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
-    # time.sleep(1)
+    time.sleep(1)
     screen.add_textures("../media/bird.jpg")
 
     # time.sleep(1)
@@ -787,7 +794,7 @@ class TestVisualizer(object):
 
         pos_cam = [-1.5, -4, 4]
         rot_cam = [-0.1, 0, 0.3, 1]
-        pos_drone = [-1.4, -1, 3.9]
+        pos_drone = [-1.5, -1, 4]
         rot_drone = [-0.3, 0, 0, 1]
         self.screen.pose_cam = pose_from_components(pos_cam, rot_cam)
         self.screen.pose_drone = pose_from_components(pos_drone, rot_drone)
