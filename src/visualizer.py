@@ -200,13 +200,14 @@ class Screen(object):
 
     """
     # TODO: Allow rotation of background.
+    # TODO: Make drone always horizontal, or keep image aligned with horizon?
     # TODO: Zoom only in, or both in and out.
     def __init__(self, size, model, fov_vertical=None, fov_diagonal=None,
                  wait=10, distance=None):
         if fov_diagonal and fov_vertical:
             raise TypeError("Enter only one value for field of view size.")
 
-        self.size = self.width, self.height = size
+        self.size = self.width, self.height = np.asarray(size)
 
         if fov_vertical is not None:
             self.fov_y = fov_vertical
@@ -533,6 +534,7 @@ class Screen(object):
         """
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
+    # TODO: Fix method for zoom.
     def draw_background(self, texture_number=1, scale=1, centre=None,
                         rotation=0):
         """
@@ -554,6 +556,11 @@ class Screen(object):
 
         """
         def find_vertices(x, y):
+            # Temporarily turn off zooming
+            scale = 1
+            centre_x, centre_y = self.size / 2
+
+            # Real zooming code.
             vertex_x = self.width/2 - scale*(centre_x - self.width * x)
             vertex_y = self.height/2 - scale*(centre_y - self.height * y)
             return vertex_x, vertex_y
@@ -574,7 +581,7 @@ class Screen(object):
             return
 
         if centre is None:
-            centre = self.width / 2, self.height / 2
+            centre = self.size / 2
         centre_x, centre_y = centre
 
         with gl_flag(gl.GL_TEXTURE_2D):
@@ -689,7 +696,8 @@ class Screen(object):
         """
         rel_pos, rot_cam, rot_drone = self._find_relative(pose_cam, pose_drone)
 
-        if self.distance:
+        # Temporarily turn off zooming.
+        if False and self.distance:
             scale = np.linalg.norm(rel_pos) / self.distance
             rel_pos = normalize(rel_pos) * self.distance
         else:
@@ -748,18 +756,18 @@ class Visualizer(object):
 
 
 def test_offline(size=(640, 480)):
-    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=3)
+    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=None)
     threading.Thread(target=screen.run).start()
 
     # time.sleep(2)
     pos_cam = [-1.5, -4, 4]
     rot_cam = [0, 0, 0, 1]
-    pos_drone = [-1.3, -1, 4]
+    pos_drone = [-0.5, 0, 6]
     rot_drone = [-0.3, 0, 0, 1]
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
-    time.sleep(1)
+    time.sleep(0.3)
     screen.add_textures("../media/bird.jpg")
 
     # time.sleep(1)
