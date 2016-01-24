@@ -1,4 +1,4 @@
-from __future__ import division, print_function
+from __future__ import division
 
 from collections import deque
 from itertools import cycle
@@ -148,181 +148,24 @@ class Drone(Shape):
                     gl.glVertex3fv(vertices[vertex])
 
 
-class Screen(object):
+class TexturesMixin(object):
     """
-    Class for displaying and updating the screen.
-
-    Parameters
-    ----------
-    size : Sequence[int]
-        The width and height of the display, in pixels.
-    model : Shape
-        The model to be drawn.
-    fov_vertical : Optional[float]
-        The vertical size of the field of view, in degrees.
-    fov_diagonal : Optional[float]
-        The diagonal size of the field of view, in degrees.
-    wait : Optional[int]
-        The time to wait before the next step, in milliseconds. Default is 10.
-    distance : Optional [float]
-        The distance at which to draw. If provided, the visualization can be
-        zoomed in or out. Default is to have no zoom.
-
-    `fov_vertical` and `fov_diagonal` are mutually exclusive. If neither is
-    specified, the default vertical field of view is set to 45 degrees.
+    Implements methods which allow usage of textures.
 
     Attributes
     ----------
-    size : Sequence[int]
-        The width and height of the display, in pixels.
-    width : int
-        The width of the display, in pixels.
-    height : int
-        The height of the display, in pixels.
-    fov_x : float
-        The horizontal field of view, in degrees.
-    fov_y : float
-        The vertical field of view, in degrees.
-    model : Shape
-        The model to draw.
     textures : Sequence[gl.GLuint]
         A list of usable textures.
-    wait : int
-        The time to wait before the next step, in milliseconds.
-    distance : float
-        The distance at which to draw. If provided, the visualization can be
-        zoomed in or out.
-
-    Raises
-    ------
-    TypeError
-        If both `fov_vertical` and `fov_diagonal` are provided.
 
     """
-    # TODO: Allow rotation of background.
-    # TODO: Make drone always horizontal, or keep image aligned with horizon?
-    # TODO: Zoom only in, or both in and out.
-    def __init__(self, size, model, fov_vertical=None, fov_diagonal=None,
-                 wait=10, distance=None):
-        if fov_diagonal and fov_vertical:
-            raise TypeError("Enter only one value for field of view size.")
+    def setup_textures(self):
+        """
+        Set up texture variables.
 
-        self.size = self.width, self.height = np.asarray(size)
-
-        if fov_vertical is not None:
-            self.fov_y = fov_vertical
-        elif fov_diagonal is not None:
-            self.fov_y = self._fov_diagonal2vertical(fov_diagonal)
-        else:
-            self.fov_y = 45
-        self.fov_x = self._fov_vertical_to_horizontal(self.fov_y)
-        self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
-
-        self.model = model
+        """
         self.textures = deque(maxlen=2)
-        self.text = deque(maxlen=3)
-        self.bridge = CvBridge()
-        self.pose_cam = self.pose_drone = None
-        self.wait = wait
-        self.distance = distance
-
-        self._old_rel_pos = np.array([0, 0, 0])
-        self._old_rot_cam = (0, 0, 0, 0)
-        self._no_texture = False
+        self._bridge = CvBridge()
         self._latest_texture = deque(maxlen=1)
-        self.is_active = True
-        self._bg_initialized = False
-
-    def run(self):
-        """
-        Run the display.
-
-        """
-        pg.init()
-        glut.glutInit()
-        pg.display.set_mode(self.size, pg.OPENGL)
-        self.set_perspective()
-
-        self.add_textures("../media/blank.png")
-        self.init_texture(*self._latest_texture.pop(), texture_number=0)
-
-        while self.is_active:
-            self.step()
-            pg.time.wait(self.wait)
-        sys.exit(0)
-
-    def step(self):
-        """
-        Show one frame.
-
-        """
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                pg.quit()
-                self.is_active = False
-                return
-
-        try:
-            if self._bg_initialized:
-                self.update_texture(*self._latest_texture.pop())
-            else:
-                self.init_texture(*self._latest_texture.pop())
-                self._bg_initialized = True
-        except IndexError:
-            pass
-
-        self.clear()
-        try:
-            self.render(self.pose_cam, self.pose_drone)
-        except AttributeError:
-            self.write_text("No data yet", colour=(1, 0, 0))
-            return
-
-        for text, position, colour in self.text:
-            kwargs = {"text": text,
-                      "position": position,
-                      "colour": colour}
-            kwargs = {k: v for k, v in kwargs.items()
-                      if v is not None}
-            self.write_text(**kwargs)
-        pg.display.flip()
-
-    def _fov_diagonal2vertical(self, fov_diagonal):
-        """
-        Convert a diagonal field of view to vertical.
-
-        Parameters
-        ----------
-        fov_diagonal : float
-            The diagonal field of view.
-
-        Returns
-        -------
-        float
-            The vertical field of view.
-
-        """
-        aspect_ratio = self.width / self.height
-        ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
-        return 2*r2d(np.arctan(np.tan(d2r(fov_diagonal) / 2) / ratio_diagonal))
-
-    def _fov_vertical_to_horizontal(self, fov_vertical):
-        """
-        Convert a vertical field of view to horizontal.
-
-        Parameters
-        ----------
-        fov_vertical : float
-            The vertical field of view.
-
-        Returns
-        -------
-        float
-            The horizontal field of view.
-
-        """
-        aspect_ratio = self.width / self.height
-        return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
 
     def add_textures(self, *images):
         """
@@ -342,10 +185,88 @@ class Screen(object):
             If the input type is unsupported.
 
         """
-        for texture_data, width, height in self._load_images(images):
+        for texture_data, width, height in self.load_images(images):
             self._latest_texture.append((texture_data, width, height))
 
-    def _load_images(self, images):
+    def select_texture(self, texture_number=1):
+        """
+        Bind a known texture for use.
+
+        Parameters
+        ----------
+        texture_number : Optional[int]
+            The number of the texture, by the order it was added. Default is the
+            latest texture.
+
+        Raises
+        ------
+        IndexError
+            If `texture_number` is larger than the number of available textures.
+
+        """
+        gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[texture_number])
+
+    def init_texture(self, texture_data, width, height, texture_number=1):
+        """
+        Initialize a texture for first use.
+
+        Parameters
+        ----------
+        texture_data : Sequence
+            The image data.
+        width : int
+            The width of the image.
+        height : int
+            The height of the image.
+        texture_number : Optional[int]
+            The number of the texture, by the order it was added. Default is the
+            latest texture.
+
+        Raises
+        ------
+        IndexError
+            If `texture_number` is larger than the number of available textures.
+
+        """
+        self.textures.append(gl.glGenTextures(1))
+        self.select_texture(texture_number)
+        gl.glTexParameter(target=gl.GL_TEXTURE_2D,
+                          pname=gl.GL_TEXTURE_MIN_FILTER,
+                          parameter=gl.GL_LINEAR)
+        # Implementation does not accept kwargs. Order is target, level,
+        # internalFormat, width, height, border, format, type, and pixels.
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
+                        gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
+
+    def update_texture(self, texture_data, width, height, texture_number=1):
+        """
+        Update a known texture.
+
+        Parameters
+        ----------
+        texture_data : Sequence
+            The image data.
+        width : int
+            The width of the image.
+        height : int
+            The height of the image.
+        texture_number : Optional[int]
+            The number of the texture, by the order it was added. Default is the
+            latest texture.
+
+        Raises
+        ------
+        IndexError
+            If `texture_number` is larger than the number of available textures.
+
+        """
+        self.select_texture(texture_number)
+        # Implementation does not accept kwargs. Order is target, level,
+        # xoffset, yoffset, width, height, format, type, and pixels.
+        gl.glTexSubImage2D(gl.GL_TEXTURE_2D, 0, 0, 0, width, height,
+                           gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
+
+    def load_images(self, images):
         """
         Load images.
 
@@ -429,112 +350,131 @@ class Screen(object):
             The height of the image.
 
         """
-        cv2_img = self.bridge.imgmsg_to_cv2(image, "rgb8")
+        cv2_img = self._bridge.imgmsg_to_cv2(image, "rgb8")
         return cv2_img[::-1], image.width, image.height
 
-    def init_texture(self, texture_data, width, height, texture_number=1):
+
+class RendererMixin(TexturesMixin):
+    """
+    Implements methods which enable rendering the scene.
+
+    Attributes
+    ----------
+    textures
+    size : np.ndarray[int]
+        The width and height of the display, in pixels.
+    width : int
+        The width of the display, in pixels.
+    height : int
+        The height of the display, in pixels.
+    model : Shape
+        The model to draw.
+    distance : float | None
+        The distance at which to draw. If provided, the visualization can be
+        zoomed in or out.
+    fov_x : float
+        The horizontal field of view, in degrees.
+    fov_y : float
+        The vertical field of view, in degrees.
+
+    """
+    def setup_renderer(self, size, model, distance,
+                       fov_diagonal=None, fov_vertical=None):
         """
-        Initialize a texture for first use.
+        Set up rendering parameters.
+
+        `fov_vertical` and `fov_diagonal` are mutually exclusive. If neither is
+        specified, the default vertical field of view is set to 45 degrees.
 
         Parameters
         ----------
-        texture_data : Sequence
-            The image data.
-        width : int
-            The width of the image.
-        height : int
-            The height of the image.
-        texture_number : Optional[int]
-            The number of the texture, by the order it was added. Default is the
-            latest texture.
+        size : Sequence[int]
+            The width and height of the display, in pixels.
+        model : Shape
+            The model to be drawn.
+        distance : float | None
+            The distance at which to draw. If provided, the visualization can be
+            zoomed in or out.
+        fov_vertical : Optional[float]
+            The vertical size of the field of view, in degrees.
+        fov_diagonal : Optional[float]
+            The diagonal size of the field of view, in degrees.
 
         Raises
         ------
-        IndexError
-            If `texture_number` is larger than the number of available textures.
+        TypeError
+            If both `fov_vertical` and `fov_diagonal` are provided.
 
         """
-        self.textures.append(gl.glGenTextures(1))
-        self.select_texture(texture_number)
-        gl.glTexParameter(target=gl.GL_TEXTURE_2D,
-                          pname=gl.GL_TEXTURE_MIN_FILTER,
-                          parameter=gl.GL_LINEAR)
-        # Implementation does not accept kwargs. Order is target, level,
-        # internalFormat, width, height, border, format, type, and pixels.
-        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGB, width, height, 0,
-                        gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
+        if fov_diagonal and fov_vertical:
+            raise TypeError("Enter only one value for field of view size.")
 
-    def select_texture(self, texture_number=1):
+        self.size = self.width, self.height = np.asarray(size)
+        self.model = model
+        self.distance = distance
+
+        self.text = deque(maxlen=3)
+        self._no_texture = False
+
+        self.pose_cam = self.pose_drone = None
+        self._old_rel_pos = np.array([0, 0, 0])
+        self._old_rot_cam = (0, 0, 0, 0)
+
+        if fov_vertical is not None:
+            self.fov_y = fov_vertical
+        elif fov_diagonal is not None:
+            self.fov_y = self._fov_diagonal2vertical(fov_diagonal)
+        else:
+            self.fov_y = 45
+        self.fov_x = self._fov_vertical_to_horizontal(self.fov_y)
+        self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
+
+    def render(self, pose_cam, pose_drone, draw_background=True):
         """
-        Bind a known texture for use.
+        Render the scene.
 
         Parameters
         ----------
-        texture_number : Optional[int]
-            The number of the texture, by the order it was added. Default is the
-            latest texture.
-
-        Raises
-        ------
-        IndexError
-            If `texture_number` is larger than the number of available textures.
+        pose_cam : PoseStamped
+            The pose of the drone when the background image was taken.
+        pose_drone : PoseStamped
+            The current pose of the drone.
+        draw_background : Optional[bool]
+            Whether to draw the background. Default is True.
 
         """
-        gl.glBindTexture(gl.GL_TEXTURE_2D, self.textures[texture_number])
+        rel_pos, rot_cam, rot_drone = self._find_rel_pos(pose_cam, pose_drone)
 
-    def update_texture(self, texture_data, width, height, texture_number=1):
-        """
-        Update a known texture.
+        # Temporarily turn off zooming.
+        if False and self.distance:
+            scale = np.linalg.norm(rel_pos) / self.distance
+            rel_pos = normalize(rel_pos) * self.distance
+        else:
+            scale = 1
+        centre = self._find_drone_on_image(rel_pos)
 
-        Parameters
-        ----------
-        texture_data : Sequence
-            The image data.
-        width : int
-            The width of the image.
-        height : int
-            The height of the image.
-        texture_number : Optional[int]
-            The number of the texture, by the order it was added. Default is the
-            latest texture.
+        # Set camera orientation.
+        # Reset camera orientation.
+        gl.glRotate(*self._old_rot_cam)
+        self._old_rot_cam = quat2axis(-rot_cam)
 
-        Raises
-        ------
-        IndexError
-            If `texture_number` is larger than the number of available textures.
+        # Set new camera orientation.
+        rot_cam[:3] *= -1  # z-axis is with respect to origin, not camera.
+        gl.glRotate(*quat2axis(rot_cam))
 
-        """
-        self.select_texture(texture_number)
-        # Implementation does not accept kwargs. Order is target, level,
-        # xoffset, yoffset, width, height, format, type, and pixels.
-        gl.glTexSubImage2D(gl.GL_TEXTURE_2D, 0, 0, 0, width, height,
-                           gl.GL_RGB, gl.GL_UNSIGNED_BYTE, texture_data)
+        # Set camera position.
+        # Convert position to OpenGL coordinate frame.
+        rel_pos[1], rel_pos[2] = rel_pos[2], -rel_pos[1]
 
-    def set_perspective(self, near=0.1, far=100):
-        """
-        Set up the perspective projection matrix.
+        # Move camera position.
+        gl.glTranslate(*(rel_pos - self._old_rel_pos))
+        self._old_rel_pos = rel_pos
 
-        Parameters
-        ----------
-        near : Optional[float]
-            The distance to the near clipping plane in the z-direction. Default
-            is 10 cm.
-        far : Optional[float]
-            The distance to the far clipping plane in the z-direction. Default
-            is 100 m.
+        if draw_background:
+            self.draw_background(scale=scale, centre=centre)
+        self.model.draw(rot_drone)
 
-        """
-        glu.gluPerspective(self.fov_y, self.width / self.height, near, far)
-
-    @staticmethod
-    def clear():
-        """
-        Reset OpenGL buffers to preset values.
-
-        """
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-
-    # TODO: Fix method for zoom.
+    # noinspection PyUnusedLocal
     def draw_background(self, texture_number=1, scale=1, centre=None,
                         rotation=0):
         """
@@ -555,7 +495,10 @@ class Screen(object):
             rotation.
 
         """
+        # TODO: Fix method for zoom.
         def find_vertices(x, y):
+            # centre_x, centre_y = centre
+
             # Temporarily turn off zooming
             scale = 1
             centre_x, centre_y = self.size / 2
@@ -582,7 +525,6 @@ class Screen(object):
 
         if centre is None:
             centre = self.size / 2
-        centre_x, centre_y = centre
 
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
@@ -626,7 +568,7 @@ class Screen(object):
                 glut.glutBitmapString(font, text)
 
     @staticmethod
-    def _find_relative(pose_cam, pose_drone):
+    def _find_rel_pos(pose_cam, pose_drone):
         """
         Find the relative positions and orientations of the camera and the
         drone.
@@ -656,7 +598,6 @@ class Screen(object):
         rel_pos = coords_drone - coords_cam
         return rel_pos, rot_cam, rot_drone
 
-    # TODO: Consider rotation of the camera
     def _find_drone_on_image(self, rel_pos):
         """
         Find the location of the drone on the image.
@@ -675,55 +616,182 @@ class Screen(object):
             The vertical location of the drone, in pixels
 
         """
+        # TODO: Consider rotation of the camera
         dx, dy, dz = rel_pos
         centre_x = self._image_distance * dx / dy + self.width / 2
         centre_y = self._image_distance * dz / dy + self.height / 2
         return centre_x, centre_y
 
-    def render(self, pose_cam, pose_drone, draw_background=True):
+    def _fov_diagonal2vertical(self, fov_diagonal):
         """
-        Render the scene.
+        Convert a diagonal field of view to vertical.
 
         Parameters
         ----------
-        pose_cam : PoseStamped
-            The pose of the drone when the background image was taken.
-        pose_drone : PoseStamped
-            The current pose of the drone.
-        draw_background : Optional[bool]
-            Whether to draw the background. Default is True.
+        fov_diagonal : float
+            The diagonal field of view.
+
+        Returns
+        -------
+        float
+            The vertical field of view.
 
         """
-        rel_pos, rot_cam, rot_drone = self._find_relative(pose_cam, pose_drone)
+        aspect_ratio = self.width / self.height
+        ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
+        return 2*r2d(np.arctan(np.tan(d2r(fov_diagonal) / 2) / ratio_diagonal))
 
-        # Temporarily turn off zooming.
-        if False and self.distance:
-            scale = np.linalg.norm(rel_pos) / self.distance
-            rel_pos = normalize(rel_pos) * self.distance
-        else:
-            scale = 1
-        centre = self._find_drone_on_image(rel_pos)
+    def _fov_vertical_to_horizontal(self, fov_vertical):
+        """
+        Convert a vertical field of view to horizontal.
 
-        # Set camera orientation.
-        # Reset camera orientation.
-        gl.glRotate(*self._old_rot_cam)
-        self._old_rot_cam = quat2axis(-rot_cam)
+        Parameters
+        ----------
+        fov_vertical : float
+            The vertical field of view.
 
-        # Set new camera orientation.
-        rot_cam[:3] *= -1  # z-axis is with respect to origin, not camera.
-        gl.glRotate(*quat2axis(rot_cam))
+        Returns
+        -------
+        float
+            The horizontal field of view.
 
-        # Set camera position.
-        # Convert position to OpenGL coordinate frame.
-        rel_pos[1], rel_pos[2] = rel_pos[2], -rel_pos[1]
+        """
+        aspect_ratio = self.width / self.height
+        return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
 
-        # Move camera position.
-        gl.glTranslate(*(rel_pos - self._old_rel_pos))
-        self._old_rel_pos = rel_pos
 
-        if draw_background:
-            self.draw_background(scale=scale, centre=centre)
-        self.model.draw(rot_drone)
+class Screen(RendererMixin):
+    """
+    Class for displaying and updating the screen.
+
+    `fov_vertical` and `fov_diagonal` are mutually exclusive. If neither is
+    specified, the default vertical field of view is set to 45 degrees.
+
+
+    Parameters
+    ----------
+    size : Sequence[int]
+        The width and height of the display, in pixels.
+    model : Shape
+        The model to be drawn.
+    fov_vertical : Optional[float]
+        The vertical size of the field of view, in degrees.
+    fov_diagonal : Optional[float]
+        The diagonal size of the field of view, in degrees.
+    wait : Optional[int]
+        The time to wait before the next step, in milliseconds. Default is 10.
+    distance : Optional[float]
+        The distance at which to draw. If provided, the visualization can be
+        zoomed in or out. Default is to have no zoom.
+
+    Attributes
+    ----------
+    textures
+    size
+    width
+    height
+    model
+    distance
+    fov_x
+    fov_y
+    wait : int
+        The time to wait before the next step, in milliseconds.
+
+    Raises
+    ------
+    TypeError
+        If both `fov_vertical` and `fov_diagonal` are provided.
+
+    """
+    def __init__(self, size, model, fov_vertical=None, fov_diagonal=None,
+                 wait=10, distance=None):
+        # TODO: Allow rotation of background.
+        # TODO: Make drone always horizontal? Keep image aligned with horizon?
+        # TODO: Zoom only in, or both in and out.
+        self.setup_textures()
+        self.setup_renderer(size, model, distance, fov_diagonal, fov_vertical)
+
+        self.wait = wait
+        self.is_active = True
+        self._bg_initialized = False
+
+    def run(self):
+        """
+        Run the display.
+
+        """
+        pg.init()
+        glut.glutInit()
+        pg.display.set_mode(self.size, pg.OPENGL)
+        self.set_perspective()
+
+        self.add_textures("../media/blank.png")
+        self.init_texture(*self._latest_texture.pop(), texture_number=0)
+
+        while self.is_active:
+            self.step()
+            pg.time.wait(self.wait)
+        sys.exit(0)
+
+    def step(self):
+        """
+        Show one frame.
+
+        """
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                self.is_active = False
+                return
+
+        try:
+            if self._bg_initialized:
+                self.update_texture(*self._latest_texture.pop())
+            else:
+                self.init_texture(*self._latest_texture.pop())
+                self._bg_initialized = True
+        except IndexError:
+            pass
+
+        self.clear()
+        try:
+            self.render(self.pose_cam, self.pose_drone)
+        except AttributeError:
+            self.write_text("No data yet", colour=(1, 0, 0))
+            return
+
+        for text, position, colour in self.text:
+            kwargs = {"text": text,
+                      "position": position,
+                      "colour": colour}
+            kwargs = {k: v for k, v in kwargs.items()
+                      if v is not None}
+            self.write_text(**kwargs)
+        pg.display.flip()
+
+    def set_perspective(self, near=0.1, far=100):
+        """
+        Set up the perspective projection matrix.
+
+        Parameters
+        ----------
+        near : Optional[float]
+            The distance to the near clipping plane in the z-direction. Default
+            is 10 cm.
+        far : Optional[float]
+            The distance to the far clipping plane in the z-direction. Default
+            is 100 m.
+
+        """
+        glu.gluPerspective(self.fov_y, self.width / self.height, near, far)
+
+    @staticmethod
+    def clear():
+        """
+        Reset OpenGL buffers to preset values.
+
+        """
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
 
 class Visualizer(object):
