@@ -446,7 +446,7 @@ class RendererMixin(TexturesMixin):
         rel_pos, rot_cam, rot_drone = self._find_rel_pos(pose_cam, pose_drone)
 
         # Temporarily turn off zooming.
-        if False and self.distance:
+        if self.distance:
             scale = np.linalg.norm(rel_pos) / self.distance
             rel_pos = normalize(rel_pos) * self.distance
         else:
@@ -497,10 +497,10 @@ class RendererMixin(TexturesMixin):
         """
         # TODO: Fix method for zoom.
         def find_vertices(x, y):
-            # centre_x, centre_y = centre
+            centre_x, centre_y = centre
 
             # Temporarily turn off zooming
-            scale = 1
+            # scale = 1
             centre_x, centre_y = self.size / 2
 
             # Real zooming code.
@@ -705,9 +705,11 @@ class Screen(RendererMixin):
     """
     def __init__(self, size, model, fov_vertical=None, fov_diagonal=None,
                  wait=10, distance=None):
-        # TODO: Allow rotation of background.
-        # TODO: Make drone always horizontal? Keep image aligned with horizon?
-        # TODO: Zoom only in, or both in and out.
+        # TODO: Make drone always horizontal?  NO
+        # TODO: Keep drone in centre of image?
+        # TODO: Allow rotation of background?
+        # TODO: Keep image aligned with horizon?
+        # TODO: Zoom only in, or both in and out?
         self.setup_textures()
         self.setup_renderer(size, model, distance, fov_diagonal, fov_vertical)
 
@@ -829,8 +831,8 @@ def test_offline(size=(640, 480)):
 
     # time.sleep(2)
     pos_cam = [-1.5, -4, 4]
-    rot_cam = [0, 0, 0, 1]
-    pos_drone = [-0.5, 0, 6]
+    rot_cam = [-0.0, 0, 0, 1]
+    pos_drone = [-1.5, 0, 4]
     rot_drone = [-0.3, 0, 0, 1]
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
@@ -838,11 +840,13 @@ def test_offline(size=(640, 480)):
     time.sleep(0.3)
     screen.add_textures("../media/bird.jpg")
 
-    # time.sleep(1)
+    time.sleep(3)
     # screen.add_textures("../media/background.bmp")
     # screen.text.append(("Help", None, None))
-    for distance in cycle([1.5, 3]):
-        time.sleep(3)
+    # for distance in cycle(np.hstack((np.arange(4, 1, -0.1),
+    #                                  np.arange(1, 4, 0.1)))):
+    for distance in cycle(np.hstack((np.arange(4, 1, -0.1), np.arange(1, 4, 0.1)))):
+        time.sleep(0.1)
         screen.distance = distance
         if not screen.is_active:
             break
