@@ -446,7 +446,7 @@ class RendererMixin(TexturesMixin):
         rel_pos, rot_cam, rot_drone = self._find_rel_pos(pose_cam, pose_drone)
 
         # Temporarily turn off zooming.
-        if False and self.distance:
+        if self.distance:
             scale = np.linalg.norm(rel_pos) / self.distance
             rel_pos = normalize(rel_pos) * self.distance
         else:
@@ -497,11 +497,11 @@ class RendererMixin(TexturesMixin):
         """
         # TODO: Fix method for zoom.
         def find_vertices(x, y):
-            # centre_x, centre_y = centre
+            centre_x, centre_y = centre
 
             # Temporarily turn off zooming
-            scale = 1
-            centre_x, centre_y = self.size / 2
+            # scale = 1
+            # centre_x, centre_y = self.size / 2
 
             # Real zooming code.
             vertex_x = self.width/2 - scale*(centre_x - self.width * x)
@@ -841,7 +841,7 @@ def test_offline(size=(640, 480)):
     # time.sleep(1)
     # screen.add_textures("../media/background.bmp")
     # screen.text.append(("Help", None, None))
-    for distance in cycle([1.5, 3]):
+    for distance in cycle([1, 1.5, 3]):
         time.sleep(3)
         screen.distance = distance
         if not screen.is_active:
