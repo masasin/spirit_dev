@@ -804,7 +804,8 @@ class Screen(RendererMixin):
 
 
 class Visualizer(object):
-    def __init__(self):
+    def __init__(self, size=(640, 480)):
+        self._start_screen(size)
         rospy.Subscriber("/ardrone/past_image", Image, self.bg_callback,
                          queue_size=1)
         rospy.Subscriber("/ardrone/past_pose", PoseStamped,
@@ -813,7 +814,6 @@ class Visualizer(object):
                          queue_size=1)
         rospy.Subscriber("/ardrone/tracked", Bool, self.tracked_callback,
                          queue_size=1)
-        self._start_screen()
 
     def bg_callback(self, background):
         self.screen.add_textures(background)
@@ -829,8 +829,8 @@ class Visualizer(object):
         if not self.tracked:
             self.screen.text.append("Not tracking!", None, (1, 0, 0))
 
-    def _start_screen(self):
-        self.screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
+    def _start_screen(self, size):
+        self.screen = Screen(size, model=Drone(), fov_diagonal=92)
         threading.Thread(target=self.screen.run).start()
 
     @property
@@ -839,10 +839,10 @@ class Visualizer(object):
 
 
 class TestVisualizer(Visualizer):
-    def __init__(self):
+    def __init__(self, size=(640, 480)):
         rospy.Subscriber("/ardrone/image_raw", Image, self.bg_callback,
                          queue_size=1)
-        self._start_screen()
+        self._start_screen(size)
 
         pos_cam = [-1.5, -4, 4]
         rot_cam = [-0.1, 0, 0.3, 1]
