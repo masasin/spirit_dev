@@ -21,7 +21,7 @@
        doc="The path to the rviz configuration file" />
 
   <!-- Camera
-       
+
        Receives the camera feed from the AR.Drone, unless mocked. The feed is
        then slowed from 30 Hz to 2 Hz.
 
@@ -33,13 +33,13 @@
   </include>
 
   <!-- Pose
-      
+
        Publishes the pose of the AR.Drone, unless mocked.
 
        Note that if the AR.Drone feed is mocked, `ardrone_autonomy` would not be
        launched, so there would be no odometry. In that case, the pose will be
        mocked if `use_mocap` is `false`.
-       
+
   -->
   <include file="$(find spirit)/launch/launchers/pose.launch" >
     <arg name="mock_pose" value="$(arg mock_pose)" />
@@ -50,7 +50,7 @@
   <!-- Past images
 
        Selects the past image to use and publishes it.
-       
+
   -->
   <include file="$(find spirit)/launch/launchers/past_images.launch" >
     <arg name="eval_method" value="$(arg past_image_eval_method)" />
@@ -61,7 +61,7 @@
   <!-- Display
 
        Displays all video feeds if `display_feeds` is `true`.
-       
+
   -->
   <include file="$(find spirit)/launch/launchers/display.launch" if="$(arg display_feeds)" />
 
