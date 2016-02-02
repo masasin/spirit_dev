@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# (C) 2015  Jean Nassar
+# Released under BSD version 4
 from __future__ import division
 
 from collections import deque
