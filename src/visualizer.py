@@ -806,9 +806,7 @@ class Visualizer(object):
                          queue_size=1)
         rospy.Subscriber("/ardrone/tracked", Bool, self.tracked_callback,
                          queue_size=1)
-
-        self.screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
-        self.screen.set_perspective()
+        self._start_screen()
 
     def bg_callback(self, background):
         self.screen.add_textures(background)
@@ -824,6 +822,9 @@ class Visualizer(object):
         if not self.tracked:
             self.screen.text.append("Not tracking!", None, (1, 0, 0))
 
+    def _start_screen(self):
+        self.screen = Screen((640, 360), model=Drone(), fov_diagonal=92)
+        threading.Thread(target=self.screen.run).start()
 
 def test_offline(size=(640, 480)):
     screen = Screen(size, model=Drone(), fov_diagonal=92, distance=None)
