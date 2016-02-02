@@ -353,7 +353,6 @@ class Selector(object):
 
         """
         self.image = None
-        self.pose = None
         self.tracked = None
 
     def __getattr__(self, name):
