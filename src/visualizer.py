@@ -5,7 +5,7 @@
 from __future__ import division
 
 from collections import deque
-from itertools import cycle
+import os
 import time
 import threading
 import sys
@@ -16,6 +16,7 @@ from OpenGL import GL, GLU, GLUT
 
 import pygame as pg
 
+import rospkg
 import rospy
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
@@ -26,6 +27,8 @@ from helpers import (get_pose_components, pose_from_components, quat2axis,
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_state, Shape)
 
+
+os.chdir(rospkg.RosPack().get_path("spirit"))
 
 # Convenience
 gl = GL
@@ -731,7 +734,7 @@ class Screen(RendererMixin):
         pg.display.set_mode(self.size, pg.OPENGL)
         self.set_perspective()
 
-        self.add_textures("../media/blank.png")
+        self.add_textures("media/blank.png")
         self.init_texture(*self._latest_texture.pop(), texture_number=0)
 
         while self.is_active:
@@ -871,8 +874,8 @@ def test_offline(size=(640, 480)):
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
-    time.sleep(0.3)
-    screen.add_textures("../media/bird.jpg")
+    time.sleep(3)
+    screen.add_textures("media/bird.jpg")
 
 
 def shutdown_hook():
