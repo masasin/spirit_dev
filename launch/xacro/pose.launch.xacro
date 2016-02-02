@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<launch xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}" />
+    <xacro:property name="real" value="${params['pose']['real']}" />
+
+    <xacro:macro name="mocap">
+        <node name="pose_node"
+              pkg="mocap_optitrack"
+              type="mocap_node"
+              respawn="false"
+              launch-prefix=""
+              required="true" >
+            <rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
+        </node>
+    </xacro:macro>
+
+    <xacro:macro name="odometry">
+        <node name="pose_node"
+              pkg="spirit"
+              type="pose_from_odometry.py"
+              output="screen" />
+    </xacro:macro>
+
+    <xacro:macro name="mock_pose">
+        <node name="pose_node"
+              pkg="spirit"
+              type="mock_pose.py"
+              output="screen" />
+    </xacro:macro>
+
+    <xacro:if value="${params['pose']['mock_pose'] or not (real['use_mocap'] or real['use_odometry'])}">
+        <xacro:mock_pose />
+    </xacro:if>
+
+    <xacro:unless value="${params['pose']['mock_pose']}">
+        <xacro:if value="${real['use_mocap']}">
+            <xacro:mocap />
+        </xacro:if>
+
+        <!--mocap and odometry are mutually exclusive.-->
+        <xacro:unless value="${real['use_mocap']}">
+            <!--odometry requires a connection to the drone.-->
+            <xacro:if value="${real['use_odometry']">
+                <xacro:if value="params['camera']['mock_camera']}">
+                    <xacro:mock_pose />
+                </xacro:if>
+                <xacro:unless value="params['camera']['mock_camera']}">
+                    <xacro:odometry />
+                </xacro:unless>
+            </xacro:if>
+            <!--we need a source for pose.-->
+            <xacro:unless value="${real['use_odometry']">
+                <xacro:mock_pose />
+            </xacro:unless>
+        </xacro:unless>
+    </xacro:unless>
+
+    <node name="tracking_verifier" pkg="spirit" type="tracking_verifier.py" output="screen" />
+</launch>

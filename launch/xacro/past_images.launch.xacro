@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}" />
+    <xacro:property name="method" value="${params['past_image']['eval_method']}" />
+    <xacro:property name="method_ns" value="${params['past_image'][method]}" />
+
+    <node name="past_image_selector" pkg="spirit" type="past_image_selector.py" output="screen">
+        <param name="eval_method" value="${method}" />
+        <xacro:if value="${method == 'constant_time_delay'}">
+            <param name="delay" value="${method_ns['delay']}" />
+        </xacro:if>
+        <xacro:if value="${method == 'constant_distance'}">
+            <param name="distance" value="${method_ns['distance']}" />
+        </xacro:if>
+    </node>
+</launch>

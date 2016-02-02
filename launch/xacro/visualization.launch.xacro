@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}"/>
+
+    <xacro:if value="${params['visualization']['show']}">
+      <node name="visualizer" pkg="spirit" type="visualizer.py" output="screen">
+	  <param name="debug" value="${params['visualization']['debug']}" />
+      </node>
+    </xacro:if>
+</launch>
