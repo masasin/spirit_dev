@@ -827,7 +827,7 @@ class Visualizer(object):
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
         if not self.tracked:
-            self.screen.text.append("Not tracking!", None, (1, 0, 0))
+            self.screen.text.append(("Not tracking!", None, (1, 0, 0)))
 
     def _start_screen(self, size):
         self.screen = Screen(size, model=Drone(), fov_diagonal=92)
@@ -853,18 +853,8 @@ class TestVisualizer(Visualizer):
         self.pose_drone_callback(pose_from_components(pos_drone, rot_drone))
 
 
-def test_live():
-    rospy.init_node("visualizer", anonymous=True)
-    rospy.on_shutdown(shutdown_hook)
-    visualizer = TestVisualizer()
-    rospy.loginfo("Started visualizer")
-    while visualizer.is_active:
-        pass
-    rospy.signal_shutdown("Done!")
-
-
 def test_offline(size=(640, 480)):
-    screen = Screen(size, model=Drone(), fov_diagonal=92, distance=None)
+    screen = Screen(size, model=Drone(), fov_diagonal=92)
     threading.Thread(target=screen.run).start()
 
     pos_cam = [-1.5, -4, 4]
@@ -885,12 +875,20 @@ def shutdown_hook():
 def main():
     rospy.init_node("visualizer", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
-    Visualizer()
-    rospy.loginfo("Started visualizer")
-    rospy.spin()
+    debug = rospy.get_param("~debug")
+    if debug == "offline":
+        test_offline()
+    else:
+        if debug == "online":
+            visualizer = TestVisualizer
+        elif not debug:
+            visualizer = Visualizer
+        visualizer()
+        rospy.loginfo("Started visualizer")
+        while visualizer.is_active:
+            pass
+        rospy.signal_shutdown("Done!")
 
 
 if __name__ == '__main__':
-    test_offline()
-    # test_live()
-    # main()
+    main()
