@@ -731,6 +731,7 @@ class Screen(RendererMixin):
         """
         pg.init()
         glut.glutInit()
+        pg.display.set_caption("Past Image Viewer")
         pg.display.set_mode(self.size, pg.OPENGL)
         self.set_perspective()
 
