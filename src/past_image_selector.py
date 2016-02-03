@@ -8,10 +8,13 @@ Selects the best image for SPIRIT.
 """
 from __future__ import division
 from time import localtime, strftime
+import os
 
 import numpy as np
 from numpy.linalg import norm
+import yaml
 
+import rospkg
 import rospy
 import tf2_ros
 from geometry_msgs.msg import PoseStamped
@@ -273,6 +276,11 @@ class Selector(object):
         method = rospy.get_param("~eval_method")
         self.evaluate = Evaluators(method, parent=self).evaluate
 
+        with open(os.path.join(rospkg.RosPack().get_path("spirit"),
+                               "config", "launch_params.yaml")) as fin:
+            params = yaml.load(fin)
+        self._method_params = params["past_image"][method].keys()
+
         rospy.Subscriber("/ardrone/slow_image_raw", Image, self.image_callback)
         rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_callback)
         rospy.Subscriber("/ardrone/tracked", Bool, self.tracked_callback)
@@ -376,7 +384,7 @@ class Selector(object):
             If the ros parameter has not been defined.
 
         """
-        if name in ("_delay", "_distance"):
+        if name in self._method_params:
             self.__setattr__(name, rospy.get_param("~{n}".format(n=name[1:])))
             return self.__getattribute__(name)
 
