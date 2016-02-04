@@ -7,7 +7,7 @@ camera:
   slowdown: 15  # times. Default is 15.
 
 pose:
-  mock_pose: true  # Default is false.
+  mock_pose: false  # Default is false.
   real:
     use_mocap: true  # Default is true.
     use_odometry: false  # Default is false.
