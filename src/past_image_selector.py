@@ -120,7 +120,7 @@ class Evaluators(object):
         """
         if len(self._parent.frames):
             optimum_timestamp = (self._parent.pose.header.stamp.to_sec() - 
-                                 self._parent._delay)
+                                 self._parent.delay)
 
             for frame in reversed(self._parent.frames):
                 if frame.stamp.to_sec() < optimum_timestamp:
@@ -135,7 +135,7 @@ class Evaluators(object):
 
         """
         if len(self._parent.frames):
-            optimum_distance = err_min = self._parent._distance
+            optimum_distance = err_min = self._parent.distance
             position, orientation = get_pose_components(self._parent.pose)
             for frame in reversed(self._parent.frames):
                 frame_distance = norm(frame.coords_precise - position)
@@ -385,7 +385,7 @@ class Selector(object):
 
         """
         if name in self._method_params:
-            self.__setattr__(name, rospy.get_param("~{n}".format(n=name[1:])))
+            self.__setattr__(name, rospy.get_param("~{n}".format(n=name)))
             return self.__getattribute__(name)
 
 
