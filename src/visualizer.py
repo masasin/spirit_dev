@@ -424,8 +424,7 @@ class RendererBase(TexturesBase):
         self.model = model
         self.distance = distance
 
-        self.text = deque(maxlen=3)
-        self._no_texture = False
+        self.text = {}
 
         self.pose_cam = self.pose_drone = None
 
@@ -519,13 +518,10 @@ class RendererBase(TexturesBase):
 
         try:
             self.select_texture(texture_number)
-            if self._no_texture:
-                self._no_texture = False
-                self.text.pop()
+            if "no_texture" in self.text:
+                del self.text["no_texture"]
         except IndexError:
-            if not self._no_texture:
-                self.text.append(("No textures yet", None, (1, 0, 0)))
-                self._no_texture = True
+            self.text["no_texture"] = ("No textures yet", None, None, (1, 0, 0))
             return
 
         if centre is None:
@@ -772,13 +768,13 @@ class Screen(RendererBase):
             self.write_text("No data yet", colour=(1, 0, 0))
             return
 
-        for text, position, colour in self.text:
+        for text, position, font, colour in self.text.values():
             kwargs = {"text": text,
                       "position": position,
+                      "font": font,
                       "colour": colour}
-            kwargs = {k: v for k, v in kwargs.items()
-                      if v is not None}
-            self.write_text(**kwargs)
+            self.write_text(**{k: v for k, v in kwargs.items()
+                               if v is not None})
         pg.display.flip()
 
     def set_perspective(self, near=0.1, far=100):
@@ -818,6 +814,11 @@ class VisualizerBase(object):
 
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
+        if not self.tracked:
+            self.screen.text["tracking"] = ("Tracking lost", None,
+                                            gl_font("helvetica", 18), (1, 0, 0))
+        elif "tracking" in self.screen.text:
+            del self.screen.text["tracking"]
 
     def _start_screen(self, size):
         self.screen = Screen(size, model=Drone(), fov_diagonal=92)
