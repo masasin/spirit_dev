@@ -9,8 +9,14 @@
     </xacro:macro>
 
     <xacro:if value="${params['camera']['show']}">
-      <xacro:display topic="image_raw" title="30 Hz feed" />
-      <xacro:display topic="slow_image_raw" title="2 Hz feed" />
-      <xacro:display topic="past_image" title="Past image feed" />
+      <xacro:if value="${params['camera']['streams']['realtime']}">
+	<xacro:display topic="image_raw" title="30 Hz feed" />
+      </xacro:if>
+      <xacro:if value="${params['camera']['streams']['slow']}">
+	<xacro:display topic="slow_image_raw" title="2 Hz feed" />
+      </xacro:if>
+      <xacro:if value="${params['camera']['streams']['past_image']}">
+	<xacro:display topic="past_image" title="Past image feed" />
+      </xacro:if>
     </xacro:if>
 </launch>
