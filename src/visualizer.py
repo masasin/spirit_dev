@@ -74,15 +74,15 @@ class Drone(Shape):
     Shape
 
     """
-    def __init__(self, size=0.5, height=0.15):
-        offset = [0, 0, size/2]
+    def __init__(self, size=0.3, height=0.13):
+        offset = [0, 0, size]
 
         vertices = np.array([
             (1, -1, -1), (1, 1, -1),
             (-1, 1, -1), (-1, -1, -1),
             (1, -1, 1), (1, 1, 1),
             (-1, -1, 1), (-1, 1, 1),
-        ]) * size / 2
+        ]) * size
         vertices += offset
         vertices[:, 1] *= height
 
@@ -111,7 +111,7 @@ class Drone(Shape):
         self.arrow_vertices = np.array([
             (-1, 1, 1), (0, 1, -1), (1, 1, 1), (0, 1, 0),
             (-1, -1, 1), (0, -1, -1), (1, -1, 1), (0, -1, 0),
-        ]) * size / 2
+        ]) * size
         self.arrow_vertices += offset
         self.arrow_vertices[:, 1] *= height
         self.arrow_colours = (
