@@ -903,9 +903,9 @@ def main():
         test_offline()
         return
     elif debug == "online":
-        visualizer = TestVisualizer()
+        visualizer = TestVisualizer((640, 360))
     else:
-        visualizer = Visualizer()
+        visualizer = Visualizer((640, 360))
     rospy.loginfo("Started visualizer")
     while visualizer.is_active:
         pass
