@@ -749,7 +749,11 @@ class Screen(RendererMixin):
         self.init_texture(*self._latest_texture.pop(), texture_number=0)
 
         while self.is_active:
-            self.step()
+            try:
+                self.step()
+            except pg.error:
+                pg.quit()
+                self.is_active = False
             pg.time.wait(self.wait)
 
     def step(self):
@@ -787,6 +791,7 @@ class Screen(RendererMixin):
                       if v is not None}
             self.write_text(**kwargs)
         pg.display.flip()
+
 
     def set_perspective(self, near=0.1, far=100):
         """
