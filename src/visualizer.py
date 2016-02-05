@@ -159,7 +159,7 @@ class Drone(Shape):
                         gl.glVertex3fv(self.arrow_vertices[vertex])
 
 
-class TexturesMixin(object):
+class TexturesBase(object):
     """
     Implements methods which allow usage of textures.
 
@@ -365,7 +365,7 @@ class TexturesMixin(object):
         return cv2_img[::-1], image.width, image.height
 
 
-class RendererMixin(TexturesMixin):
+class RendererBase(TexturesBase):
     """
     Implements methods which enable rendering the scene.
 
@@ -514,7 +514,7 @@ class RendererMixin(TexturesMixin):
         """
         # TODO: Fix method for zoom.
         def find_vertices(x, y):
-            centre_x, centre_y = centre
+            # centre_x, centre_y = centre
 
             # Temporarily turn off zooming
             # scale = 1
@@ -678,7 +678,7 @@ class RendererMixin(TexturesMixin):
         return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
 
 
-class Screen(RendererMixin):
+class Screen(RendererBase):
     """
     Class for displaying and updating the screen.
 
@@ -818,18 +818,7 @@ class Screen(RendererMixin):
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
 
-class Visualizer(object):
-    def __init__(self, size=(640, 480)):
-        self._start_screen(size)
-        rospy.Subscriber("/ardrone/past_image", Image, self.bg_callback,
-                         queue_size=1)
-        rospy.Subscriber("/ardrone/past_pose", PoseStamped,
-                         self.pose_cam_callback, queue_size=1)
-        rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_drone_callback,
-                         queue_size=1)
-        rospy.Subscriber("/ardrone/tracked", Bool, self.tracked_callback,
-                         queue_size=1)
-
+class VisualizerBase(object):
     def bg_callback(self, background):
         self.screen.add_textures(background)
 
@@ -851,7 +840,20 @@ class Visualizer(object):
         return self.screen.is_active
 
 
-class TestVisualizer(Visualizer):
+class Visualizer(VisualizerBase):
+    def __init__(self, size=(640, 480)):
+        self._start_screen(size)
+        rospy.Subscriber("/ardrone/past_image", Image, self.bg_callback,
+                         queue_size=1)
+        rospy.Subscriber("/ardrone/past_pose", PoseStamped,
+                         self.pose_cam_callback, queue_size=1)
+        rospy.Subscriber("/ardrone/pose", PoseStamped, self.pose_drone_callback,
+                         queue_size=1)
+        rospy.Subscriber("/ardrone/tracked", Bool, self.tracked_callback,
+                         queue_size=1)
+
+
+class TestVisualizer(VisualizerBase):
     def __init__(self, size=(640, 480)):
         rospy.Subscriber("/ardrone/image_raw", Image, self.bg_callback,
                          queue_size=1)
