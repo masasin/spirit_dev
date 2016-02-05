@@ -8,7 +8,6 @@ from collections import deque
 import os
 import time
 import threading
-import sys
 
 from cv_bridge import CvBridge
 import numpy as np
@@ -76,12 +75,15 @@ class Drone(Shape):
 
     """
     def __init__(self, size=0.5, height=0.15):
+        offset = [0, 0, size/2]
+
         vertices = np.array([
             (1, -1, -1), (1, 1, -1),
             (-1, 1, -1), (-1, -1, -1),
             (1, -1, 1), (1, 1, 1),
             (-1, -1, 1), (-1, 1, 1),
-        ]) * size
+        ]) * size / 2
+        vertices += offset
         vertices[:, 1] *= height
 
         colours = (
@@ -109,7 +111,8 @@ class Drone(Shape):
         self.arrow_vertices = np.array([
             (-1, 1, 1), (0, 1, -1), (1, 1, 1), (0, 1, 0),
             (-1, -1, 1), (0, -1, -1), (1, -1, 1), (0, -1, 0),
-        ]) * size
+        ]) * size / 2
+        self.arrow_vertices += offset
         self.arrow_vertices[:, 1] *= height
         self.arrow_colours = (
             (1, 0, 0),  # Red on left
@@ -741,7 +744,6 @@ class Screen(RendererMixin):
         while self.is_active:
             self.step()
             pg.time.wait(self.wait)
-        sys.exit(0)
 
     def step(self):
         """
@@ -827,8 +829,6 @@ class Visualizer(object):
 
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
-        if not self.tracked:
-            self.screen.text.append(("Not tracking!", None, (1, 0, 0)))
 
     def _start_screen(self, size):
         self.screen = Screen(size, model=Drone(), fov_diagonal=92)
@@ -858,10 +858,10 @@ def test_offline(size=(640, 480)):
     screen = Screen(size, model=Drone(), fov_diagonal=92)
     threading.Thread(target=screen.run).start()
 
-    pos_cam = [-1.5, -4, 4]
-    rot_cam = [-0.0, 0, 0, 1]
-    pos_drone = [-0.1, 0, 4]
-    rot_drone = [-0.3, 0, 0, 1]
+    pos_cam = [-0.5700, 0.08365, 0.0837]
+    rot_cam = [0.0006, 0.0042, 0.0166, 0.9999]
+    pos_drone = [-0.4767, 1.3597, 0.0770]
+    rot_drone = [0.0078, 0.0087, 0.0059, 0.9999]
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 
@@ -876,19 +876,22 @@ def shutdown_hook():
 def main():
     rospy.init_node("visualizer", anonymous=True)
     rospy.on_shutdown(shutdown_hook)
-    debug = rospy.get_param("~debug")
+    try:
+        debug = rospy.get_param("~debug")
+    except KeyError:
+        rospy.logwarn("Running offline test.")
+        debug = "offline"
     if debug == "offline":
         test_offline()
+        return
+    elif debug == "online":
+        visualizer = TestVisualizer()
     else:
-        if debug == "online":
-            visualizer = TestVisualizer
-        elif not debug:
-            visualizer = Visualizer
-        visualizer()
-        rospy.loginfo("Started visualizer")
-        while visualizer.is_active:
-            pass
-        rospy.signal_shutdown("Done!")
+        visualizer = Visualizer()
+    rospy.loginfo("Started visualizer")
+    while visualizer.is_active:
+        pass
+    rospy.signal_shutdown("Done!")
 
 
 if __name__ == '__main__':
