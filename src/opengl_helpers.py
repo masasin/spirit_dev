@@ -144,7 +144,7 @@ def new_matrix(mode_start=None, mode_end=None):
     ----------
     mode_start : gl.GLenum
         The matrix mode to use for the new matrix.
-    mode_end : int
+    mode_end : gl.GLenum
         The matrix mode to use after finishing with the new matrix.
 
     """
