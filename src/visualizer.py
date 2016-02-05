@@ -455,6 +455,12 @@ class RendererMixin(TexturesMixin):
         """
         rel_pos, rot_cam, rot_drone = self._find_rel_pos(pose_cam, pose_drone)
 
+        rot_cam[0] *= -1
+        rot_cam[1], rot_cam[2] = rot_cam[2], rot_cam[1]
+
+        rot_drone[0] *= -1
+        rot_drone[1], rot_drone[2] = rot_drone[2], rot_drone[1]
+
         # Temporarily turn off zooming.
         if self.distance:
             scale = np.linalg.norm(rel_pos) / self.distance
@@ -605,7 +611,8 @@ class RendererMixin(TexturesMixin):
         """
         coords_cam, rot_cam = get_pose_components(pose_cam)
         coords_drone, rot_drone = get_pose_components(pose_drone)
-        rel_pos = coords_drone - coords_cam
+        rel_pos = coords_cam - coords_drone
+        rel_pos[2] *= -1
         return rel_pos, rot_cam, rot_drone
 
     def _find_drone_on_image(self, rel_pos):
@@ -858,10 +865,14 @@ def test_offline(size=(640, 480)):
     screen = Screen(size, model=Drone(), fov_diagonal=92)
     threading.Thread(target=screen.run).start()
 
-    pos_cam = [-0.5700, 0.08365, 0.0837]
-    rot_cam = [0.0006, 0.0042, 0.0166, 0.9999]
-    pos_drone = [-0.4767, 1.3597, 0.0770]
-    rot_drone = [0.0078, 0.0087, 0.0059, 0.9999]
+    pos_cam = [0, 0, 0]
+    rot_cam = [0, 0, 0, 1]
+    pos_drone = [0, -1, 0]
+    rot_drone = [-0.2, 0, 0, 1]
+    # pos_cam = [-0.5700, 0.08365, 0.0837]
+    # rot_cam = [0.0006, 0.0042, 0.0166, 0.9999]
+    # pos_drone = [-0.4767, 1.3597, 0.0770]
+    # rot_drone = [0.0078, 0.0087, 0.0059, 0.9999]
     screen.pose_cam = pose_from_components(pos_cam, rot_cam)
     screen.pose_drone = pose_from_components(pos_drone, rot_drone)
 

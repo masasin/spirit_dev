@@ -1,9 +1,9 @@
 camera:
-  mock_camera: true  # Default is false.
-  show: false  # Default is true.
+  mock_camera: false  # Default is false.
+  show: false  # Default is false.
   real:
     drone_ip: 192.168.1.1  # Default is 192.168.1.1.
-    use_tum: true  # Default is false.
+    use_tum: false  # Default is false.
   slowdown: 15  # times. Default is 15.
 
 pose:
