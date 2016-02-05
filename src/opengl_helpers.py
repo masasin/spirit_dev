@@ -5,7 +5,7 @@ from OpenGL import GL as gl
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 
-from helpers import rotation_matrix
+from helpers import quat2axis
 
 
 def gl_font(name, height):
@@ -207,22 +207,21 @@ class Shape(object):
             Default is white.
 
         """
-        # Rotate the shape.
-        vertices = np.dot(self.vertices, rotation_matrix(quaternion).T)
+        with new_matrix():
+            gl.glRotate(*quat2axis(quaternion))
+            # Draw the surfaces.
+            with gl_primitive(gl.GL_QUADS):
+                for surface in self.surfaces:
+                    for i, vertex in enumerate(surface):
+                        gl.glColor3fv(self.colours[i % len(self.colours)])
+                        gl.glVertex3fv(self.vertices[vertex])
+            gl.glColor3fv(edge_colour)
 
-        # Draw the surfaces.
-        with gl_primitive(gl.GL_QUADS):
-            for surface in self.surfaces:
-                for i, vertex in enumerate(surface):
-                    gl.glColor3fv(self.colours[i % len(self.colours)])
-                    gl.glVertex3fv(vertices[vertex])
-        gl.glColor3fv(edge_colour)
-
-        # Draw the edges.
-        with gl_primitive(gl.GL_LINES):
-            for edge in self.edges:
-                for vertex in edge:
-                    gl.glVertex3fv(vertices[vertex])
+            # Draw the edges.
+            with gl_primitive(gl.GL_LINES):
+                for edge in self.edges:
+                    for vertex in edge:
+                        gl.glVertex3fv(self.vertices[vertex])
 
 
 class Cube(Shape):

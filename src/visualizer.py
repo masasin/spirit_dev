@@ -22,9 +22,9 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 from helpers import (get_pose_components, pose_from_components, quat2axis,
-                     rotation_matrix, normalize)
+                     normalize)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
-                            new_state, Shape)
+                            new_matrix, new_state, Shape)
 
 
 os.chdir(rospkg.RosPack().get_path("spirit"))
@@ -142,20 +142,21 @@ class Drone(Shape):
         super(Drone, self).draw(quaternion, edge_colour)
 
         # Draw arrow
-        vertices = np.dot(self.arrow_vertices, rotation_matrix(quaternion).T)
+        with new_matrix():
+            gl.glRotate(*quat2axis(quaternion))
+            with gl_primitive(gl.GL_QUADS):
+                for surface in self.arrow_surfaces:
+                    for i, vertex in enumerate(surface):
+                        gl.glColor3fv(
+                            self.arrow_colours[i % len(self.arrow_colours)]
+                        )
+                        gl.glVertex3fv(self.arrow_vertices[vertex])
+            gl.glColor3fv(edge_colour)
 
-        with gl_primitive(gl.GL_QUADS):
-            for surface in self.arrow_surfaces:
-                for i, vertex in enumerate(surface):
-                    gl.glColor3fv(self.arrow_colours[i %
-                                                     len(self.arrow_colours)])
-                    gl.glVertex3fv(vertices[vertex])
-        gl.glColor3fv(edge_colour)
-
-        with gl_primitive(gl.GL_LINES):
-            for edge in self.arrow_edges:
-                for vertex in edge:
-                    gl.glVertex3fv(vertices[vertex])
+            with gl_primitive(gl.GL_LINES):
+                for edge in self.arrow_edges:
+                    for vertex in edge:
+                        gl.glVertex3fv(self.arrow_vertices[vertex])
 
 
 class TexturesMixin(object):
@@ -792,7 +793,6 @@ class Screen(RendererMixin):
             self.write_text(**kwargs)
         pg.display.flip()
 
-
     def set_perspective(self, near=0.1, far=100):
         """
         Set up the perspective projection matrix.
@@ -871,9 +871,9 @@ def test_offline(size=(640, 480)):
     threading.Thread(target=screen.run).start()
 
     pos_cam = [0, 0, 0]
-    rot_cam = [0, 0, 0, 1]
-    pos_drone = [0, -1, 0]
-    rot_drone = [-0.2, 0, 0, 1]
+    rot_cam = [0, 0, -0.2, 1]
+    pos_drone = [0, -3, 0]
+    rot_drone = [-0.2, 0.2, 0.2, 1]
     # pos_cam = [-0.5700, 0.08365, 0.0837]
     # rot_cam = [0.0006, 0.0042, 0.0166, 0.9999]
     # pos_drone = [-0.4767, 1.3597, 0.0770]
