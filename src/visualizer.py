@@ -428,8 +428,6 @@ class RendererBase(TexturesBase):
         self._no_texture = False
 
         self.pose_cam = self.pose_drone = None
-        self._old_rel_pos = np.array([0, 0, 0])
-        self._old_rot_cam = (0, 0, 0, 0)
 
         if fov_vertical is not None:
             self.fov_y = fov_vertical
@@ -440,7 +438,7 @@ class RendererBase(TexturesBase):
         self.fov_x = self._fov_vertical_to_horizontal(self.fov_y)
         self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
 
-    def render(self, pose_cam, pose_drone, draw_background=True):
+    def render(self, pose_cam, pose_drone):
         """
         Render the scene.
 
@@ -450,8 +448,6 @@ class RendererBase(TexturesBase):
             The pose of the drone when the background image was taken.
         pose_drone : PoseStamped
             The current pose of the drone.
-        draw_background : Optional[bool]
-            Whether to draw the background. Default is True.
 
         """
         rel_pos, rot_cam, rot_drone = self._find_rel_pos(pose_cam, pose_drone)
@@ -470,26 +466,18 @@ class RendererBase(TexturesBase):
             scale = 1
         centre = self._find_drone_on_image(rel_pos)
 
-        # Set camera orientation.
-        # Reset camera orientation.
-        gl.glRotate(*self._old_rot_cam)
-        self._old_rot_cam = quat2axis(-rot_cam)
+        with new_matrix():
+            # Set camera orientation.
+            rot_cam[:3] *= -1  # z-axis is with respect to origin, not camera.
+            gl.glRotate(*quat2axis(rot_cam))
 
-        # Set new camera orientation.
-        rot_cam[:3] *= -1  # z-axis is with respect to origin, not camera.
-        gl.glRotate(*quat2axis(rot_cam))
+            # Set camera position.
+            # Convert position to OpenGL coordinate frame first.
+            rel_pos[1], rel_pos[2] = rel_pos[2], -rel_pos[1]
+            gl.glTranslate(*rel_pos)
 
-        # Set camera position.
-        # Convert position to OpenGL coordinate frame.
-        rel_pos[1], rel_pos[2] = rel_pos[2], -rel_pos[1]
-
-        # Move camera position.
-        gl.glTranslate(*(rel_pos - self._old_rel_pos))
-        self._old_rel_pos = rel_pos
-
-        if draw_background:
             self.draw_background(scale=scale, centre=centre)
-        self.model.draw(rot_drone)
+            self.model.draw(rot_drone)
 
     # noinspection PyUnusedLocal
     def draw_background(self, texture_number=1, scale=1, centre=None,
