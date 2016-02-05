@@ -1,6 +1,6 @@
 camera:
   mock_camera: false  # Default is false.
-  show: false  # Default is false.
+  show: true  # Default is false.
   streams:
     realtime: false
     slow: true
@@ -19,7 +19,7 @@ pose:
 past_image:
   eval_method: constant_time_delay
   constant_time_delay:
-    delay: 500
+    delay: 5
   constant_distance:
     distance: 10
 
