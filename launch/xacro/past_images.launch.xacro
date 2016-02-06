@@ -1,16 +1,32 @@
-<?xml version="1.0"?>
+<?xml version='1.0' encoding='UTF-8'?>
+<!--Generated automatically from launch config file.-->
 <launch xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}" />
-    <xacro:property name="method" value="${params['past_image']['eval_method']}" />
-    <xacro:property name="method_ns" value="${params['past_image'][method]}" />
-
-    <node name="past_image_selector" pkg="spirit" type="past_image_selector.py" output="screen">
-        <param name="eval_method" value="${method}" />
-        <xacro:if value="${method == 'constant_time_delay'}">
-            <param name="delay" value="${method_ns['delay']}" />
-        </xacro:if>
-        <xacro:if value="${method == 'constant_distance'}">
-            <param name="distance" value="${method_ns['distance']}" />
-        </xacro:if>
-    </node>
+  <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}"/>
+  <xacro:property name="method" value="${params['past_image']['eval_method']}"/>
+  <xacro:property name="method_ns" value="${params['past_image'][method]}"/>
+  <node name="past_image_selector" output="screen" pkg="spirit" type="past_image_selector.py">
+    <param name="eval_method" value="${method}"/>
+    <xacro:if value="${method == 'constant_distance'}">
+      <param name="distance" value="${method_ns['distance']}"/>
+    </xacro:if>
+    <xacro:if value="${method == 'constant_time_delay'}">
+      <param name="delay" value="${method_ns['delay']}"/>
+    </xacro:if>
+    <xacro:if value="${method == 'spirit'}">
+      <param name="coeff_distance" value="${method_ns['coeff_distance']}"/>
+      <param name="coeff_similarity" value="${method_ns['coeff_similarity']}"/>
+      <param name="coeff_centred" value="${method_ns['coeff_centred']}"/>
+      <param name="coeff_direction" value="${method_ns['coeff_direction']}"/>
+      <param name="l_ref" value="${method_ns['l_ref']}"/>
+    </xacro:if>
+    <xacro:if value="${method == 'murata'}">
+      <param name="z_ref" value="${method_ns['z_ref']}"/>
+      <param name="coeff_height" value="${method_ns['coeff_height']}"/>
+      <param name="coeff_direction" value="${method_ns['coeff_direction']}"/>
+      <param name="l_ref" value="${method_ns['l_ref']}"/>
+      <param name="coeff_elevation" value="${method_ns['coeff_elevation']}"/>
+      <param name="coeff_similarity" value="${method_ns['coeff_similarity']}"/>
+      <param name="coeff_distance" value="${method_ns['coeff_distance']}"/>
+    </xacro:if>
+  </node>
 </launch>
