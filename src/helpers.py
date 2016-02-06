@@ -201,6 +201,37 @@ def quat2axis(quaternion):
     return angle, axis_x, axis_y, axis_z
 
 
+def angle_between_quaternions(a, b):
+    """
+    Find the angle between two quaternions.
+
+    Parameters
+    ----------
+    a : Sequence[float]
+        A quaternion in the order of x, y, z, w.
+    b : Sequence[float]
+        A quaternion in the order of x, y, z, w.
+
+    Returns
+    -------
+    float
+        The angle between the quaternions, in radians.
+
+    Notes
+    -----
+    The angle is multiplied by 2 because of its effect in 3D.
+
+    Examples
+    --------
+    >>> np.rad2deg(angle_between_quaternions([0, 0, 0, 1], [0, 0, 0, 1]))
+    0.0
+    >>> np.rad2deg(angle_between_quaternions([0, 0, 0, 1], [0, -1, 0, 1]))
+    90.0
+
+    """
+    return 2 * np.arccos(np.dot(normalize(a), normalize(b)))
+
+
 def rotation_matrix(quaternion):
     """
     Create the rotation matrix of a quaternion.
