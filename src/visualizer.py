@@ -144,19 +144,9 @@ class Drone(Shape):
         # Draw arrow
         with new_matrix():
             gl.glRotate(*quat2axis(quaternion))
-            with gl_primitive(gl.GL_QUADS):
-                for surface in self.arrow_surfaces:
-                    for i, vertex in enumerate(surface):
-                        gl.glColor3fv(
-                            self.arrow_colours[i % len(self.arrow_colours)]
-                        )
-                        gl.glVertex3fv(self.arrow_vertices[vertex])
-            gl.glColor3fv(edge_colour)
-
-            with gl_primitive(gl.GL_LINES):
-                for edge in self.arrow_edges:
-                    for vertex in edge:
-                        gl.glVertex3fv(self.arrow_vertices[vertex])
+            self._draw_components(self.arrow_vertices, self.arrow_colours,
+                                  self.arrow_edges, self.arrow_surfaces,
+                                  edge_colour)
 
 
 class TexturesBase(object):

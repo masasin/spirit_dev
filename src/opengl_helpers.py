@@ -209,19 +209,24 @@ class Shape(object):
         """
         with new_matrix():
             gl.glRotate(*quat2axis(quaternion))
-            # Draw the surfaces.
-            with gl_primitive(gl.GL_QUADS):
-                for surface in self.surfaces:
-                    for i, vertex in enumerate(surface):
-                        gl.glColor3fv(self.colours[i % len(self.colours)])
-                        gl.glVertex3fv(self.vertices[vertex])
-            gl.glColor3fv(edge_colour)
+            self._draw_components(self.vertices, self.colours, self.edges,
+                                  self.surfaces, edge_colour)
 
-            # Draw the edges.
-            with gl_primitive(gl.GL_LINES):
-                for edge in self.edges:
-                    for vertex in edge:
-                        gl.glVertex3fv(self.vertices[vertex])
+    @staticmethod
+    def _draw_components(vertices, colours, edges, surfaces, edge_colour):
+        # Draw the surfaces.
+        with gl_primitive(gl.GL_QUADS):
+            for surface in surfaces:
+                for i, vertex in enumerate(surface):
+                    gl.glColor3fv(colours[i % len(colours)])
+                    gl.glVertex3fv(vertices[vertex])
+        gl.glColor3fv(edge_colour)
+
+        # Draw the edges.
+        with gl_primitive(gl.GL_LINES):
+            for edge in edges:
+                for vertex in edge:
+                    gl.glVertex3fv(vertices[vertex])
 
 
 class Cube(Shape):
