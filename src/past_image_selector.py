@@ -206,16 +206,16 @@ class Evaluators(object):
                 results[frame] = eval_func(self.pose)
             return min(results, key=results.get)
 
-    # noinspection PyUnreachableCode
     def spirit(self):
         """
         Not implemented yet.
 
         """
         def eval_func(pose, frame):
-            pass
+            return 0
 
-        raise NotImplementedError
+        if self.current_frame is None:
+            return self.frames[0]
 
         position, orientation = get_pose_components(self.pose)
         nearest_ten = self.octree.get_nearest(position, k=10)
