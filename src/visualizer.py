@@ -21,7 +21,7 @@ from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
-from helpers import (get_pose_components, pose_from_components, quat2axis,
+from helpers import (get_pose_components, pose_from_components, quat2axis, d2r,
                      normalize, fov_diagonal2vertical, fov_vertical2horizontal)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_matrix, new_state, Shape)
@@ -33,8 +33,6 @@ os.chdir(rospkg.RosPack().get_path("spirit"))
 gl = GL
 glu = GLU
 glut = GLUT
-d2r = np.deg2rad
-r2d = np.rad2deg
 
 
 class Drone(Shape):
@@ -499,8 +497,8 @@ class RendererBase(TexturesBase):
             centre_x, centre_y = self.size / 2
 
             # Real zooming code.
-            vertex_x = self.width/2 - scale*(centre_x - self.width * x)
-            vertex_y = self.height/2 - scale*(centre_y - self.height * y)
+            vertex_x = self.width / 2 - scale * (centre_x - self.width * x)
+            vertex_y = self.height / 2 - scale * (centre_y - self.height * y)
             return vertex_x, vertex_y
 
         # Clear background
@@ -521,7 +519,7 @@ class RendererBase(TexturesBase):
         with gl_flag(gl.GL_TEXTURE_2D):
             with gl_ortho(self.width, self.height):
                 gl.glRotate(rotation, 0, 0, 1)
-                gl.glTranslate(-self.width/2, -self.height/2, 0)
+                gl.glTranslate(-self.width / 2, -self.height / 2, 0)
                 with gl_primitive(gl.GL_QUADS):
                     for x, y in ((0, 0), (0, 1), (1, 1), (1, 0)):
                         gl.glTexCoord2f(x, y)
@@ -803,7 +801,7 @@ class TestVisualizer(VisualizerBase):
         self._start_screen(size)
 
         pos_cam = [-1.5, -4, 4]
-        rot_cam = [-0.1, 0, 0.3, 1]
+        rot_cam = [-0, 0, 0, 1]
         pos_drone = [-1.5, -1, 4]
         rot_drone = [-0.3, 0, 0, 1]
 
@@ -816,9 +814,9 @@ def test_offline(size=(640, 480)):
     threading.Thread(target=screen.run).start()
 
     pos_cam = [0, 0, 0]
-    rot_cam = [0, 0, -0.2, 1]
+    rot_cam = [0, 0, 0, 1]
     pos_drone = [0, -3, 0]
-    rot_drone = [-0.2, 0.2, 0.2, 1]
+    rot_drone = [0, -0.7, 0, 1]
     # pos_cam = [-0.5700, 0.08365, 0.0837]
     # rot_cam = [0.0006, 0.0042, 0.0166, 0.9999]
     # pos_drone = [-0.4767, 1.3597, 0.0770]
