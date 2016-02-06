@@ -118,14 +118,13 @@ class Evaluators(object):
         If the delay has not yet passed, return the first frame.
 
         """
-        if len(self._parent.frames):
-            optimum_timestamp = (self._parent.pose.header.stamp.to_sec() - 
-                                 self._parent.delay)
+        if len(self.frames):
+            optimum_timestamp = (self.pose.header.stamp.to_sec() - self.delay)
 
-            for frame in reversed(self._parent.frames):
+            for frame in reversed(self.frames):
                 if frame.stamp.to_sec() < optimum_timestamp:
                     return frame
-            return self._parent.frames[0]
+            return self.frames[0]
 
     def constant_distance(self):
         """
@@ -134,16 +133,16 @@ class Evaluators(object):
         If the distance has not yet been crossed, return the last frame.
 
         """
-        if len(self._parent.frames):
-            optimum_distance = err_min = self._parent.distance
-            position, orientation = get_pose_components(self._parent.pose)
-            for frame in reversed(self._parent.frames):
+        if len(self.frames):
+            optimum_distance = err_min = self.distance
+            position, orientation = get_pose_components(self.pose)
+            for frame in reversed(self.frames):
                 frame_distance = norm(frame.coords_precise - position)
                 if frame_distance > optimum_distance:
                     err_current = abs(frame_distance - optimum_distance)
                     if err_current < err_min:
                         return frame
-            return self._parent.frames[-1]
+            return self.frames[-1]
 
     def murata(self):
         """
@@ -198,13 +197,13 @@ class Evaluators(object):
                     + self.a4 * ((a_mag - self.l_ref) / self.l_ref) ** 2
                     + self.a5 * (change / test_state_vector) ** 2)
 
-        if self._parent.current_frame is None:
-            return self._parent.frames[0]
+        if self.current_frame is None:
+            return self.frames[0]
 
-        if len(self._parent.frames):
+        if self.frames:
             results = {}
-            for frame in reversed(self._parent.frames):
-                results[frame] = eval_func(self._parent.pose)
+            for frame in reversed(self.frames):
+                results[frame] = eval_func(self.pose)
             return min(results, key=results.get)
 
     # noinspection PyUnreachableCode
@@ -218,13 +217,37 @@ class Evaluators(object):
 
         raise NotImplementedError
 
-        position, orientation = get_pose_components(self._parent.pose)
-        nearest_ten = self._parent.octree.get_nearest(position, k=10)
+        position, orientation = get_pose_components(self.pose)
+        nearest_ten = self.octree.get_nearest(position, k=10)
         results = {}
         for location in nearest_ten:
             for frame in location:
-                results[frame] = eval_func(self._parent.pose, frame)
+                results[frame] = eval_func(self.pose, frame)
         return min(results, key=results.get)
+
+    def __getattr__(self, name):
+        """
+        Return undefined attributes.
+
+        Upon first access, the value of the parameter is obtained from the
+        parent class and stored as an attribute, from where it is read on
+        subsequent accesses.
+
+        Parameters
+        ----------
+        name : str
+            The attribute to get.
+
+        Raises
+        ------
+        AttributeError
+            If the attribute does not exist.
+        KeyError
+            If the ros parameter has not been defined.
+
+        """
+        self.__setattr__(name, self._parent.__getattribute__(name))
+        return self.__getattribute__(name)
 
 
 class Selector(object):
