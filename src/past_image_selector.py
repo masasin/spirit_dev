@@ -181,7 +181,7 @@ class Evaluators(object):
 
             dx, dy, dz = coords - frame.coords_precise
             beta = angle_between_quaternions(orientation, frame.orientation)
-            alpha = np.arctan(dz, dx)
+            alpha = np.arctan2(dz, dy)
             fov_y = d2r(fov_diagonal2vertical(92))
 
             a_mag = norm(coords - frame.coords_precise)
