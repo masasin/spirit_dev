@@ -34,6 +34,7 @@ def main():
     with open(os.devnull, "w") as DEVNULL:
         for path in tqdm.tqdm(glob.glob("xacro/*.xacro"),
                               desc="Regenerating launch files",
+                              unit=" files",
                               leave=True):
             root = get_file_root(path)
             compile_xacro(path, os.path.join("launchers", root), DEVNULL)
