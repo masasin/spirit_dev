@@ -207,22 +207,34 @@ class Evaluators(object):
         return min(results, key=results.get)
 
     def spirit(self):
-        """
-        Not implemented yet.
-
-        """
         def eval_func(pose, frame):
-            return 0
+            coords, orientation = get_pose_components(pose)
+            current_state_vector = np.hstack((self.current_frame.coords_precise,
+                                              self.current_frame.orientation))
+            frame_state_vector = np.hstack((frame.coords_precise,
+                                            frame.orientation))
+
+            dx, dy, dz = coords - frame.coords_precise
+            beta = angle_between_quaternions(orientation, frame.orientation)
+            a_mag = norm(coords - frame.coords_precise)
+
+            centrality = np.arctan2(np.sqrt(dx**2 + dz**2), dy)
+
+            return (
+                self.coeff_centred * (centrality / (np.pi / 2)) ** 2
+                + self.coeff_direction * (beta / (np.pi / 2)) ** 2
+                + self.coeff_distance * ((a_mag - self.l_ref) / self.l_ref) ** 2
+                + self.coeff_similarity * (
+                    norm(frame_state_vector - current_state_vector)
+                    / norm(frame_state_vector)) ** 2
+            )
 
         if self.current_frame is None:
             return self.frames[0]
 
-        position, orientation = get_pose_components(self.pose)
-        nearest_ten = self.octree.get_nearest(position, k=10)
         results = {}
-        for location in nearest_ten:
-            for frame in location:
-                results[frame] = eval_func(self.pose, frame)
+        for frame in reversed(self.frames):
+            results[frame] = eval_func(self.pose, frame)
         return min(results, key=results.get)
 
     def __getattr__(self, name):

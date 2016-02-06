@@ -35,6 +35,7 @@ past_image:
     coeff_direction: 1
     coeff_distance: 4
     coeff_similarity: 1
+    l_ref: 1.5
 
 visualization:
   show: true
