@@ -16,13 +16,12 @@ import yaml
 
 import rospkg
 import rospy
-import tf2_ros
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 from ntree import Octree
-from helpers import get_pose_components, tf_from_pose
+from helpers import get_pose_components
 
 
 class Frame(object):
@@ -257,8 +256,6 @@ class Selector(object):
         The evaluation function to use.
     past_image_pub : rospy.Publisher
         The publisher for the past images.
-    tf_pub : tf2_ros.TransformBroadcaster
-        The publisher for TF.
 
     Raises
     ------
@@ -289,7 +286,6 @@ class Selector(object):
                                               queue_size=1)
         self.past_pose_pub = rospy.Publisher("/ardrone/past_pose", PoseStamped,
                                              queue_size=1)
-        self.tf_pub = tf2_ros.TransformBroadcaster()
 
     def image_callback(self, image):
         """
@@ -312,7 +308,7 @@ class Selector(object):
 
     def pose_callback(self, pose):
         """
-        Update tf and `pose`, and select the best past image.
+        Update `pose`, and select the best past image.
 
         Parameters
         ----------
@@ -322,7 +318,6 @@ class Selector(object):
         """
         rospy.logdebug("New pose")
         self.pose = pose
-        self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone"))
 
         best_frame = self.evaluate()
         if best_frame is not None:
