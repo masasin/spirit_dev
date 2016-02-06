@@ -22,6 +22,14 @@ past_image:
     delay: 2
   constant_distance:
     distance: 1.5
+  murata:
+    a1: 1
+    a2: 1
+    a3: 1
+    a4: 1
+    a5: 1
+    z_ref: 0.2
+    l_ref: 1.5
 
 visualization:
   show: true
