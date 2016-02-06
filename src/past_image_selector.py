@@ -172,30 +172,28 @@ class Evaluators(object):
                過去画像履歴を用いた移動マニピュレータの遠隔操作システム
 
         """
-        def eval_func(pose):
+        def eval_func(pose, frame):
             coords, orientation = get_pose_components(pose)
-            current_state_vector = np.hstack((coords, orientation))
-            test_state_vector = np.hstack(
-                (self.current_frame.coords_precise,
-                 self.current_frame.orientation))
-            change = current_state_vector - test_state_vector
+            current_state_vector = np.hstack((self.current_frame.coords_precise,
+                                              self.current_frame.orientation))
+            frame_state_vector = np.hstack((frame.coords_precise,
+                                            frame.orientation))
 
-            x, y, z = change[:3]
-
-            beta = angle_between_quaternions(orientation,
-                                             self.current_frame.orientation)
-            alpha = np.arctan(z, x)
+            dx, dy, dz = coords - frame.coords_precise
+            beta = angle_between_quaternions(orientation, frame.orientation)
+            alpha = np.arctan(dz, dx)
             fov_y = d2r(fov_diagonal2vertical(92))
 
-            a_mag = norm(coords - self.current_frame.coords_precise)
+            a_mag = norm(coords - frame.coords_precise)
             if a_mag < self.l_ref:
                 return float("inf")
 
-            return (self.a1 * ((z - self.z_ref) / self.z_ref) ** 2
+            return (self.a1 * ((dz - self.z_ref) / self.z_ref) ** 2
                     + self.a2 * (beta / (np.pi / 2)) ** 2
                     + self.a3 * (alpha / fov_y) ** 2
                     + self.a4 * ((a_mag - self.l_ref) / self.l_ref) ** 2
-                    + self.a5 * (change / test_state_vector) ** 2)
+                    + self.a5 * (norm(frame_state_vector - current_state_vector)
+                                 / norm(frame_state_vector)) ** 2)
 
         if self.current_frame is None:
             return self.frames[0]
@@ -203,7 +201,7 @@ class Evaluators(object):
         if self.frames:
             results = {}
             for frame in reversed(self.frames):
-                results[frame] = eval_func(self.pose)
+                results[frame] = eval_func(self.pose, frame)
             return min(results, key=results.get)
 
     def spirit(self):
