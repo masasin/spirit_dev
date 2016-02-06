@@ -21,7 +21,8 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 from ntree import Octree
-from helpers import get_pose_components
+from helpers import (get_pose_components, fov_diagonal2vertical,
+                     angle_between_quaternions, d2r)
 
 
 class Frame(object):
@@ -153,26 +154,18 @@ class Evaluators(object):
         The evaluation function is:
 
         .. math::
-            E = a_1 ((z_{camera} - z_{ref})/z_{ref})^2 +
-                a_2 (β_{xy}/(π / 2))^2 +
-                a_3 (α/φ_v)^2 +
-                a_4 ((|\mathbf{a}| - l)/l)^2 +
-                a_5 (|\mathbf{x}^v - \mathbf{x}^v_{curr}|/
+            E = a1 ((z_{camera} - z_{ref})/z_{ref})^2 +
+                a2 (β_{xy}/(π / 2))^2 +
+                a3 (α/φ_v)^2 +
+                a4 ((|\mathbf{a}| - l_ref)/l_ref)^2 +
+                a5 (|\mathbf{x}^v - \mathbf{x}^v_{curr}|/
                      |\mathbf{x}^v_{curr}|)^2
 
-        where :math:`a_1` through :math:`a_4` are coefficients, :math:`z` is the
+        where :math:`a1` through :math:`a5` are coefficients, :math:`z` is the
         difference in height of the drone, :math:`α` is the tilt angle,
         :math:`β` is the difference in yaw, :math:`\mathbf{a}` is the distance
-        vector, :math:`l` is the optimal distance, and :math:`φ_v` is the angle
-        of the vertical field of view.
-
-        :math:`φ_v` is calculated using :math:`φ_h`, the angle of the horizontal
-        field of view:
-
-        .. math::
-            φ_v = 2\mathrm{arctan}(γ\mathrm{tan}(φ_h/2))
-
-        where :math:`γ` is the aspect ratio of the display.
+        vector, :math:`l_ref` is the optimal distance, and :math:`φ_v` is the
+        angle of the vertical field of view.
 
         References
         ----------
@@ -182,30 +175,28 @@ class Evaluators(object):
         """
         def eval_func(pose):
             coords, orientation = get_pose_components(pose)
-            best_state_vector = np.hstack((coords, orientation))
-            old_state_vector = np.hstack(
-                (self._parent.current_frame.coords_precise,
-                 self._parent.current_frame.orientation))
-            change = best_state_vector - old_state_vector
+            current_state_vector = np.hstack((coords, orientation))
+            test_state_vector = np.hstack(
+                (self.current_frame.coords_precise,
+                 self.current_frame.orientation))
+            change = current_state_vector - test_state_vector
 
-            a1, a2, a3, a4, a5 = (1, 2, 3, 4, 5)
-            z_camera = change[2]
-            z_ref = 0.5
+            x, y, z = change[:3]
 
-            beta = 1
-            alpha = 1
-            fov_v = np.pi / 3
+            beta = angle_between_quaternions(orientation,
+                                             self.current_frame.orientation)
+            alpha = np.arctan(z, x)
+            fov_y = d2r(fov_diagonal2vertical(92))
 
-            a_mag = norm(coords - self._parent.current_frame.coords_precise)
-            l_ref = 1
+            a_mag = norm(coords - self.current_frame.coords_precise)
+            if a_mag < self.l_ref:
+                return float("inf")
 
-            score = (a1 * ((z_camera - z_ref) / z_ref) ** 2 +
-                     a2 * (beta / (np.pi / 2)) ** 2 +
-                     a3 * (alpha / fov_v) ** 2 +
-                     a4 * ((a_mag - l_ref) / l_ref) ** 2 +
-                     a5 * (change / old_state_vector) ** 2)
-
-            return score
+            return (self.a1 * ((z - self.z_ref) / self.z_ref) ** 2
+                    + self.a2 * (beta / (np.pi / 2)) ** 2
+                    + self.a3 * (alpha / fov_y) ** 2
+                    + self.a4 * ((a_mag - self.l_ref) / self.l_ref) ** 2
+                    + self.a5 * (change / test_state_vector) ** 2)
 
         if self._parent.current_frame is None:
             return self._parent.frames[0]
