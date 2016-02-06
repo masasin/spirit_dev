@@ -185,8 +185,8 @@ class Evaluators(object):
             fov_y = d2r(fov_diagonal2vertical(92))
 
             a_mag = norm(coords - frame.coords_precise)
-            if a_mag < self.l_ref:
-                return float("inf")
+            # if a_mag < self.l_ref:
+            #    return float("inf")
 
             return (self.coeff_height * ((dz - self.z_ref) / self.z_ref) ** 2
                     + self.coeff_direction * (beta / (np.pi / 2)) ** 2
@@ -316,7 +316,7 @@ class Selector(object):
         if self.can_make_frame:
             rospy.logdebug("Adding frames to octree and queue")
             frame = Frame(self.pose, self.image)
-            self.ntree.insert(frame)
+            # self.ntree.insert(frame)
             self.frames.append(frame)
             self.clear()
 
