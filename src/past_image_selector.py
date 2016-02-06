@@ -188,15 +188,15 @@ class Evaluators(object):
             # if a_mag < self.l_ref:
             #    return float("inf")
 
-            return (self.coeff_height * ((dz - self.z_ref) / self.z_ref) ** 2
-                    + self.coeff_direction * (beta / (np.pi / 2)) ** 2
-                    + self.coeff_tilt * (alpha / fov_y) ** 2
-                    + self.coeff_distance * ((a_mag - self.l_ref)
-                                             / self.l_ref) ** 2
-                    + self.coeff_similarity * (
-                        norm(frame_state_vector - current_state_vector)
-                        / norm(frame_state_vector)) ** 2
-                    )
+            return (
+                self.coeff_height * ((dz - self.z_ref) / self.z_ref) ** 2
+                + self.coeff_direction * (beta / (np.pi / 2)) ** 2
+                + self.coeff_tilt * (alpha / fov_y) ** 2
+                + self.coeff_distance * ((a_mag - self.l_ref) / self.l_ref) ** 2
+                + self.coeff_similarity * (
+                    norm(frame_state_vector - current_state_vector)
+                    / norm(frame_state_vector)) ** 2
+            )
 
         if self.current_frame is None:
             return self.frames[0]
