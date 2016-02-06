@@ -22,7 +22,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 from helpers import (get_pose_components, pose_from_components, quat2axis,
-                     normalize)
+                     normalize, fov_diagonal2vertical, fov_vertical2horizontal)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_matrix, new_state, Shape)
 
@@ -411,6 +411,7 @@ class RendererBase(TexturesBase):
             raise TypeError("Enter only one value for field of view size.")
 
         self.size = self.width, self.height = np.asarray(size)
+        self.aspect_ratio = self.width / self.height
         self.model = model
         self.distance = distance
 
@@ -421,10 +422,10 @@ class RendererBase(TexturesBase):
         if fov_vertical is not None:
             self.fov_y = fov_vertical
         elif fov_diagonal is not None:
-            self.fov_y = self._fov_diagonal2vertical(fov_diagonal)
+            self.fov_y = fov_diagonal2vertical(fov_diagonal, self.aspect_ratio)
         else:
             self.fov_y = 45
-        self.fov_x = self._fov_vertical_to_horizontal(self.fov_y)
+        self.fov_x = fov_vertical2horizontal(self.fov_y, self.aspect_ratio)
         self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
 
     def render(self, pose_cam, pose_drone):
@@ -614,43 +615,6 @@ class RendererBase(TexturesBase):
         centre_y = self._image_distance * dz / dy + self.height / 2
         return centre_x, centre_y
 
-    def _fov_diagonal2vertical(self, fov_diagonal):
-        """
-        Convert a diagonal field of view to vertical.
-
-        Parameters
-        ----------
-        fov_diagonal : float
-            The diagonal field of view.
-
-        Returns
-        -------
-        float
-            The vertical field of view.
-
-        """
-        aspect_ratio = self.width / self.height
-        ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
-        return 2*r2d(np.arctan(np.tan(d2r(fov_diagonal) / 2) / ratio_diagonal))
-
-    def _fov_vertical_to_horizontal(self, fov_vertical):
-        """
-        Convert a vertical field of view to horizontal.
-
-        Parameters
-        ----------
-        fov_vertical : float
-            The vertical field of view.
-
-        Returns
-        -------
-        float
-            The horizontal field of view.
-
-        """
-        aspect_ratio = self.width / self.height
-        return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
-
 
 class Screen(RendererBase):
     """
@@ -781,7 +745,7 @@ class Screen(RendererBase):
             is 100 m.
 
         """
-        glu.gluPerspective(self.fov_y, self.width / self.height, near, far)
+        glu.gluPerspective(self.fov_y, self.aspect_ratio, near, far)
 
     @staticmethod
     def clear():

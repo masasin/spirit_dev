@@ -3,10 +3,16 @@
 Helper functions for vector, pose, and tf shenanigans.
 
 """
+from __future__ import division
+
 import numpy as np
 
 import rospy
 from geometry_msgs.msg import PoseStamped, TransformStamped
+
+
+d2r = np.deg2rad
+r2d = np.rad2deg
 
 
 def normalize(v):
@@ -181,7 +187,7 @@ def quat2axis(quaternion):
 
     """
     x, y, z, w = normalize(quaternion)
-    angle = np.rad2deg(2 * np.arccos(w))
+    angle = r2d(2 * np.arccos(w))
 
     if angle == 0:
         axis_x = 1
@@ -238,3 +244,44 @@ def rotation_matrix(quaternion):
     return np.array([[1 - (yy + zz), xy - wz, wy],
                      [wz, 1 - (xx + zz), yz - wx],
                      [xz - wy, yz + wx, 1 - (xx + yy)]])
+
+
+def fov_diagonal2vertical(fov_diagonal, aspect_ratio=4 / 3):
+    """
+    Convert a diagonal field of view to vertical.
+
+    Parameters
+    ----------
+    fov_diagonal : float
+        The diagonal field of view.
+    aspect_ratio: Optional[float]
+        The aspect ratio of the display. Default is 4:3.
+
+    Returns
+    -------
+    float
+        The vertical field of view.
+
+    """
+    ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
+    return 2 * r2d(np.arctan(np.tan(d2r(fov_diagonal) / 2) / ratio_diagonal))
+
+
+def fov_vertical2horizontal(fov_vertical, aspect_ratio=4 / 3):
+    """
+    Convert a vertical field of view to horizontal.
+
+    Parameters
+    ----------
+    fov_vertical : float
+        The vertical field of view.
+    aspect_ratio: Optional[float]
+        The aspect ratio of the display. Default is 4:3.
+
+    Returns
+    -------
+    float
+        The horizontal field of view.
+
+    """
+    return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
