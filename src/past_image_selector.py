@@ -188,21 +188,23 @@ class Evaluators(object):
             if a_mag < self.l_ref:
                 return float("inf")
 
-            return (self.a1 * ((dz - self.z_ref) / self.z_ref) ** 2
-                    + self.a2 * (beta / (np.pi / 2)) ** 2
-                    + self.a3 * (alpha / fov_y) ** 2
-                    + self.a4 * ((a_mag - self.l_ref) / self.l_ref) ** 2
-                    + self.a5 * (norm(frame_state_vector - current_state_vector)
-                                 / norm(frame_state_vector)) ** 2)
+            return (self.coeff_height * ((dz - self.z_ref) / self.z_ref) ** 2
+                    + self.coeff_direction * (beta / (np.pi / 2)) ** 2
+                    + self.coeff_tilt * (alpha / fov_y) ** 2
+                    + self.coeff_distance * ((a_mag - self.l_ref)
+                                             / self.l_ref) ** 2
+                    + self.coeff_similarity * (
+                        norm(frame_state_vector - current_state_vector)
+                        / norm(frame_state_vector)) ** 2
+                    )
 
         if self.current_frame is None:
             return self.frames[0]
 
-        if self.frames:
-            results = {}
-            for frame in reversed(self.frames):
-                results[frame] = eval_func(self.pose, frame)
-            return min(results, key=results.get)
+        results = {}
+        for frame in reversed(self.frames):
+            results[frame] = eval_func(self.pose, frame)
+        return min(results, key=results.get)
 
     def spirit(self):
         """

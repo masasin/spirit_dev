@@ -17,19 +17,24 @@ pose:
     use_odometry: false  # Default is false.
 
 past_image:
-  eval_method: constant_distance
+  eval_method: murata
   constant_time_delay:
     delay: 2
   constant_distance:
     distance: 1.5
   murata:
-    a1: 1
-    a2: 1
-    a3: 1
-    a4: 1
-    a5: 1
-    z_ref: 0.2
+    coeff_height: 2
+    coeff_direction: 1
+    coeff_elevation: 1
+    coeff_distance: 4
+    coeff_similarity: 1
+    z_ref: 0.3
     l_ref: 1.5
+  spirit:
+    coeff_centred: 1
+    coeff_direction: 1
+    coeff_distance: 4
+    coeff_similarity: 1
 
 visualization:
   show: true
