@@ -2,9 +2,9 @@ camera:
   mock_camera: false  # Default is false.
   show: true  # Default is false.
   streams:
-    realtime: false
+    realtime: true
     slow: true
-    past_image: false
+    past_image: true
   real:
     drone_ip: 192.168.1.1  # Default is 192.168.1.1.
     use_tum: false  # Default is false.
@@ -17,11 +17,11 @@ pose:
     use_odometry: false  # Default is false.
 
 past_image:
-  eval_method: constant_time_delay
+  eval_method: constant_distance
   constant_time_delay:
-    delay: 5
+    delay: 2
   constant_distance:
-    distance: 10
+    distance: 1.5
 
 visualization:
   show: true
