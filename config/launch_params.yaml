@@ -4,7 +4,7 @@ camera:
   streams:
     realtime: true
     slow: true
-    past_image: true
+    past_image: false
   real:
     drone_ip: 192.168.1.1  # Default is 192.168.1.1.
     use_tum: false  # Default is false.
@@ -17,7 +17,7 @@ pose:
     use_odometry: false  # Default is false.
 
 past_image:
-  eval_method: murata
+  eval_method: spirit
   constant_time_delay:
     delay: 2
   constant_distance:
@@ -27,14 +27,14 @@ past_image:
     coeff_direction: 1
     coeff_elevation: 1
     coeff_distance: 4
-    coeff_similarity: 1
+    coeff_similarity: 0
     z_ref: 0.3
     l_ref: 1.5
   spirit:
-    coeff_centred: 1
+    coeff_centred: 2
     coeff_direction: 1
     coeff_distance: 4
-    coeff_similarity: 1
+    coeff_similarity: 0
     l_ref: 1.5
 
 visualization:
