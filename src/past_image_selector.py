@@ -199,14 +199,7 @@ class Evaluators(object):
                     / norm(frame_state_vector)) ** 2
             )
 
-        if self.frames:
-            if self.current_frame is None:
-                return self.frames[0]
-
-            results = {}
-            for frame in reversed(self.frames):
-                results[frame] = eval_func(self.pose, frame)
-            return min(results, key=results.get)
+        return self._get_best_frame(eval_func)
 
     def spirit(self):
         def eval_func(pose, frame):
@@ -240,6 +233,9 @@ class Evaluators(object):
                     + self.coeff_similarity * similarity
             )
 
+        return self._get_best_frame(eval_func)
+
+    def _get_best_frame(self, eval_func):
         if self.frames:
             if self.current_frame is None:
                 return self.frames[0]
