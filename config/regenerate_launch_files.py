@@ -77,7 +77,6 @@ def update_past_image_generator(keys, path="xacro/past_images.launch.xacro"):
     for node in tree.findall("node[@name='past_image_selector']"):
         remove_old_elements(node)
         add_new_keys(node, keys)
-    add_message(tree)
     tree.write(path, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
 
