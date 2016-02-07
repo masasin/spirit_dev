@@ -213,8 +213,8 @@ class Evaluators(object):
             beta = angle_between_quaternions(orientation, frame.orientation)
             a_mag = norm(coords - frame.coords_precise)
 
-            centrality = (np.arctan2(np.sqrt(dx**2 + dz**2), dy) / (np.pi / 3)) ** 2
-            centrality = ((dx / dy)**2 + (dz / dy)**2)
+            centrality = (np.arctan2(np.sqrt(dx**2 + dz**2), dy) / (np.pi / 2)) ** 2
+            # centrality = ((dx / dy)**2 + (dz / dy)**2)
             direction = (beta / (np.pi / 2)) ** 2
             distance = ((a_mag - self.l_ref) / self.l_ref) ** 2
             similarity = (norm(frame_state_vector - current_state_vector)
