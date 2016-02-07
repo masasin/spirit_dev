@@ -9,6 +9,7 @@ Selects the best image for SPIRIT.
 from __future__ import division
 from time import localtime, strftime
 import os
+import time
 
 import numpy as np
 from numpy.linalg import norm
@@ -118,8 +119,8 @@ class Evaluators(object):
         If the delay has not yet passed, return the first frame.
 
         """
-        if len(self.frames):
-            optimum_timestamp = (self.pose.header.stamp.to_sec() - self.delay)
+        if self.frames:
+            optimum_timestamp = self.pose.header.stamp.to_sec() - self.delay
 
             for frame in reversed(self.frames):
                 if frame.stamp.to_sec() < optimum_timestamp:
@@ -133,7 +134,7 @@ class Evaluators(object):
         If the distance has not yet been crossed, return the last frame.
 
         """
-        if len(self.frames):
+        if self.frames:
             optimum_distance = err_min = self.distance
             position, orientation = get_pose_components(self.pose)
             for frame in reversed(self.frames):
@@ -191,20 +192,21 @@ class Evaluators(object):
             return (
                 self.coeff_height * ((dz - self.z_ref) / self.z_ref) ** 2
                 + self.coeff_direction * (beta / (np.pi / 2)) ** 2
-                + self.coeff_tilt * (alpha / fov_y) ** 2
+                + self.coeff_elevation * (alpha / fov_y) ** 2
                 + self.coeff_distance * ((a_mag - self.l_ref) / self.l_ref) ** 2
                 + self.coeff_similarity * (
                     norm(frame_state_vector - current_state_vector)
                     / norm(frame_state_vector)) ** 2
             )
 
-        if self.current_frame is None:
-            return self.frames[0]
+        if self.frames:
+            if self.current_frame is None:
+                return self.frames[0]
 
-        results = {}
-        for frame in reversed(self.frames):
-            results[frame] = eval_func(self.pose, frame)
-        return min(results, key=results.get)
+            results = {}
+            for frame in reversed(self.frames):
+                results[frame] = eval_func(self.pose, frame)
+            return min(results, key=results.get)
 
     def spirit(self):
         def eval_func(pose, frame):
@@ -218,24 +220,34 @@ class Evaluators(object):
             beta = angle_between_quaternions(orientation, frame.orientation)
             a_mag = norm(coords - frame.coords_precise)
 
-            centrality = np.arctan2(np.sqrt(dx**2 + dz**2), dy)
+            centrality = (np.arctan2(np.sqrt(dx**2 + dz**2), dy) / (np.pi / 3)) ** 2
+            centrality = ((dx / dy)**2 + (dz / dy)**2)
+            direction = (beta / (np.pi / 2)) ** 2
+            distance = ((a_mag - self.l_ref) / self.l_ref) ** 2
+            similarity = (norm(frame_state_vector - current_state_vector)
+                          / norm(frame_state_vector)) ** 2
 
-            return (
-                self.coeff_centred * (centrality / (np.pi / 2)) ** 2
-                + self.coeff_direction * (beta / (np.pi / 2)) ** 2
-                + self.coeff_distance * ((a_mag - self.l_ref) / self.l_ref) ** 2
-                + self.coeff_similarity * (
-                    norm(frame_state_vector - current_state_vector)
-                    / norm(frame_state_vector)) ** 2
+            # Dropping criteria
+            # if a_mag < self.l_ref:
+            #    return float("inf")
+            # if centrality > np.pi / 3:
+            #     print("dropping {}".format(np.rad2deg(centrality)))
+            #     return float("inf")
+
+            return (self.coeff_centred * centrality
+                    + self.coeff_direction * direction
+                    + self.coeff_distance * distance
+                    + self.coeff_similarity * similarity
             )
 
-        if self.current_frame is None:
-            return self.frames[0]
+        if self.frames:
+            if self.current_frame is None:
+                return self.frames[0]
 
-        results = {}
-        for frame in reversed(self.frames):
-            results[frame] = eval_func(self.pose, frame)
-        return min(results, key=results.get)
+            results = {}
+            for frame in reversed(self.frames):
+                results[frame] = eval_func(self.pose, frame)
+            return min(results, key=results.get)
 
     def __getattr__(self, name):
         """
@@ -258,8 +270,11 @@ class Evaluators(object):
             If the ros parameter has not been defined.
 
         """
-        self.__setattr__(name, self._parent.__getattribute__(name))
-        return self.__getattribute__(name)
+        if name in self._parent._method_params:
+            self.__setattr__(name, self._parent.__getattr__(name))
+            return self.__getattribute__(name)
+        else:
+            return self._parent.__getattribute__(name)
 
 
 class Selector(object):
@@ -407,7 +422,7 @@ class Selector(object):
         """
         if name in self._method_params:
             self.__setattr__(name, rospy.get_param("~{n}".format(n=name)))
-            return self.__getattribute__(name)
+        return self.__getattribute__(name)
 
 
 def main():
