@@ -3,6 +3,7 @@
     <include file="$(find spirit)/launch/launchers/camera.launch" />
     <include file="$(find spirit)/launch/launchers/pose.launch" />
     <include file="$(find spirit)/launch/launchers/past_images.launch" />
+    <include file="$(find spirit)/launch/launchers/control.launch" />
     <include file="$(find spirit)/launch/launchers/display.launch" />
     <include file="$(find spirit)/launch/launchers/visualization.launch" />
 </launch>

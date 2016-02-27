@@ -30,17 +30,6 @@
         </node>
     </xacro:macro>
 
-    <xacro:macro name="tum_gui" >
-        <node name="drone_autopilot"
-              pkg="tum_ardrone"
-              type="drone_autopilot"
-              output="screen" />
-
-        <node name="drone_gui"
-              pkg="tum_ardrone"
-              type="drone_gui"
-              output="screen" />
-    </xacro:macro>
 
     <xacro:if value="${params['camera']['mock_camera']}">
         <xacro:mock_camera />
@@ -48,9 +37,6 @@
 
     <xacro:unless value="${params['camera']['mock_camera']}">
         <xacro:ardrone_camera />
-        <xacro:if value="${params['camera']['real']['use_tum']}">
-            <xacro:tum_gui />
-        </xacro:if>
     </xacro:unless>
 
     <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen">

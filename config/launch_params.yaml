@@ -7,8 +7,11 @@ camera:
     past_image: false
   real:
     drone_ip: 192.168.1.1  # Default is 192.168.1.1.
-    use_tum: false  # Default is false.
   slowdown: 15  # times. Default is 15.
+
+control:
+  use_joystick: true  # Default is true.
+  js_number: 1  # Default is 0.
 
 pose:
   mock_pose: false  # Default is false.

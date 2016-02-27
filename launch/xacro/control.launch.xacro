@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}"/>
+
+    <xacro:macro name="joystick_gui" >
+    <rosparam param="joy_node/dev">
+        /dev/input/js${params['control']['js_number']}
+    </rosparam>
+        <node name="drone_autopilot"
+              pkg="tum_ardrone"
+              type="drone_autopilot"
+              output="screen" />
+
+        <node name="drone_gui"
+              pkg="tum_ardrone"
+              type="drone_gui"
+              output="screen" />
+
+    <node name="joy_node"
+          pkg="joy"
+          type="joy_node"
+          output="screen" />
+    </xacro:macro>
+
+    <xacro:if value="${params['control']['use_joystick']}">
+      <xacro:joystick_gui />
+    </xacro:if>
+</launch>
