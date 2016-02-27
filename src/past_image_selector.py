@@ -220,13 +220,6 @@ class Evaluators(object):
             similarity = (norm(frame_state_vector - current_state_vector)
                           / norm(frame_state_vector)) ** 2
 
-            # Dropping criteria
-            # if a_mag < self.l_ref:
-            #    return float("inf")
-            # if centrality > np.pi / 3:
-            #     print("dropping {}".format(np.rad2deg(centrality)))
-            #     return float("inf")
-
             return (self.coeff_centred * centrality
                     + self.coeff_direction * direction
                     + self.coeff_distance * distance
