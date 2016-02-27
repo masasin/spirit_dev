@@ -333,7 +333,7 @@ class Selector(object):
         if self.can_make_frame:
             rospy.logdebug("Adding frames to octree and queue")
             frame = Frame(self.pose, self.image)
-            # self.ntree.insert(frame)
+            self.ntree.insert(frame)
             self.frames.append(frame)
             self.clear()
 
