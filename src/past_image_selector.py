@@ -334,6 +334,7 @@ class Selector(object):
             An image message.
 
         """
+        # TODO: Make sure we are not using old poses.
         rospy.logdebug("New image")
         self.image = image
         if self.can_make_frame:
