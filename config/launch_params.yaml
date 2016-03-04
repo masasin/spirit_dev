@@ -1,3 +1,5 @@
+package_name: spirit
+
 camera:
   mock_camera: false  # Default is false.
   show: true  # Default is false.

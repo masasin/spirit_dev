@@ -10,20 +10,20 @@
               respawn="false"
               launch-prefix=""
               required="true" >
-            <rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
+	  <rosparam file="../../config/mocap.yaml" command="load" />
         </node>
     </xacro:macro>
 
     <xacro:macro name="odometry">
         <node name="pose_node"
-              pkg="spirit"
+	      pkg="${params['package_name']}"
               type="pose_from_odometry.py"
               output="screen" />
     </xacro:macro>
 
     <xacro:macro name="mock_pose">
         <node name="pose_node"
-              pkg="spirit"
+	      pkg="${params['package_name']}"
               type="mock_pose.py"
               output="screen" />
     </xacro:macro>
