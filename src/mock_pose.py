@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# (C) 2015  Jean Nassar
+# (C) 2016  Jean Nassar
 # Released under BSD version 4
 """
 Publishes random similar poses to /ardrone/pose.

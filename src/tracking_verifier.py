@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# (C) 2015  Jean Nassar
+# (C) 2016  Jean Nassar
 # Released under BSD version 4
 """
 Publish the tracking status of the drone.
