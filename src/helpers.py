@@ -4,15 +4,18 @@ Helper functions for vector, pose, and tf shenanigans.
 
 """
 from __future__ import division
+from collections import namedtuple
 
 import numpy as np
 
 import rospy
 from geometry_msgs.msg import PoseStamped, TransformStamped
+import tf
 
 
 d2r = np.deg2rad
 r2d = np.rad2deg
+Euler = namedtuple("Euler", ("roll", "pitch", "yaw"))
 
 
 def normalize(v):
@@ -199,6 +202,24 @@ def quat2axis(quaternion):
         axis_y = y / np.sqrt(1 - w**2)
         axis_z = z / np.sqrt(1 - w**2)
     return angle, axis_x, axis_y, axis_z
+
+
+def quat2euler(quaternion):
+    """
+    Change a quaternion to an axis-angle representation.
+
+    Parameters
+    ----------
+    quaternion : np.ndarray
+        A quaternion in the order of x, y, z, w.
+
+    Returns
+    -------
+    Euler
+        The euler angle, as roll, pitch, and yaw.
+
+    """
+    return Euler(tf.transformations.euler_from_quaternion(quaternion))
 
 
 def angle_between_quaternions(a, b):
