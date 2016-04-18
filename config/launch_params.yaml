@@ -20,6 +20,7 @@ pose:
     use_odometry: false  # Default is false.
 
 past_image:
+  image_queue_length: 60  # Use None for infinite.
   eval_method: constant_time_delay
   constant_time_delay:
     delay: 2
