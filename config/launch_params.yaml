@@ -20,7 +20,7 @@ pose:
     use_odometry: false  # Default is false.
 
 past_image:
-  eval_method: spirit
+  eval_method: constant_time_delay
   constant_time_delay:
     delay: 2
   constant_distance:
@@ -34,9 +34,9 @@ past_image:
     z_ref: 0.3
     l_ref: 1.5
   spirit:
-    coeff_centred: 2
-    coeff_direction: 1
-    coeff_distance: 4
+    coeff_centred: 4
+    coeff_direction: 2
+    coeff_distance: 1
     coeff_similarity: 0
     l_ref: 1.5
 
