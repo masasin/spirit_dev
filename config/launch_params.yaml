@@ -10,11 +10,11 @@ camera:
   slowdown: 15  # times. Default is 15.
 
 control:
-  use_joystick: true  # Default is true.
+  use_joystick: false  # Default is true.
   js_number: 1  # Default is 0.
 
 pose:
-  mock_pose: true  # Default is false.
+  mock_pose: false  # Default is false.
   real:
     use_mocap: true  # Default is true.
     use_odometry: false  # Default is false.
@@ -26,7 +26,7 @@ past_image:
   constant_distance:
     distance: 1.5
   constant_time_delay:
-    delay: 2
+    delay: 200
   murata:
     coeff_height: 2
     coeff_direction: 1
