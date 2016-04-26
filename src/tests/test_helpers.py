@@ -1,7 +1,6 @@
 from __future__ import division
 import time
 
-import mock
 import numpy as np
 
 from geometry_msgs.msg import Point, Quaternion, PoseStamped, TransformStamped
@@ -63,18 +62,15 @@ class TestPoseAndTf(object):
         self.tf.transform.rotation = Quaternion(*self.orientation)
 
     def test_pose_from_tf(self):
-        with mock.patch("rospy.Time.now"):
-            assert pose_from_tf(self.tf).pose == self.pose.pose
+        assert pose_from_tf(self.tf).pose == self.pose.pose
 
     def test_tf_from_pose(self):
-        with mock.patch("rospy.Time.now"):
-            assert tf_from_pose(self.pose).transform == self.tf.transform
+        assert tf_from_pose(self.pose).transform == self.tf.transform
 
     def test_invariance(self):
-        with mock.patch("rospy.Time.now"):
-            assert pose_from_tf(tf_from_pose(self.pose)).pose == self.pose.pose
-            assert (tf_from_pose(pose_from_tf(self.tf)).transform
-                    == self.tf.transform)
+        assert pose_from_tf(tf_from_pose(self.pose)).pose == self.pose.pose
+        assert (tf_from_pose(pose_from_tf(self.tf)).transform
+                == self.tf.transform)
 
 
 class TestAngle(object):

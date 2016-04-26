@@ -146,7 +146,10 @@ def tf_from_pose(pose, parent="world", child="robot"):
 
     """
     transform = TransformStamped()
-    transform.header.stamp = rospy.Time.now()
+    try:
+        transform.header.stamp = rospy.Time.now()
+    except rospy.exceptions.ROSInitException:
+        pass
     transform.header.frame_id = parent
     transform.child_frame_id = child
 
