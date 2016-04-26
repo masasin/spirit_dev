@@ -7,8 +7,9 @@ Selects the best image for SPIRIT.
 
 """
 from __future__ import division
-from time import localtime, strftime
+from collections import deque
 import os
+from time import localtime, strftime
 
 import numpy as np
 from numpy.linalg import norm
