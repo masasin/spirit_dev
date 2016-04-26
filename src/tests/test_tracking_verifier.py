@@ -30,12 +30,16 @@ class TestVerifier(object):
     def setup(self):
         self.timeout = 5e-4
         tracking_verifier.TIMEOUT = self.timeout
-        self.tracking_verifier = tracking_verifier.Verifier()
+        with mock.patch("rospy.Time.now",
+                        return_value=rospy.rostime.Time(time.time())):
+            self.tracking_verifier = tracking_verifier.Verifier()
 
     def create_pose(self):
-        pose = PoseStamped()
-        pose.header.stamp = rospy.Time.now()
-        return pose
+        with mock.patch("rospy.Time.now",
+                        return_value=rospy.rostime.Time(time.time())):
+            pose = PoseStamped()
+            pose.header.stamp = rospy.Time.now()
+            return pose
 
     def make_steady_state(self):
         pose = self.create_pose()
