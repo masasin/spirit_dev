@@ -4,21 +4,19 @@ Helper functions for vector, pose, and tf shenanigans.
 
 """
 from __future__ import division
-from collections import namedtuple
 
 import numpy as np
 
 import rospy
-from geometry_msgs.msg import PoseStamped, TransformStamped
+from geometry_msgs.msg import Point, Quaternion, PoseStamped, TransformStamped
 import tf
 
 
 d2r = np.deg2rad
 r2d = np.rad2deg
-Euler = namedtuple("Euler", ("roll", "pitch", "yaw"))
 
 
-def normalize(v):
+def unit_vector(v):
     """
     Change the length of the vector to unity in the same direction.
 
@@ -30,11 +28,14 @@ def normalize(v):
     Returns
     -------
     np.ndarray
-        The normalized vector.
+        The normalized vector, or the original vector if it has a length of 0.
 
     """
     norm = np.linalg.norm(v)
-    return (v / norm) if norm else v
+    if norm:
+        return v / norm
+    else:
+        return np.asarray(v)
 
 
 def get_pose_components(pose):
@@ -43,7 +44,7 @@ def get_pose_components(pose):
 
     Parameters
     ----------
-    pose : Pose | PoseWithCovariance | PoseStamped | PoseWithCovarianceStamped
+    pose : Pose(WithCovariance)?(Stamped)?
         The pose to be decomposed.
 
     Returns
@@ -92,15 +93,8 @@ def pose_from_components(coords, orientation, sequence=0):
     except rospy.exceptions.ROSInitException:
         pass
 
-    pose.pose.position.x = coords[0]
-    pose.pose.position.y = coords[1]
-    pose.pose.position.z = coords[2]
-
-    pose.pose.orientation.x = orientation[0]
-    pose.pose.orientation.y = orientation[1]
-    pose.pose.orientation.z = orientation[2]
-    pose.pose.orientation.w = orientation[3]
-
+    pose.pose.position = Point(*coords)
+    pose.pose.orientation = Quaternion(*orientation)
     return pose
 
 
@@ -126,14 +120,8 @@ def pose_from_tf(transform):
         pass
     pose.header.frame_id = transform.header.frame_id
 
-    pose.pose.position.x = transform.transform.translation.x
-    pose.pose.position.y = transform.transform.translation.y
-    pose.pose.position.z = transform.transform.translation.z
-
-    pose.pose.orientation.x = transform.transform.rotation.x
-    pose.pose.orientation.y = transform.transform.rotation.y
-    pose.pose.orientation.z = transform.transform.rotation.z
-    pose.pose.orientation.w = transform.transform.rotation.w
+    pose.pose.position = transform.transform.translation
+    pose.pose.orientation = transform.transform.rotation
 
     return pose
 
@@ -162,14 +150,8 @@ def tf_from_pose(pose, parent="world", child="robot"):
     transform.header.frame_id = parent
     transform.child_frame_id = child
 
-    transform.transform.translation.x = pose.pose.position.x
-    transform.transform.translation.y = pose.pose.position.y
-    transform.transform.translation.z = pose.pose.position.z
-
-    transform.transform.rotation.x = pose.pose.orientation.x
-    transform.transform.rotation.y = pose.pose.orientation.y
-    transform.transform.rotation.z = pose.pose.orientation.z
-    transform.transform.rotation.w = pose.pose.orientation.w
+    transform.transform.translation = pose.pose.position
+    transform.transform.rotation = pose.pose.orientation
 
     return transform
 
@@ -183,13 +165,18 @@ def quat2axis(quaternion):
     quaternion : np.ndarray
         A quaternion in the order of x, y, z, w.
 
+    Notes
+    -----
+    θ is in degrees rather than radians, for ease of integration in OpenGL.
+
     Returns
     -------
     tuple
-        The angle in axis-angle representation, with the order of θ, x, y, z
+        The angle in axis-angle representation, with the order of θ, x, y, z. θ
+        is in degrees.
 
     """
-    x, y, z, w = normalize(quaternion)
+    x, y, z, w = unit_vector(quaternion)
     angle = r2d(2 * np.arccos(w))
 
     if angle == 0:
@@ -201,12 +188,13 @@ def quat2axis(quaternion):
         axis_x = x / np.sqrt(1 - w**2)
         axis_y = y / np.sqrt(1 - w**2)
         axis_z = z / np.sqrt(1 - w**2)
+
     return angle, axis_x, axis_y, axis_z
 
 
 def quat2euler(quaternion):
     """
-    Change a quaternion to an axis-angle representation.
+    Change a quaternion to an Euler angle representation.
 
     Parameters
     ----------
@@ -215,11 +203,45 @@ def quat2euler(quaternion):
 
     Returns
     -------
-    Euler
-        The euler angle, as roll, pitch, and yaw.
+    np.ndarray
+        The Euler angle, in the order of roll, pitch, yaw.
 
     """
-    return Euler(tf.transformations.euler_from_quaternion(quaternion))
+    return tf.transformations.euler_from_quaternion(quaternion)
+
+
+def angle_between(a, b):
+    """
+    Find the angle between two vectors.
+
+    Parameters
+    ----------
+    a : Sequence[float]
+        A vector of length n.
+    b : Sequence[float]
+        A vector of length n.
+
+    Returns
+    -------
+    float
+        The angle between the quaternions, in radians.
+
+    Raises
+    ------
+    ValueError
+        If the lengths of the vectors are different.
+
+    Examples
+    --------
+    >>> angle_between([1, 0, 0], [0, 1, 0])
+    1.5707963267948966
+    >>> angle_between([1, 0, 0], [1, 0, 0])
+    0.0
+    >>> angle_between([1, 0, 0], [-1, 0, 0])
+    3.1415926535897931
+
+    """
+    return np.arccos(np.clip(np.dot(unit_vector(a), unit_vector(b)), -1, 1))
 
 
 def angle_between_quaternions(a, b):
@@ -244,13 +266,13 @@ def angle_between_quaternions(a, b):
 
     Examples
     --------
-    >>> np.rad2deg(angle_between_quaternions([0, 0, 0, 1], [0, 0, 0, 1]))
+    >>> angle_between_quaternions([0, 0, 0, 1], [0, 0, 0, 1])
     0.0
-    >>> np.rad2deg(angle_between_quaternions([0, 0, 0, 1], [0, -1, 0, 1]))
-    90.0
+    >>> angle_between_quaternions([0, 0, 0, 1], [0, -1, 0, 1])
+    1.5707963267948968
 
     """
-    return 2 * np.arccos(np.dot(normalize(a), normalize(b)))
+    return 2 * angle_between(a, b)
 
 
 def rotation_matrix(quaternion):

@@ -1,3 +1,7 @@
+from __future__ import division
+import time
+
+import mock
 import numpy as np
 
 from geometry_msgs.msg import Point, Quaternion, PoseStamped, TransformStamped
@@ -28,7 +32,9 @@ class TestPoseAndComponents(object):
         self.pose.pose.orientation = Quaternion(*self.orientation)
 
     def test_get_pose_components(self):
-        assert (get_pose_components(self.pose) == self.components).all()
+        assert all([(i == j).all()
+                    for i, j in zip(get_pose_components(self.pose),
+                                    self.components)])
 
     def test_pose_from_components(self):
         assert pose_from_components(*self.components) == self.pose
@@ -36,8 +42,11 @@ class TestPoseAndComponents(object):
     def test_invariance(self):
         assert (pose_from_components(*get_pose_components(self.pose))
                 == self.pose)
-        assert (get_pose_components(pose_from_components(*self.components))
-                == self.components).all()
+        assert all([(i == j).all()
+                    for i, j in zip(
+                        get_pose_components(
+                            pose_from_components(*self.components)),
+                        self.components)])
 
 
 class TestPoseAndTf(object):
@@ -54,14 +63,18 @@ class TestPoseAndTf(object):
         self.tf.transform.rotation = Quaternion(*self.orientation)
 
     def test_pose_from_tf(self):
-        assert pose_from_tf(self.tf) == self.pose
+        with mock.patch("rospy.Time.now"):
+            assert pose_from_tf(self.tf).pose == self.pose.pose
 
     def test_tf_from_pose(self):
-        assert tf_from_pose(self.pose) == self.tf
+        with mock.patch("rospy.Time.now"):
+            assert tf_from_pose(self.pose).transform == self.tf.transform
 
     def test_invariance(self):
-        assert pose_from_tf(tf_from_pose(self.pose)) == self.pose
-        assert tf_from_pose(pose_from_tf(self.tf)) == self.tf
+        with mock.patch("rospy.Time.now"):
+            assert pose_from_tf(tf_from_pose(self.pose)).pose == self.pose.pose
+            assert (tf_from_pose(pose_from_tf(self.tf)).transform
+                    == self.tf.transform)
 
 
 class TestAngle(object):
@@ -70,37 +83,37 @@ class TestAngle(object):
         assert angle_between([1, 0, 0], [1, 0, 0]) == 0
         assert angle_between([1, 0, 0], [-1, 0, 0]) == np.pi
         assert angle_between([0, 0, 0, 1], [0, 0, 0, 1]) == 0
-        assert angle_between([0, 0, 0, 1], [0, -1, 0, 1]) == np.pi / 4
+        assert np.isclose(angle_between([0, 0, 0, 1], [0, -1, 0, 1]), np.pi / 4)
 
     def test_angle_between_quaternions(self):
         assert angle_between_quaternions([0, 0, 0, 1], [0, 0, 0, 1]) == 0
-        assert angle_between_quaternions([0, 0, 0, 1],
-                                         [0, -1, 0, 1]) == np.pi / 2
+        assert np.isclose(angle_between_quaternions([0, 0, 0, 1], [0, -1, 0, 1]),
+                          np.pi / 2)
 
 
 class TestFieldOfView(object):
     def test_fov_diagonal_to_vertical(self):
-        assert np.isclose(fov_diagonal2vertical(73, 16 / 9), 40)
-        assert np.isclose(fov_diagonal2vertical(83, 16 / 9), 47)
-        assert np.isclose(fov_diagonal2vertical(90, 16 / 9), 52)
-        assert np.isclose(fov_diagonal2vertical(98, 16 / 9), 59)
-        assert np.isclose(fov_diagonal2vertical(113, 16 / 9), 73)
+        assert np.isclose(fov_diagonal2vertical(73, 16 / 9), 40, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(83, 16 / 9), 47, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(90, 16 / 9), 52, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(98, 16 / 9), 59, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(113, 16 / 9), 73, rtol=0.1)
 
-        assert np.isclose(fov_diagonal2vertical(69, 16 / 10), 40)
-        assert np.isclose(fov_diagonal2vertical(84, 16 / 10), 51)
-        assert np.isclose(fov_diagonal2vertical(90, 16 / 10), 56)
-        assert np.isclose(fov_diagonal2vertical(99, 16 / 10), 64)
-        assert np.isclose(fov_diagonal2vertical(109, 16 / 10), 73)
+        assert np.isclose(fov_diagonal2vertical(69, 16 / 10), 40, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(84, 16 / 10), 51, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(90, 16 / 10), 56, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(99, 16 / 10), 64, rtol=0.1)
+        assert np.isclose(fov_diagonal2vertical(109, 16 / 10), 73, rtol=0.1)
 
     def test_fov_vertical_to_horizontal(self):
-        assert np.isclose(fov_vertical2horizontal(40, 16 / 9), 66)
-        assert np.isclose(fov_vertical2horizontal(47, 16 / 9), 75)
-        assert np.isclose(fov_vertical2horizontal(52, 16 / 9), 82)
-        assert np.isclose(fov_vertical2horizontal(59, 16 / 9), 90)
-        assert np.isclose(fov_vertical2horizontal(73, 16 / 9), 106)
+        assert np.isclose(fov_vertical2horizontal(40, 16 / 9), 66, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(47, 16 / 9), 75, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(52, 16 / 9), 82, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(59, 16 / 9), 90, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(73, 16 / 9), 106, rtol=0.1)
 
-        assert np.isclose(fov_vertical2horizontal(40, 16 / 10), 60)
-        assert np.isclose(fov_vertical2horizontal(51, 16 / 10), 75)
-        assert np.isclose(fov_vertical2horizontal(56, 16 / 10), 81)
-        assert np.isclose(fov_vertical2horizontal(64, 16 / 10), 90)
-        assert np.isclose(fov_vertical2horizontal(73, 16 / 10), 100)
+        assert np.isclose(fov_vertical2horizontal(40, 16 / 10), 60, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(51, 16 / 10), 75, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(56, 16 / 10), 81, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(64, 16 / 10), 90, rtol=0.1)
+        assert np.isclose(fov_vertical2horizontal(73, 16 / 10), 100, rtol=0.1)
