@@ -22,7 +22,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
 from helpers import (get_pose_components, pose_from_components, quat2axis, d2r,
-                     normalize, fov_diagonal2vertical, fov_vertical2horizontal)
+                     unit_vector, fov_diagonal2vertical, fov_vertical2horizontal)
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_matrix, new_state, Shape)
 
@@ -449,7 +449,7 @@ class RendererBase(TexturesBase):
         # Temporarily turn off zooming.
         if self.distance:
             scale = np.linalg.norm(rel_pos) / self.distance
-            rel_pos = normalize(rel_pos) * self.distance
+            rel_pos = unit_vector(rel_pos) * self.distance
         else:
             scale = 1
         centre = self._find_drone_on_image(rel_pos)
