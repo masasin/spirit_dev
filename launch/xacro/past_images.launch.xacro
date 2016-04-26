@@ -2,10 +2,11 @@
 <!--Generated automatically from launch config file.-->
 <launch xmlns:xacro="http://www.ros.org/wiki/xacro">
   <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}"/>
-  <xacro:property name="method" value="${params['past_image']['eval_method']}"/>
+  <xacro:property name="method" value="${params['past_image']['general']['eval_method']}"/>
   <xacro:property name="method_ns" value="${params['past_image'][method]}"/>
   <node name="past_image_selector" output="screen" pkg="spirit" type="past_image_selector.py">
     <param name="eval_method" value="${method}"/>
+    <param name="image_queue_length" value="${params['past_image']['general']['image_queue_length']}"/>
     <xacro:if value="${method == 'constant_distance'}">
       <param name="distance" value="${method_ns['distance']}"/>
     </xacro:if>

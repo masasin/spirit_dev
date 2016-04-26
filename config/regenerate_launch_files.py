@@ -39,9 +39,10 @@ def get_past_image_keys():
         launch_params = yaml.load(fin)
 
     keys = {}
-    for eval_method in launch_params["past_image"]:
-        if eval_method != "eval_method":
-            keys[eval_method] = launch_params["past_image"][eval_method].keys()
+    past_image_params = launch_params["past_image"]
+    for eval_method in past_image_params:
+        if eval_method != "general":
+            keys[eval_method] = past_image_params[eval_method].keys()
     return keys
 
 
