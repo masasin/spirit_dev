@@ -122,7 +122,7 @@ class Evaluators(object):
         if self.frames:
             optimum_timestamp = self.pose.header.stamp.to_sec() - self.delay
 
-            for frame in reversed(self.frames):
+            for frame in reversed(list(self.frames)):
                 if frame.stamp.to_sec() < optimum_timestamp:
                     return frame
             return self.frames[0]
@@ -137,7 +137,7 @@ class Evaluators(object):
         if self.frames:
             optimum_distance = err_min = self.distance
             position, orientation = get_pose_components(self.pose)
-            for frame in reversed(self.frames):
+            for frame in reversed(list(self.frames)):
                 frame_distance = norm(frame.coords_precise - position)
                 if frame_distance > optimum_distance:
                     err_current = abs(frame_distance - optimum_distance)
@@ -242,7 +242,7 @@ class Evaluators(object):
                 return self.frames[0]
 
             results = {}
-            for frame in reversed(self.frames):
+            for frame in reversed(list(self.frames)):
                 results[frame] = eval_func(self.pose, frame)
             return min(results, key=results.get)
 
