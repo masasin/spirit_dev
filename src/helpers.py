@@ -263,10 +263,6 @@ def angle_between_quaternions(a, b):
     float
         The angle between the quaternions, in radians.
 
-    Notes
-    -----
-    The angle is multiplied by 2 because of its effect in 3D.
-
     Examples
     --------
     >>> angle_between_quaternions([0, 0, 0, 1], [0, 0, 0, 1])
