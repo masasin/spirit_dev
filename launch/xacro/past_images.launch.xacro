@@ -7,11 +7,11 @@
   <node name="past_image_selector" output="screen" pkg="spirit" type="past_image_selector.py">
     <param name="eval_method" value="${method}"/>
     <param name="image_queue_length" value="${params['past_image']['general']['image_queue_length']}"/>
-    <xacro:if value="${method == 'constant_distance'}">
-      <param name="distance" value="${method_ns['distance']}"/>
-    </xacro:if>
     <xacro:if value="${method == 'constant_time_delay'}">
       <param name="delay" value="${method_ns['delay']}"/>
+    </xacro:if>
+    <xacro:if value="${method == 'constant_distance'}">
+      <param name="distance" value="${method_ns['distance']}"/>
     </xacro:if>
     <xacro:if value="${method == 'spirit'}">
       <param name="coeff_distance" value="${method_ns['coeff_distance']}"/>
