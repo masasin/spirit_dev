@@ -23,7 +23,7 @@ from std_msgs.msg import Bool
 
 from ntree import Octree
 from helpers import (get_pose_components, fov_diagonal2vertical,
-                     angle_between_quaternions, d2r)
+                     euler_difference, d2r)
 
 
 class Frame(object):
@@ -181,7 +181,7 @@ class Evaluators(object):
                                             frame.orientation))
 
             dx, dy, dz = coords - frame.coords_precise
-            beta = angle_between_quaternions(orientation, frame.orientation)
+            beta = euler_difference(orientation, frame.orientation)[2]
             alpha = np.arctan2(dz, dy)
             fov_y = d2r(fov_diagonal2vertical(92))
 
@@ -204,19 +204,18 @@ class Evaluators(object):
     def spirit(self):
         def eval_func(pose, frame):
             coords, orientation = get_pose_components(pose)
-            current_state_vector = np.hstack((self.current_frame.coords_precise,
-                                              self.current_frame.orientation))
-            frame_state_vector = np.hstack((frame.coords_precise,
-                                            frame.orientation))
+            current_state_vector = np.append(self.current_frame.coords_precise,
+                                             self.current_frame.orientation)
+            frame_state_vector = np.append(frame.coords_precise,
+                                           frame.orientation)
 
             dx, dy, dz = coords - frame.coords_precise
-            beta = angle_between_quaternions(orientation, frame.orientation)
+            beta = euler_difference(orientation, frame.orientation)[2]
             a_mag = norm(coords - frame.coords_precise)
 
-            centrality = (np.arctan2(np.sqrt(dx**2 + dz**2), dy)
-                          / (np.pi / 2)) ** 2
+            centrality = np.arctan2(np.sqrt(dx**2 + dz**2), dy) ** 2
             # centrality = ((dx / dy)**2 + (dz / dy)**2)
-            direction = (beta / (np.pi / 2)) ** 2
+            direction = beta ** 2
             distance = ((a_mag - self.l_ref) / self.l_ref) ** 2
             similarity = (norm(frame_state_vector - current_state_vector)
                           / norm(frame_state_vector)) ** 2
@@ -232,7 +231,7 @@ class Evaluators(object):
                     + self.coeff_direction * direction
                     + self.coeff_distance * distance
                     + self.coeff_similarity * similarity
-            )
+                    )
 
         return self._get_best_frame(eval_func)
 
