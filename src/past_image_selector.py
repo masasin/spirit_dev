@@ -307,6 +307,11 @@ class Selector(object):
         self.ntree = Octree((0, 0, 0), 1000)  # 100 m per side
         self.frames = deque([], rospy.get_param("~image_queue_length"))
 
+        self.image = None
+        self.pose = None
+        self.current_frame = None
+        self.tracked = None
+
         method = rospy.get_param("~eval_method")
         self.evaluate = Evaluators(method, parent=self).evaluate
 
