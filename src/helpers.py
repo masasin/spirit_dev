@@ -208,9 +208,10 @@ def quat2euler(quaternion):
     Returns
     -------
     np.ndarray
-        The Euler angle, in the order of roll, pitch, yaw.
+        The Euler angle, in the order of pitch, roll, yaw.
 
     """
+    # TODO: Change Euler angle to roll pitch yaw.
     return tf.transformations.euler_from_quaternion(quaternion,
                                                     EULER_CONVENTION)
 
@@ -291,7 +292,7 @@ def euler_difference(a, b):
     Returns
     -------
     np.ndarray
-        The Euler angle, in the order of roll, pitch, yaw.
+        The Euler angle, in the order of pitch, roll, yaw.
 
     """
     return quat2euler(quaternion_rotation(a, b))
