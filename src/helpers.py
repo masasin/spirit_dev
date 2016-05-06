@@ -14,6 +14,7 @@ import tf
 
 d2r = np.deg2rad
 r2d = np.rad2deg
+EULER_CONVENTION = "rxyz"
 
 
 def unit_vector(v):
@@ -210,7 +211,90 @@ def quat2euler(quaternion):
         The Euler angle, in the order of roll, pitch, yaw.
 
     """
-    return tf.transformations.euler_from_quaternion(quaternion)
+    return tf.transformations.euler_from_quaternion(quaternion,
+                                                    EULER_CONVENTION)
+
+
+def quaternion_product(a, b):
+    """
+    Find the product of two quaternions.
+
+    Parameters
+    ----------
+    a : Sequence[float]
+        A quaternion, in the order of x, y, z, w
+    b : Sequence[float]
+        A quaternion, in the order of x, y, z, w
+
+    Returns
+    -------
+    np.ndarray
+        A quaternion, in the order of x, y, z, w
+
+    """
+    imaginary_part = a[3] * b[:3] + b[3] * a[:3] + np.cross(a[:3], b[:3])
+    real_part = a[3] * b[3] - np.dot(a[:3], b[:3])
+    return np.append(imaginary_part, real_part)
+
+
+def quaternion_inverse(quaternion):
+    """
+    Return the inverse of a quaternion
+
+    Parameters
+    ----------
+    quaternion : Sequence[float]
+        A quaternion, in the order of x, y, z, w
+
+    Returns
+    -------
+    np.ndarray
+        The inverse of the quaternion.
+
+    """
+    return (quaternion * np.array([-1, -1, -1, 1])
+            / np.linalg.norm(quaternion)**2)
+
+
+def quaternion_rotation(a, b):
+    """
+    Find the quaternion which produces a rotation from `a` to `b`.
+
+    Parameters
+    ----------
+    a : Sequence[float]
+        A quaternion, in the order of x, y, z, w
+    b : Sequence[float]
+        A quaternion, in the order of x, y, z, w
+
+    Returns
+    -------
+    np.ndarray
+        A quaternion, in the order of x, y, z, w
+
+    """
+    return quaternion_product(unit_vector(a),
+                              quaternion_inverse(unit_vector(b)))
+
+
+def euler_difference(a, b):
+    """
+    Find the Euler angles which produce a rotation from `a` to `b`
+
+    Parameters
+    ----------
+    a : Sequence[float]
+        A quaternion, in the order of x, y, z, w
+    b : Sequence[float]
+        A quaternion, in the order of x, y, z, w
+
+    Returns
+    -------
+    np.ndarray
+        The Euler angle, in the order of roll, pitch, yaw.
+
+    """
+    return quat2euler(quaternion_rotation(a, b))
 
 
 def angle_between(a, b):
@@ -267,8 +351,10 @@ def angle_between_quaternions(a, b):
     --------
     >>> angle_between_quaternions([0, 0, 0, 1], [0, 0, 0, 1])
     0.0
-    >>> angle_between_quaternions([0, 0, 0, 1], [0, -1, 0, 1])
-    1.5707963267948968
+    >>> q1 = [0, 0, 0, 1]
+    >>> q2 = [0, -1, 0, 1]
+    >>> np.isclose(np.pi/2, angle_between_quaternions(q1, q2))
+    True
 
     """
     return 2 * angle_between(a, b)
