@@ -2,6 +2,8 @@
 # (C) 2015  Jean Nassar
 # Released under BSD
 import glob
+import imp
+import inspect
 from lxml import etree as et
 import os
 import subprocess as sp
@@ -11,7 +13,8 @@ import tqdm
 import yaml
 
 
-namespace = {"xacro": "{http://www.ros.org/wiki/xacro}"}
+CONFIG_FILE = "launch_params.yaml"
+NAMESPACES = {"xacro": "{http://www.ros.org/wiki/xacro}"}
 # et.register_namespace("xacro", "http://www.ros.org/wiki/xacro")
 
 
@@ -25,7 +28,7 @@ def get_file_root(path):
     'test'
 
     """
-    return os.path.split(path[:path.rindex(".")])[1]
+    return os.path.splitext(os.path.basename(path))[0]
 
 
 def compile_xacro(inpath, outpath, stdout):
@@ -34,10 +37,7 @@ def compile_xacro(inpath, outpath, stdout):
             stdout=stdout)
     
 
-def get_past_image_keys():
-    with open("launch_params.yaml") as fin:
-        launch_params = yaml.load(fin)
-
+def get_past_image_keys(launch_params):
     keys = {}
     past_image_params = launch_params["past_image"]
     for eval_method in past_image_params:
@@ -52,15 +52,15 @@ def load_xml(path):
     
 
 def remove_old_elements(node):
-    for element in node.findall("{}if".format(namespace["xacro"])):
+    for element in node.findall("{}if".format(NAMESPACES["xacro"])):
         node.remove(element)
 
 
 def add_new_keys(node, keys):
     for method_name, key_list in keys.items():
-        element = et.Element("{}if".format(namespace["xacro"]),
+        element = et.Element("{}if".format(NAMESPACES["xacro"]),
                              attrib={"value": "${{method == '{}'}}"
-                                     .format(method_name)})
+                             .format(method_name)})
         for key in key_list:
             et.SubElement(element, "param",
                           attrib={"name": key,
@@ -70,7 +70,9 @@ def add_new_keys(node, keys):
 
 def add_message(tree):
     root = tree.getroot()
-    root.addprevious(et.Comment("Generated automatically from launch config file."))
+    root.addprevious(
+        et.Comment("Generated automatically from launch config file.")
+    )
 
 
 def update_past_image_generator(keys, path="xacro/past_images.launch.xacro"):
@@ -81,9 +83,46 @@ def update_past_image_generator(keys, path="xacro/past_images.launch.xacro"):
     tree.write(path, encoding="utf-8", xml_declaration=True, pretty_print=True)
 
 
+def verify_coeffs(method, past_image_keys):
+    """
+
+    Parameters
+    ----------
+    method
+    past_image_keys
+
+    Raises
+    ------
+    AttributeError
+        If a key does not exist.
+    TypeError
+        If a key is not callable.
+
+    """
+    method_params = past_image_keys[method]
+    os.chdir(get_ros_dir("spirit", "src"))
+    helpers = imp.load_source("helpers", "helpers.py")  # Needed for import
+    evaluators = imp.load_source("evaluators", "evaluators.py")
+
+    components = [param.split("coeff_", 1)[1] for param in method_params
+                  if param.startswith("coeff_")]
+    evaluator = getattr(evaluators, method)
+
+    bad_keys = [component for component in components
+                if not (inspect.ismethod(getattr(evaluator, component))
+                        or inspect.isfunction(getattr(evaluator, component)))]
+    if bad_keys:
+        raise TypeError("The following components are not callable: {}"
+                        .format(bad_keys))
+
+
 def main():
     os.chdir(get_ros_dir("spirit", "config"))
-    past_image_keys = get_past_image_keys()
+    with open(CONFIG_FILE) as fin:
+        launch_params = yaml.load(fin)
+    method = launch_params["past_image"]["general"]["eval_method"]
+    past_image_keys = get_past_image_keys(launch_params)
+    verify_coeffs(method, past_image_keys)
 
     os.chdir(get_ros_dir("spirit", "launch"))
     update_past_image_generator(past_image_keys)
