@@ -24,8 +24,8 @@ past_image:
     eval_method: Spirit
     image_queue_length: 60  # Use None for infinite.
   Spirit:
-    coeff_centrality: 1
-    coeff_direction: 1
+    coeff_centrality: 2.5
+    coeff_direction: 0.1
     coeff_distance: 1
     ref_distance: 1.5
   ConstantDistance:
