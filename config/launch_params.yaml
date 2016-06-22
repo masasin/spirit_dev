@@ -14,33 +14,32 @@ control:
   js_number: 1  # Default is 0.
 
 pose:
-  mock_pose: false  # Default is false.
+  mock_pose: true  # Default is false.
   real:
     use_mocap: true  # Default is true.
     use_odometry: false  # Default is false.
 
 past_image:
   general:
-    eval_method: spirit
+    eval_method: Spirit
     image_queue_length: 60  # Use None for infinite.
-  constant_distance:
-    distance: 1.5
-  constant_time_delay:
-    delay: 200
-  murata:
-    coeff_height: 2
-    coeff_direction: 1
-    coeff_elevation: 1
-    coeff_distance: 4
-    coeff_similarity: 0
-    z_ref: 0.3
-    l_ref: 1.5
-  spirit:
-    coeff_centred: 1
+  Spirit:
+    coeff_centrality: 1
     coeff_direction: 1
     coeff_distance: 1
-    coeff_similarity: 1
-    l_ref: 1.5
+    ref_distance: 1.5
+  ConstantDistance:
+    ref_distance: 1.5
+  ConstantTimeDelay:
+    ref_time: 200
+  # Konishi:
+  Murata:
+    coeff_height: 2
+    coeff_direction: 0.4
+    coeff_elevation: 1
+    coeff_distance: 4
+    ref_height: 0.3
+    ref_distance: 1.5
 
 visualization:
   show: true
