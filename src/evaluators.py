@@ -27,7 +27,7 @@ class Evaluator(object):
         self._vars_frame = {}
         return frame_score
 
-    def evaluate(self):
+    def select_best_frame(self):
         if self.frames:
             if self.current_frame is None:
                 return self.frames[0]

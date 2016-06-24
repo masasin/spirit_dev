@@ -110,7 +110,7 @@ class Selector(object):
         self._pose_stamped = pose_stamped
         self.pose = Pose(pose_stamped)
 
-        best_frame = self.evaluator.evaluate()
+        best_frame = self.evaluator.select_best_frame()
         if best_frame is not None:
             self.current_frame = best_frame
             self.past_image_pub.publish(best_frame.image)
