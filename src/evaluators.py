@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 # (C) 2016  Jean Nassar
 # Released under BSD version 4
-import abc
 import sys
 
 import numpy as np
-import six
 
 from helpers import fov_diagonal2vertical, d2r
 
@@ -15,14 +13,13 @@ def get_evaluator(method, parent):
     return getattr(sys.modules[__name__], method)(parent)
 
 
-@six.add_metaclass(abc.ABCMeta)
 class Evaluator(object):
     def __init__(self, parent):
         self._parent = parent
 
-    @abc.abstractmethod
     def _evaluate_frame(self, pose, frame):
-        return
+        return sum(coeff * self.__getattribute__(component)(pose, frame)
+                   for component, coeff in self.eval_coeffs.items())
 
     def evaluate(self):
         if self.frames:
@@ -62,24 +59,18 @@ class Evaluator(object):
             return self._parent.__getattribute__(name)
 
 
-class CoeffedEvaluator(Evaluator):
-    def _evaluate_frame(self, pose, frame):
-        return sum(coeff * self.__getattribute__(component)(pose, frame)
-                   for component, coeff in self.eval_coeffs.items())
-
-
 class ConstantTimeDelay(Evaluator):
-    def _evaluate_frame(self, pose, frame):
+    def time(self, pose, frame):
         optimum_timestamp = pose.header.stamp.to_sec() - self.ref_delay
         return abs(frame.stamp.to_sec() - optimum_timestamp)
 
 
 class ConstantDistance(Evaluator):
-    def _evaluate_frame(self, pose, frame):
+    def distance(self, pose, frame):
         return abs(frame.distance(pose) - self.ref_distance)
 
 
-class Spirit(CoeffedEvaluator):
+class Spirit(Evaluator):
     @staticmethod
     def centrality(pose, frame):
         dx, dy, dz = frame.dpos(pose)
@@ -94,11 +85,11 @@ class Spirit(CoeffedEvaluator):
                 / self.ref_distance)**2
 
 
-class Konishi(CoeffedEvaluator):
+class Konishi(Evaluator):
     pass
 
 
-class Murata(CoeffedEvaluator):
+class Murata(Evaluator):
     """
     Use the evaluation function from Murata's thesis. [#]_
 

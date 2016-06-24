@@ -29,8 +29,10 @@ past_image:
     coeff_distance: 1
     ref_distance: 1.5
   ConstantDistance:
+    coeff_distance: 1
     ref_distance: 1.5
   ConstantTimeDelay:
+    coeff_time: 1
     ref_time: 200
   # Konishi:
   Murata:
