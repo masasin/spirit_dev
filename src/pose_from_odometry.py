@@ -3,7 +3,7 @@
 # (C) 2016  Jean Nassar
 # Released under BSD version 4
 """
-Generates a pose using AR.Drone odometry readings.
+Generate a pose using AR.Drone odometry readings.
 
 Note that this would only work if the AR.Drone is active with the motors on.
 

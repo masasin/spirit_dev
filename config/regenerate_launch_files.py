@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 # (C) 2015  Jean Nassar
 # Released under BSD
 import glob

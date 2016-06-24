@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 # (C) 2016  Jean Nassar
 # Released under BSD version 4
+"""
+Visualize the drone position using SPIRIT.
+
+"""
 from __future__ import division
 
 from collections import deque

@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+# (C) 2015  Jean Nassar
+# Released under BSD
+"""
+Helper functions for use with OpenGL.
+
+"""
 from contextlib import contextmanager
 
 import numpy as np

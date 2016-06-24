@@ -3,7 +3,7 @@
 # (C) 2016  Jean Nassar
 # Released under BSD version 4
 """
-Publishes random similar poses to /ardrone/pose.
+Publish random similar poses to /ardrone/pose.
 
 """
 from __future__ import division
