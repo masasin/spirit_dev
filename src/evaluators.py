@@ -9,7 +9,7 @@ import sys
 
 import numpy as np
 
-from helpers import fov_diagonal2vertical, d2r
+from helpers import Fov, d2r
 
 
 def get_evaluator(method, parent):
@@ -79,12 +79,12 @@ class ConstantDistance(Evaluator):
 class Spirit(Evaluator):
     @staticmethod
     def centrality(pose, frame):
-        dx, dy, dz = frame.dpos(pose)
+        dx, dy, dz = frame.rel_position(pose)
         return min((dx**2 + dz**2) / dy**2, 0.2) if dy < 0 else 0.2
 
     @staticmethod
     def direction(pose, frame):
-        return frame.deuler(pose)[2]**2
+        return frame.rel_euler(pose)[2] ** 2
 
     def distance(self, pose, frame):
         return ((frame.distance(pose) - self.ref_distance)
@@ -136,12 +136,12 @@ class Murata(Evaluator):
 
     @staticmethod
     def direction(pose, frame):
-        beta = frame.deuler(pose)[2]
+        beta = frame.rel_euler(pose)[2]
         return beta**2
 
     def elevation(self, pose, frame):
         alpha = np.arctan2(self._frame_vars["dzg"], self._frame_vars["dyg"])
-        fov_y = d2r(fov_diagonal2vertical(92))
+        fov_y = d2r(Fov.d2v(92))
         return (alpha / fov_y)**2
 
     def distance(self, pose, frame):

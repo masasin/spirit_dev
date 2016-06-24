@@ -12,7 +12,7 @@ from OpenGL import GL as gl
 from OpenGL import GLU as glu
 from OpenGL import GLUT as glut
 
-from helpers import quat2axis
+from helpers import Quat
 
 
 def gl_font(name, height):
@@ -215,7 +215,7 @@ class Shape(object):
 
         """
         with new_matrix():
-            gl.glRotate(*quat2axis(quaternion))
+            gl.glRotate(*Quat.to_axis(quaternion))
             self._draw_components(self.vertices, self.colours, self.edges,
                                   self.surfaces, edge_colour)
 
@@ -284,5 +284,3 @@ class Cube(Shape):
         )
 
         super(Cube, self).__init__(vertices, colours, edges, surfaces)
-
-

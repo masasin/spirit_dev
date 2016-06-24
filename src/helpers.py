@@ -6,11 +6,13 @@ Helper functions and classes for general use.
 
 """
 from __future__ import division
+from time import localtime, strftime
 
 import numpy as np
+from numpy.linalg import norm
 
 import rospy
-from geometry_msgs.msg import Point, Quaternion, PoseStamped, TransformStamped
+from geometry_msgs.msg import Point, Quaternion, PoseStamped
 import tf
 
 
@@ -41,409 +43,362 @@ def unit_vector(v):
         return np.asarray(v)
 
 
-def get_pose_components(pose):
+class Pose(object):
+    def __init__(self, pose_stamped):
+        self.pose_stamped = pose_stamped
+        self.position, self.orientation = self._components(self.pose_stamped)
+        self.header = self.pose_stamped.header
+
+    def rel_position(self, pose, rotation_matrix=None):
+        if rotation_matrix is None:
+            rotation_matrix = Quat.rotation_matrix(self.orientation)
+        return rotation_matrix.dot(pose.position - self.position)
+
+    def _rel_quaternion(self, pose):
+        return Quat.rel_rotation(pose.orientation, self.orientation)
+
+    def rel_euler(self, pose):
+        return Quat.to_euler(self._rel_quaternion(pose))
+
+    def distance(self, pose):
+        """
+        Calculate the distance to another pose.
+
+        Parameters
+        ----------
+        pose : Pose
+            The target pose.
+
+        Returns
+        -------
+        float
+            The distance to the target pose.
+
+        """
+        return norm(pose.position - self.position)
+
+    @staticmethod
+    def _components(pose_stamped):
+        """
+        Return the position and orientation of a PoseStamped as a numpy array.
+
+        Parameters
+        ----------
+        pose_stamped : Pose(WithCovariance)?(Stamped)?
+            The pose to be decomposed.
+
+        Returns
+        -------
+        position : np.ndarray
+            The x, y, and z coordinates contained in the pose.
+        orientation : np.ndarray
+            The x, y, z, and w quaternion contained in the pose.
+
+        """
+        position = np.array([pose_stamped.pose.position.x,
+                             pose_stamped.pose.position.y,
+                             pose_stamped.pose.position.z])
+
+        orientation = np.array([pose_stamped.pose.orientation.x,
+                                pose_stamped.pose.orientation.y,
+                                pose_stamped.pose.orientation.z,
+                                pose_stamped.pose.orientation.w])
+
+        return position, orientation
+
+    @staticmethod
+    def generate_stamped(position, orientation, sequence=0):
+        """
+        Generate a PoseStamped from its components.
+
+        Parameters
+        ----------
+        position : Sequence[float]
+            The x, y, and z coordinates of the pose.
+        orientation : Sequence[float]
+            The x, y, z, and w quaternion of the pose.
+        sequence : Optional[int]
+            The sequence number of the pose.
+
+        Returns
+        -------
+        PoseStamped
+            The generated pose.
+
+        """
+        pose_stamped = PoseStamped()
+        pose_stamped.header.seq = sequence
+        try:
+            pose_stamped.header.stamp = rospy.Time.now()
+        except rospy.exceptions.ROSInitException:
+            pass
+
+        pose_stamped.pose.position = Point(*position)
+        pose_stamped.pose.orientation = Quaternion(*orientation)
+        return pose_stamped
+
+
+class Frame(object):
     """
-    Return the coordinates and orientation of a pose as a numpy array.
+    Encapsulate an image and the pose it was taken in.
 
     Parameters
     ----------
-    pose : Pose(WithCovariance)?(Stamped)?
-        The pose to be decomposed.
+    pose_stamped : PoseStamped
+        The pose of the drone when the image was taken.
+    image : Image
+        The image that was taken.
 
-    Returns
-    -------
-    coords : np.ndarray
-        The x, y, and z coordinates contained in the pose.
-    orientation : np.ndarray
-        The x, y, z, and w quaternion contained in the pose.
-
-    """
-    coords = np.array([pose.pose.position.x,
-                       pose.pose.position.y,
-                       pose.pose.position.z])
-
-    orientation = np.array([pose.pose.orientation.x,
-                            pose.pose.orientation.y,
-                            pose.pose.orientation.z,
-                            pose.pose.orientation.w])
-
-    return coords, orientation
-
-
-def pose_from_components(coords, orientation, sequence=0):
-    """
-    Generate a pose from its components.
-
-    Parameters
+    Attributes
     ----------
-    coords : Sequence[float]
-        The x, y, and z coordinates of the pose.
-    orientation : Sequence[float]
-        The x, y, z, and w quaternion of the pose.
-    sequence : Optional[int]
-        The sequence number of the pose.
-
-    Returns
-    -------
-    PoseStamped
-        The generated pose.
-
-    """
-    pose = PoseStamped()
-    pose.header.seq = sequence
-    try:
-        pose.header.stamp = rospy.Time.now()
-    except rospy.exceptions.ROSInitException:
-        pass
-
-    pose.pose.position = Point(*coords)
-    pose.pose.orientation = Quaternion(*orientation)
-    return pose
-
-
-def pose_from_tf(transform):
-    """
-    Generate a pose from a transform.
-
-    Parameters
-    ----------
-    transform : TransformStamped
-        The transform to be translated.
-
-    Returns
-    -------
-    PoseStamped
-        The pose.
+    pose_stamped : PoseStamped
+        The raw pose message of the drone at which the image was taken.
+    pose : Pose
+        The pose of the drone at which the image was taken.
+    rotation_matrix : np.ndarray
+        The rotation matrix of the frame orientation.
+    image : Image
+        The image that was taken.
+    stamp : rospy.rostime.Time
+        The timestamp of the pose.
+    stamp_str : str
+        The timestamp of the pose, in human readable format.
 
     """
-    pose = PoseStamped()
-    try:
-        pose.header.stamp = rospy.Time.now()
-    except rospy.exceptions.ROSInitException:
-        pass
-    pose.header.frame_id = transform.header.frame_id
+    def __init__(self, pose_stamped, image):
+        self.pose_stamped = pose_stamped
+        self.pose = Pose(pose_stamped)
+        self.rotation_matrix = Quat.rotation_matrix(self.pose.orientation)
+        self.image = image
+        self.stamp = self.pose.header.stamp
+        self.stamp_str = strftime("%Y-%m-%d %H:%M:%S",
+                                  localtime(self.stamp.to_time()))
 
-    pose.pose.position = transform.transform.translation
-    pose.pose.orientation = transform.transform.rotation
+    def rel_position(self, pose):
+        return self.pose.rel_position(pose, rotation_matrix=self.rotation_matrix)
 
-    return pose
+    def rel_euler(self, pose):
+        return self.pose.rel_euler(pose)
+
+    def distance(self, pose):
+        return self.pose.distance(pose)
+
+    def __str__(self):
+        return "Frame ({position}): {time}".format(
+            position=self.pose.position.tolist(),
+            time=self.stamp)
 
 
-def tf_from_pose(pose, parent="world", child="robot"):
+class Fov(object):
     """
-    Generate a transform from a pose.
-
-    Parameters
-    ----------
-    pose : Pose(WithCovariance)?(Stamped)?
-        The pose to be translated.
-    parent : Optional[str]
-        The frame_id of the transform. Default is "world"
-    child : Optional[str]
-        The child_frame_id of the transform. Default is "robot"
-
-    Returns
-    -------
-    TransformStamped
-        The transform.
+    Field of view methods.
 
     """
-    transform = TransformStamped()
-    try:
-        transform.header.stamp = rospy.Time.now()
-    except rospy.exceptions.ROSInitException:
-        pass
-    transform.header.frame_id = parent
-    transform.child_frame_id = child
+    @staticmethod
+    def d2v(fov_diagonal, aspect_ratio=4 / 3):
+        """
+        Convert a diagonal field of view to vertical.
 
-    transform.transform.translation = pose.pose.position
-    transform.transform.rotation = pose.pose.orientation
+        Parameters
+        ----------
+        fov_diagonal : float
+            The diagonal field of view.
+        aspect_ratio: Optional[float]
+            The aspect ratio of the display. Default is 4:3.
 
-    return transform
+        Returns
+        -------
+        float
+            The vertical field of view.
+
+        """
+        ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
+        return 2 * r2d(np.arctan(np.tan(d2r(fov_diagonal) / 2)
+                                 / ratio_diagonal))
+
+    @staticmethod
+    def v2h(fov_vertical, aspect_ratio=4 / 3):
+        """
+        Convert a vertical field of view to horizontal.
+
+        Parameters
+        ----------
+        fov_vertical : float
+            The vertical field of view.
+        aspect_ratio: Optional[float]
+            The aspect ratio of the display. Default is 4:3.
+
+        Returns
+        -------
+        float
+            The horizontal field of view.
+
+        """
+        return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
 
 
-def quat2axis(quaternion):
+class Quat(object):
     """
-    Change a quaternion to an axis-angle representation.
-
-    Parameters
-    ----------
-    quaternion : np.ndarray
-        A quaternion in the order of x, y, z, w.
-
-    Notes
-    -----
-    θ is in degrees rather than radians, for ease of integration in OpenGL.
-
-    Returns
-    -------
-    tuple
-        The angle in axis-angle representation, with the order of θ, x, y, z. θ
-        is in degrees.
-
-    """
-    x, y, z, w = unit_vector(quaternion)
-    angle = r2d(2 * np.arccos(w))
-
-    if angle == 0:
-        axis_x = 1
-        axis_y = axis_z = 0
-    elif angle % 180 == 0:
-        axis_x, axis_y, axis_z = x, y, z
-    else:
-        axis_x = x / np.sqrt(1 - w**2)
-        axis_y = y / np.sqrt(1 - w**2)
-        axis_z = z / np.sqrt(1 - w**2)
-
-    return angle, axis_x, axis_y, axis_z
-
-
-def quat2euler(quaternion):
-    """
-    Change a quaternion to an Euler angle representation.
-
-    Parameters
-    ----------
-    quaternion : np.ndarray
-        A quaternion in the order of x, y, z, w.
-
-    Returns
-    -------
-    np.ndarray
-        The Euler angle, in the order of pitch, roll, yaw.
+    Quaternion methods.
 
     """
-    # TODO: Change Euler angle to roll pitch yaw.
-    return tf.transformations.euler_from_quaternion(quaternion,
-                                                    EULER_CONVENTION)
+    @staticmethod
+    def to_euler(quaternion):
+        """
+        Change a quaternion to an Euler angle representation.
 
+        Parameters
+        ----------
+        quaternion : np.ndarray
+            A quaternion in the order of x, y, z, w.
 
-def quaternion_product(a, b):
-    """
-    Find the product of two quaternions.
+        Returns
+        -------
+        np.ndarray
+            The Euler angle, in the order of pitch, roll, yaw.
 
-    Parameters
-    ----------
-    a : Sequence[float]
-        A quaternion, in the order of x, y, z, w
-    b : Sequence[float]
-        A quaternion, in the order of x, y, z, w
+        """
+        return tf.transformations.euler_from_quaternion(quaternion,
+                                                        EULER_CONVENTION)
 
-    Returns
-    -------
-    np.ndarray
-        A quaternion, in the order of x, y, z, w
+    @staticmethod
+    def to_axis(quaternion):
+        """
+        Change a quaternion to an axis-angle representation.
 
-    """
-    imaginary_part = a[3] * b[:3] + b[3] * a[:3] + np.cross(a[:3], b[:3])
-    real_part = a[3] * b[3] - np.dot(a[:3], b[:3])
-    return np.append(imaginary_part, real_part)
+        Parameters
+        ----------
+        quaternion : np.ndarray
+            A quaternion in the order of x, y, z, w.
 
+        Notes
+        -----
+        θ is in degrees rather than radians, for ease of integration in OpenGL.
 
-def quaternion_inverse(quaternion):
-    """
-    Return the inverse of a quaternion
+        Returns
+        -------
+        tuple
+            The angle in axis-angle representation, with the order of θ, x, y,
+            z. θ is in degrees.
 
-    Parameters
-    ----------
-    quaternion : Sequence[float]
-        A quaternion, in the order of x, y, z, w
+        """
+        x, y, z, w = unit_vector(quaternion)
+        angle = r2d(2 * np.arccos(w))
 
-    Returns
-    -------
-    np.ndarray
-        The inverse of the quaternion.
+        if angle == 0:
+            axis_x = 1
+            axis_y = axis_z = 0
+        elif angle % 180 == 0:
+            axis_x, axis_y, axis_z = x, y, z
+        else:
+            axis_x = x / np.sqrt(1 - w**2)
+            axis_y = y / np.sqrt(1 - w**2)
+            axis_z = z / np.sqrt(1 - w**2)
 
-    """
-    return (quaternion * np.array([-1, -1, -1, 1])
-            / np.linalg.norm(quaternion)**2)
+        return angle, axis_x, axis_y, axis_z
 
+    @staticmethod
+    def product(a, b):
+        """
+        Find the product of two quaternions.
 
-def quaternion_rotation(a, b):
-    """
-    Find the quaternion which produces a rotation from `a` to `b`.
+        Parameters
+        ----------
+        a : Sequence[float]
+            A quaternion, in the order of x, y, z, w
+        b : Sequence[float]
+            A quaternion, in the order of x, y, z, w
 
-    Parameters
-    ----------
-    a : Sequence[float]
-        A quaternion, in the order of x, y, z, w
-    b : Sequence[float]
-        A quaternion, in the order of x, y, z, w
+        Returns
+        -------
+        np.ndarray
+            A quaternion, in the order of x, y, z, w
 
-    Returns
-    -------
-    np.ndarray
-        A quaternion, in the order of x, y, z, w
+        """
+        imaginary_part = a[3] * b[:3] + b[3] * a[:3] + np.cross(a[:3], b[:3])
+        real_part = a[3] * b[3] - np.dot(a[:3], b[:3])
+        return np.append(imaginary_part, real_part)
 
-    """
-    return quaternion_product(unit_vector(a),
-                              quaternion_inverse(unit_vector(b)))
+    @staticmethod
+    def inverse(quaternion):
+        """
+        Return the inverse of a quaternion
 
+        Parameters
+        ----------
+        quaternion : Sequence[float]
+            A quaternion, in the order of x, y, z, w
 
-def euler_difference(a, b):
-    """
-    Find the Euler angles which produce a rotation from `a` to `b`
+        Returns
+        -------
+        np.ndarray
+            The inverse of the quaternion.
 
-    Parameters
-    ----------
-    a : Sequence[float]
-        A quaternion, in the order of x, y, z, w
-    b : Sequence[float]
-        A quaternion, in the order of x, y, z, w
+        """
+        return (quaternion * np.array([-1, -1, -1, 1])
+                / np.linalg.norm(quaternion)**2)
 
-    Returns
-    -------
-    np.ndarray
-        The Euler angle, in the order of pitch, roll, yaw.
+    @staticmethod
+    def rel_rotation(a, b):
+        """
+        Find the quaternion which produces a rotation from `a` to `b`.
 
-    """
-    return quat2euler(quaternion_rotation(a, b))
+        Parameters
+        ----------
+        a : Sequence[float]
+            A quaternion, in the order of x, y, z, w
+        b : Sequence[float]
+            A quaternion, in the order of x, y, z, w
 
+        Returns
+        -------
+        np.ndarray
+            A quaternion, in the order of x, y, z, w
 
-def angle_between(a, b):
-    """
-    Find the angle between two vectors.
+        """
+        return Quat.product(unit_vector(a), Quat.inverse(unit_vector(b)))
 
-    Parameters
-    ----------
-    a : Sequence[float]
-        A vector of length n.
-    b : Sequence[float]
-        A vector of length n.
+    @staticmethod
+    def rotation_matrix(quaternion):
+        """
+        Create the rotation matrix of a quaternion.
 
-    Returns
-    -------
-    float
-        The angle between the quaternions, in radians.
+        Parameters
+        ----------
+        quaternion : np.ndarray
+            A quaternion in the order of x, y, z, w.
 
-    Raises
-    ------
-    ValueError
-        If the lengths of the vectors are different.
+        Returns
+        -------
+        np.ndarray
+            A 3x3 rotation matrix representing the quaternion.
 
-    Examples
-    --------
-    >>> angle_between([1, 0, 0], [0, 1, 0])
-    1.5707963267948966
-    >>> angle_between([1, 0, 0], [1, 0, 0])
-    0.0
-    >>> angle_between([1, 0, 0], [-1, 0, 0])
-    3.1415926535897931
+        References
+        ----------
+        .. [1] Wikipedia, Rotation Matrix.
+               https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
 
-    """
-    return np.arccos(np.clip(np.dot(unit_vector(a), unit_vector(b)), -1, 1))
+        """
+        x, y, z, w = quaternion
+        n = sum(quaternion**2)
 
+        if n == 0:
+            return np.identity(3)
 
-def angle_between_quaternions(a, b):
-    """
-    Find the angle between two quaternions.
+        s = 2 / n
 
-    Parameters
-    ----------
-    a : Sequence[float]
-        A quaternion in the order of x, y, z, w.
-    b : Sequence[float]
-        A quaternion in the order of x, y, z, w.
+        wx = s * w * x
+        wy = s * w * y
+        wz = s * w * z
 
-    Returns
-    -------
-    float
-        The angle between the quaternions, in radians.
+        xx = s * x * x
+        xy = s * x * y
+        xz = s * x * z
 
-    Examples
-    --------
-    >>> angle_between_quaternions([0, 0, 0, 1], [0, 0, 0, 1])
-    0.0
-    >>> q1 = [0, 0, 0, 1]
-    >>> q2 = [0, -1, 0, 1]
-    >>> np.isclose(np.pi/2, angle_between_quaternions(q1, q2))
-    True
+        yy = s * y * y
+        yz = s * y * z
+        zz = s * z * z
 
-    """
-    return 2 * angle_between(a, b)
-
-
-def rotation_matrix(quaternion):
-    """
-    Create the rotation matrix of a quaternion.
-
-    Parameters
-    ----------
-    quaternion : np.ndarray
-        A quaternion in the order of x, y, z, w.
-
-    Returns
-    -------
-    np.ndarray
-        A 3x3 rotation matrix representing the quaternion.
-
-    References
-    ----------
-    .. [1] Wikipedia, Rotation Matrix.
-           https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
-
-    """
-    x, y, z, w = quaternion
-    n = sum(quaternion**2)
-
-    if n == 0:
-        return np.identity(3)
-
-    s = 2 / n
-
-    wx = s * w * x
-    wy = s * w * y
-    wz = s * w * z
-
-    xx = s * x * x
-    xy = s * x * y
-    xz = s * x * z
-
-    yy = s * y * y
-    yz = s * y * z
-    zz = s * z * z
-
-    return np.array([[1 - (yy + zz), xy - wz, wy],
-                     [wz, 1 - (xx + zz), yz - wx],
-                     [xz - wy, yz + wx, 1 - (xx + yy)]])
-
-
-def fov_diagonal2vertical(fov_diagonal, aspect_ratio=4 / 3):
-    """
-    Convert a diagonal field of view to vertical.
-
-    Parameters
-    ----------
-    fov_diagonal : float
-        The diagonal field of view.
-    aspect_ratio: Optional[float]
-        The aspect ratio of the display. Default is 4:3.
-
-    Returns
-    -------
-    float
-        The vertical field of view.
-
-    """
-    ratio_diagonal = np.sqrt(1 + aspect_ratio**2)
-    return 2 * r2d(np.arctan(np.tan(d2r(fov_diagonal) / 2) / ratio_diagonal))
-
-
-def fov_vertical2horizontal(fov_vertical, aspect_ratio=4 / 3):
-    """
-    Convert a vertical field of view to horizontal.
-
-    Parameters
-    ----------
-    fov_vertical : float
-        The vertical field of view.
-    aspect_ratio: Optional[float]
-        The aspect ratio of the display. Default is 4:3.
-
-    Returns
-    -------
-    float
-        The horizontal field of view.
-
-    """
-    return 2 * r2d(np.arctan(np.tan(d2r(fov_vertical) / 2) * aspect_ratio))
+        return np.array([[1 - (yy + zz), xy - wz, wy],
+                         [wz, 1 - (xx + zz), yz - wx],
+                         [xz - wy, yz + wx, 1 - (xx + yy)]])

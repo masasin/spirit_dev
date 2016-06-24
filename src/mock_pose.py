@@ -12,9 +12,9 @@ import numpy as np
 
 import rospy
 import tf2_ros
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import PoseStamped, TransformStamped
 
-from helpers import pose_from_components, tf_from_pose
+from helpers import Pose
 
 
 class PoseGenerator(object):
@@ -29,9 +29,42 @@ class PoseGenerator(object):
         self.rate = rospy.Rate(200)
         self.n_items = 100000
         x = np.arange(self.n_items)
-        self.x_pos = np.sin(0.1*x*np.pi/180)
-        self.y_pos = np.sin(0.1*x*np.pi/180)
-        self.z_pos = np.sin(0.1*x*np.pi/180)
+        self.x_pos = np.sin(0.1 * x * np.pi / 180)
+        self.y_pos = np.sin(0.1 * x * np.pi / 180)
+        self.z_pos = np.sin(0.1 * x * np.pi / 180)
+
+    @staticmethod
+    def _tf_from_pose(pose, parent="world", child="robot"):
+        """
+        Generate a transform from a pose.
+
+        Parameters
+        ----------
+        pose : Pose(WithCovariance)?(Stamped)?
+            The pose to be translated.
+        parent : Optional[str]
+            The frame_id of the transform. Default is "world"
+        child : Optional[str]
+            The child_frame_id of the transform. Default is "robot"
+
+        Returns
+        -------
+        TransformStamped
+            The transform.
+
+        """
+        transform = TransformStamped()
+        try:
+            transform.header.stamp = rospy.Time.now()
+        except rospy.exceptions.ROSInitException:
+            pass
+        transform.header.frame_id = parent
+        transform.child_frame_id = child
+
+        transform.transform.translation = pose.pose.position
+        transform.transform.rotation = pose.pose.orientation
+
+        return transform
 
     def stream(self):
         """
@@ -45,7 +78,8 @@ class PoseGenerator(object):
             pose = self.generate_sine_pose(sequence)
 
             self.pose_pub.publish(pose)
-            self.tf_pub.sendTransform(tf_from_pose(pose, child="ardrone/body"))
+            self.tf_pub.sendTransform(self._tf_from_pose(pose,
+                                                         child="ardrone/body"))
             self.rate.sleep()
 
     def generate_sine_pose(self, sequence=0):
@@ -63,11 +97,9 @@ class PoseGenerator(object):
 
         """
         idx = sequence % self.n_items
-        return pose_from_components(coords=(30*self.x_pos[idx],
-                                            0,
-                                            0),
-                                    orientation=(0, 1, 0, -0.6),
-                                    sequence=sequence)
+        return Pose.generate_stamped(coords=(30 * self.x_pos[idx], 0, 0),
+                                     orientation=(0, 1, 0, -0.6),
+                                     sequence=sequence)
 
     @staticmethod
     def generate_random_pose(sequence=0):
@@ -84,9 +116,9 @@ class PoseGenerator(object):
         The generated pose.
 
         """
-        return pose_from_components(coords=np.random.rand(1, 3) / 100,
-                                    orientation=(0.1, 0, 0.1, 0.1),
-                                    sequence=sequence)
+        return Pose.generate_stamped(coords=np.random.rand(1, 3) / 100,
+                                     orientation=(0.1, 0, 0.1, 0.1),
+                                     sequence=sequence)
 
 
 def main():

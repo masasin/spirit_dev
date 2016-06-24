@@ -25,8 +25,7 @@ from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 
-from helpers import (get_pose_components, pose_from_components, quat2axis, d2r,
-                     unit_vector, fov_diagonal2vertical, fov_vertical2horizontal)
+from helpers import Pose, Fov, Quat, d2r, unit_vector
 from opengl_helpers import (gl_font, gl_flag, gl_ortho, gl_primitive,
                             new_matrix, new_state, Shape)
 
@@ -145,7 +144,7 @@ class Drone(Shape):
 
         # Draw arrow
         with new_matrix():
-            gl.glRotate(*quat2axis(quaternion))
+            gl.glRotate(*Quat.to_axis(quaternion))
             self._draw_components(self.arrow_vertices, self.arrow_colours,
                                   self.arrow_edges, self.arrow_surfaces,
                                   edge_colour)
@@ -424,10 +423,10 @@ class RendererBase(TexturesBase):
         if fov_vertical is not None:
             self.fov_y = fov_vertical
         elif fov_diagonal is not None:
-            self.fov_y = fov_diagonal2vertical(fov_diagonal, self.aspect_ratio)
+            self.fov_y = Fov.d2v(fov_diagonal, self.aspect_ratio)
         else:
             self.fov_y = 45
-        self.fov_x = fov_vertical2horizontal(self.fov_y, self.aspect_ratio)
+        self.fov_x = Fov.v2h(self.fov_y, self.aspect_ratio)
         self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
 
     def render(self, pose_cam, pose_drone):
@@ -436,9 +435,9 @@ class RendererBase(TexturesBase):
 
         Parameters
         ----------
-        pose_cam : PoseStamped
+        pose_cam : Pose
             The pose of the drone when the background image was taken.
-        pose_drone : PoseStamped
+        pose_drone : Pose
             The current pose of the drone.
 
         """
@@ -461,7 +460,7 @@ class RendererBase(TexturesBase):
         with new_matrix():
             # Set camera orientation.
             rot_cam[:3] *= -1  # z-axis is with respect to origin, not camera.
-            gl.glRotate(*quat2axis(rot_cam))
+            gl.glRotate(*Quat.to_axis(rot_cam))
 
             # Set camera position.
             # Convert position to OpenGL coordinate frame first.
@@ -569,9 +568,9 @@ class RendererBase(TexturesBase):
 
         Parameters
         ----------
-        pose_cam : PoseStamped
+        pose_cam : Pose
             The pose of the drone when the background image was taken.
-        pose_drone : PoseStamped
+        pose_drone : Pose
             The current pose of the drone.
 
         Returns
@@ -587,11 +586,9 @@ class RendererBase(TexturesBase):
             w format.
 
         """
-        coords_cam, rot_cam = get_pose_components(pose_cam)
-        coords_drone, rot_drone = get_pose_components(pose_drone)
-        rel_pos = coords_cam - coords_drone
+        rel_pos = pose_cam.position - pose_drone.position
         rel_pos[2] *= -1
-        return rel_pos, rot_cam, rot_drone
+        return rel_pos, pose_cam.orientation, pose_drone.orientation
 
     def _find_drone_on_image(self, rel_pos):
         """
@@ -763,10 +760,10 @@ class VisualizerBase(object):
         self.screen.add_textures(background)
 
     def pose_cam_callback(self, pose_cam):
-        self.screen.pose_cam = pose_cam
+        self.screen.pose_cam = Pose(pose_cam)
 
     def pose_drone_callback(self, pose_drone):
-        self.screen.pose_drone = pose_drone
+        self.screen.pose_drone = Pose(pose_drone)
 
     def tracked_callback(self, tracked):
         self.tracked = tracked.data
@@ -809,8 +806,8 @@ class TestVisualizer(VisualizerBase):
         pos_drone = [-1.5, -1, 4]
         rot_drone = [-0.3, 0, 0, 1]
 
-        self.pose_cam_callback(pose_from_components(pos_cam, rot_cam))
-        self.pose_drone_callback(pose_from_components(pos_drone, rot_drone))
+        self.pose_cam_callback(Pose.generate_stamped(pos_cam, rot_cam))
+        self.pose_drone_callback(Pose.generate_stamped(pos_drone, rot_drone))
 
 
 def test_offline(size=(640, 480)):
@@ -825,8 +822,8 @@ def test_offline(size=(640, 480)):
     # rot_cam = [0.0006, 0.0042, 0.0166, 0.9999]
     # pos_drone = [-0.4767, 1.3597, 0.0770]
     # rot_drone = [0.0078, 0.0087, 0.0059, 0.9999]
-    screen.pose_cam = pose_from_components(pos_cam, rot_cam)
-    screen.pose_drone = pose_from_components(pos_drone, rot_drone)
+    screen.pose_cam = Pose.generate_stamped(pos_cam, rot_cam)
+    screen.pose_drone = Pose.generate_stamped(pos_drone, rot_drone)
 
     time.sleep(3)
     screen.add_textures("media/bird.jpg")
