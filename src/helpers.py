@@ -12,7 +12,7 @@ import numpy as np
 from numpy.linalg import norm
 
 import rospy
-from geometry_msgs.msg import Point, Quaternion, PoseStamped
+from geometry_msgs.msg import Header, Point, PoseStamped, Quaternion
 import tf
 
 
@@ -44,21 +44,70 @@ def unit_vector(v):
 
 
 class Pose(object):
+    """
+    Convenience wrapper for PoseStamped.
+
+    Parameters
+    ----------
+    pose_stamped : PoseStamped
+        The pose message.
+
+    Attributes
+    ----------
+    pose_stamped : PoseStamped
+        The pose message.
+    position : np.ndarray
+        The x, y, and z coordinates contained in the pose.
+    orientation : np.ndarray
+        The x, y, z, and w quaternion contained in the pose.
+    header : Header
+        The header from the pose message
+
+    """
     def __init__(self, pose_stamped):
         self.pose_stamped = pose_stamped
         self.position, self.orientation = self._components(self.pose_stamped)
         self.header = self.pose_stamped.header
 
     def rel_position(self, pose, rotation_matrix=None):
+        """
+        Calculate the relative position with another pose, with local reference.
+
+        Parameters
+        ----------
+        pose : Pose
+            The target pose.
+        rotation_matrix : Optional[np.ndarray]
+            The rotation matrix to use. If not provided, the rotation matrix of
+            the current pose is used.
+
+        Returns
+        -------
+        np.ndarray
+            The x, y, z relative positions.
+
+        """
         if rotation_matrix is None:
             rotation_matrix = Quat.rotation_matrix(self.orientation)
         return rotation_matrix.dot(pose.position - self.position)
 
-    def _rel_quaternion(self, pose):
-        return Quat.rel_rotation(pose.orientation, self.orientation)
-
     def rel_euler(self, pose):
-        return Quat.to_euler(self._rel_quaternion(pose))
+        """
+        Calculate the relative angle with another pose.
+
+        Parameters
+        ----------
+        pose : Pose
+            The target pose.
+
+        Returns
+        -------
+        np.ndarray
+            The relative angle as Euler, in the order of pitch, roll, yaw.
+
+        """
+        return Quat.to_euler(Quat.rel_rotation(pose.orientation,
+                                               self.orientation))
 
     def distance(self, pose):
         """
@@ -80,7 +129,7 @@ class Pose(object):
     @staticmethod
     def _components(pose_stamped):
         """
-        Return the position and orientation of a PoseStamped as a numpy array.
+        Return the position and orientation of a PoseStamped as numpy arrays.
 
         Parameters
         ----------
@@ -175,12 +224,54 @@ class Frame(object):
                                   localtime(self.stamp.to_time()))
 
     def rel_position(self, pose):
+        """
+        Calculate the relative position with another pose, with local reference.
+
+        Parameters
+        ----------
+        pose : Pose
+            The target pose.
+
+        Returns
+        -------
+        np.ndarray
+            The x, y, z relative positions.
+
+        """
         return self.pose.rel_position(pose, rotation_matrix=self.rotation_matrix)
 
     def rel_euler(self, pose):
+        """
+        Calculate the relative angle with another pose.
+
+        Parameters
+        ----------
+        pose : Pose
+            The target pose.
+
+        Returns
+        -------
+        np.ndarray
+            The relative angle as Euler, in the order of pitch, roll, yaw.
+
+        """
         return self.pose.rel_euler(pose)
 
     def distance(self, pose):
+        """
+        Calculate the distance to another pose.
+
+        Parameters
+        ----------
+        pose : Pose
+            The target pose.
+
+        Returns
+        -------
+        float
+            The distance to the target pose.
+
+        """
         return self.pose.distance(pose)
 
     def __str__(self):
