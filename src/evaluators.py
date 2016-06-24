@@ -118,16 +118,18 @@ class Murata(Evaluator):
 
     """
     def height(self, pose, frame):
-        self._dxg, self._dyg, self.dzg = pose.position - frame.position
-        return ((self._dzg - self.ref_height) / self.ref_height)**2
+        dxg, dyg, dzg = pose.position - frame.position
+        return ((dzg - self.ref_height) / self.ref_height)**2
 
     @staticmethod
     def direction(pose, frame):
         beta = frame.deuler(pose)[2]
         return beta**2
 
-    def elevation(self, pose, frame):
-        alpha = np.arctan2(self._dzg, self._dyg)
+    @staticmethod
+    def elevation(pose, frame):
+        dxg, dyg, dzg = pose.position - frame.position
+        alpha = np.arctan2(dzg, dyg)
         fov_y = d2r(fov_diagonal2vertical(92))
         return (alpha / fov_y)**2
 
