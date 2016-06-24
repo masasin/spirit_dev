@@ -3,16 +3,13 @@
 # (C) 2016  Jean Nassar
 # Released under BSD version 4
 """
-Selects the best image for SPIRIT.
+Select the best image for SPIRIT.
 
 """
 from __future__ import division
 from collections import deque, OrderedDict
 import os
-from time import localtime, strftime
 
-import numpy as np
-from numpy.linalg import norm
 import yaml
 
 import rospkg

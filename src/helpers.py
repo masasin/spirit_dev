@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+# (C) 2015  Jean Nassar
+# Released under BSD
 """
-Helper functions for vector, pose, and tf shenanigans.
+Helper functions and classes for general use.
 
 """
 from __future__ import division

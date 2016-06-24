@@ -1,7 +1,10 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # (C) 2016  Jean Nassar
 # Released under BSD version 4
+"""
+Evaluators for solving SPIRIT.
+
+"""
 import sys
 
 import numpy as np
