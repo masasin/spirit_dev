@@ -27,7 +27,7 @@ def unit_vector(v):
 
     Parameters
     ----------
-    v : np.ndarray
+    v : array-like
         A vector to be normalized.
 
     Returns

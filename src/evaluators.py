@@ -107,14 +107,12 @@ class Murata(Evaluator):
         E = a1 ((z_{camera} - z_{ref})/z_{ref})^2 +
             a2 (β_{xy}/(π / 2))^2 +
             a3 (α/φ_v)^2 +
-            a4 ((|\mathbf{a}| - l_ref)/l_ref)^2 +
-            a5 (|\mathbf{x}^v - \mathbf{x}^v_{curr}|/
-                 |\mathbf{x}^v_{curr}|)^2
+            a4 ((|\mathbf{a}| - l_ref)/l_ref)^2
 
-    where :math:`a1` through :math:`a5` are coefficients, :math:`z` is the
+    where :math:`a1` through :math:`a4` are coefficients, :math:`z` is the
     difference in height of the drone, :math:`α` is the tilt angle,
     :math:`β` is the difference in yaw, :math:`\mathbf{a}` is the distance
-    vector, :math:`l_ref` is the optimal distance, and :math:`φ_v` is the
+    vector, :math:`l_ref` is the reference distance, and :math:`φ_v` is the
     angle of the vertical field of view.
 
     References
