@@ -38,7 +38,7 @@ past_image:
   Murata:
     coeff_height: 2
     coeff_direction: 0.4
-    coeff_elevation: 1
+    coeff_elevation: 0.8
     coeff_distance: 4
     ref_height: 0.3
     ref_distance: 1.5

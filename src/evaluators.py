@@ -9,7 +9,7 @@ import sys
 
 import numpy as np
 
-from helpers import Fov, d2r
+from helpers import Pose, Frame
 
 
 def get_evaluator(method, parent):
@@ -105,15 +105,14 @@ class Murata(Evaluator):
 
     .. math::
         E = a1 ((z_{camera} - z_{ref})/z_{ref})^2 +
-            a2 (β_{xy}/(π / 2))^2 +
-            a3 (α/φ_v)^2 +
+            a2 β_{xy}^2 +
+            a3 α^2 +
             a4 ((|\mathbf{a}| - l_ref)/l_ref)^2
 
     where :math:`a1` through :math:`a4` are coefficients, :math:`z` is the
     difference in height of the drone, :math:`α` is the tilt angle,
     :math:`β` is the difference in yaw, :math:`\mathbf{a}` is the distance
-    vector, :math:`l_ref` is the reference distance, and :math:`φ_v` is the
-    angle of the vertical field of view.
+    vector, and :math:`l_ref` is the reference distance.
 
     References
     ----------
@@ -138,9 +137,23 @@ class Murata(Evaluator):
         return beta**2
 
     def elevation(self, pose, frame):
-        alpha = np.arctan2(self._frame_vars["dzg"], self._frame_vars["dyg"])
-        fov_y = d2r(Fov.d2v(92))
-        return (alpha / fov_y)**2
+        """
+        Get the closeness to the reference elevation.
+
+        Parameters
+        ----------
+        pose : Pose
+            The pose to be evaluated.
+        frame : Frame
+            The frame against which the pose is evaluated.
+
+        Returns
+        -------
+        float
+            The elevation score.
+
+        """
+        return np.arctan2(self._frame_vars["dzg"], self._frame_vars["dyg"]) ** 2
 
     def distance(self, pose, frame):
         return ((frame.distance(pose) - self.ref_distance)
