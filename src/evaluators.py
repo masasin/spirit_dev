@@ -16,10 +16,13 @@ def get_evaluator(method, parent):
 class Evaluator(object):
     def __init__(self, parent):
         self._parent = parent
+        self._vars_frame = {}
 
     def _evaluate_frame(self, pose, frame):
-        return sum(coeff * self.__getattribute__(component)(pose, frame)
-                   for component, coeff in self.eval_coeffs.items())
+        frame_score = sum(coeff * self.__getattribute__(component)(pose, frame)
+                          for component, coeff in self.eval_coeffs.items())
+        self._vars_frame = {}
+        return frame_score
 
     def evaluate(self):
         if self.frames:
@@ -117,19 +120,24 @@ class Murata(Evaluator):
            過去画像履歴を用いた移動マニピュレータの遠隔操作システム
 
     """
+    def _evaluate_frame(self, pose, frame):
+        self._frame_vars.update(
+            {var: value for var, value in zip(("dxg", "dyg", "dzg"),
+                                              pose.position - frame.position)}
+        )
+        super(Murata, self)._evaluate_frame(pose, frame)
+
     def height(self, pose, frame):
-        dxg, dyg, dzg = pose.position - frame.position
-        return ((dzg - self.ref_height) / self.ref_height)**2
+        return ((self._frame_vars["dzg"] - self.ref_height)
+                / self.ref_height)**2
 
     @staticmethod
     def direction(pose, frame):
         beta = frame.deuler(pose)[2]
         return beta**2
 
-    @staticmethod
-    def elevation(pose, frame):
-        dxg, dyg, dzg = pose.position - frame.position
-        alpha = np.arctan2(dzg, dyg)
+    def elevation(self, pose, frame):
+        alpha = np.arctan2(self._frame_vars["dzg"], self._frame_vars["dyg"])
         fov_y = d2r(fov_diagonal2vertical(92))
         return (alpha / fov_y)**2
 
