@@ -239,10 +239,6 @@ class Spirit(Evaluator):
                 / self.ref_distance)**2
 
 
-class Konishi(Evaluator):
-    pass
-
-
 class Murata(Evaluator):
     """
     Use the evaluator from Murata's thesis. [#]_

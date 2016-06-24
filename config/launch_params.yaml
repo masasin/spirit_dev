@@ -34,7 +34,6 @@ past_image:
   ConstantTimeDelay:
     coeff_time: 1
     ref_time: 200
-  # Konishi:
   Murata:
     coeff_height: 2
     coeff_direction: 0.4
