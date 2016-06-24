@@ -33,7 +33,7 @@ class Evaluator(object):
                 return self.frames[0]
 
             results = {}
-            for frame in reversed(list(self.frames)):
+            for frame in self.frames:
                 results[frame] = self._evaluate_frame(self.pose, frame)
             return min(results, key=results.get)
 
