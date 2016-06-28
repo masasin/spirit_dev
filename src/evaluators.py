@@ -9,7 +9,7 @@ import sys
 
 import numpy as np
 
-from helpers import Pose, Frame
+from helpers import memoize, Pose, Frame
 
 
 def get_evaluator(method, parent):
@@ -205,6 +205,7 @@ class Spirit(Evaluator):
         return min((dx**2 + dz**2) / dy**2, 0.2) if dy < 0 else 0.2
 
     @staticmethod
+    @memoize
     def direction(pose, frame):
         """
         Get how close the yaws of pose and frame are.
@@ -224,6 +225,7 @@ class Spirit(Evaluator):
         """
         return frame.rel_euler(pose)[2] ** 2
 
+    @memoize
     def distance(self, pose, frame):
         """
         Get the closeness to the reference distance.
