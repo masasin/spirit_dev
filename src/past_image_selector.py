@@ -66,7 +66,7 @@ class Selector(object):
         self.eval_coeffs = OrderedDict()
         for param, coefficient in params["past_image"][eval_method].items():
             if param.startswith("coeff_"):
-                component = param.split("coeff_", maxsplit=1)[1]
+                component = param.split("coeff_", 1)[1]
                 self.eval_coeffs[component] = coefficient
 
         rospy.Subscriber("/ardrone/slow_image_raw", Image, self.image_callback)
