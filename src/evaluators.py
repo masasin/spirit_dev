@@ -264,9 +264,9 @@ class Spirit(Evaluator):
         Parameters
         ----------
         pose : Pose
-            The pose to be evaluated.
+            (Unused) The pose to be evaluated.
         frame : Frame
-            (Unused) The frame against which the pose is evaluated.
+            The frame against which the pose is evaluated.
 
         Returns
         -------
@@ -274,7 +274,7 @@ class Spirit(Evaluator):
             The similar direction score.
 
         """
-        return self.direction(pose, self.current_frame)
+        return self.direction(frame.pose, self.current_frame)
 
     # noinspection PyUnusedLocal
     def distance_with_current(self, pose, frame):
@@ -284,9 +284,9 @@ class Spirit(Evaluator):
         Parameters
         ----------
         pose : Pose
-            The pose to be evaluated.
+            (Unused) The pose to be evaluated.
         frame : Frame
-            (Unused) The frame against which the pose is evaluated.
+            The frame against which the pose is evaluated.
 
         Returns
         -------
@@ -294,7 +294,7 @@ class Spirit(Evaluator):
             The similar distance score.
 
         """
-        return self.distance(pose, self.current_frame)
+        return self.distance(frame.pose, self.current_frame)
 
 
 class Murata(Evaluator):
