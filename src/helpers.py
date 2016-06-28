@@ -14,6 +14,7 @@ from numpy.linalg import norm
 
 import rospy
 from geometry_msgs.msg import Point, PoseStamped, Quaternion
+from sensor_msgs.msg import Image
 from std_msgs.msg import Header
 import tf
 
