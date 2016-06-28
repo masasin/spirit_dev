@@ -36,7 +36,7 @@ def compile_xacro(inpath, outpath, stdout):
     sp.call("rosrun xacro xacro {inpath} --inorder -o {outpath}"
             .format(inpath=inpath, outpath=outpath).split(),
             stdout=stdout)
-    
+
 
 def get_past_image_keys(launch_params):
     keys = {}
@@ -50,7 +50,7 @@ def get_past_image_keys(launch_params):
 def load_xml(path):
     parser = et.XMLParser(remove_blank_text=True)
     return et.parse(path, parser)
-    
+
 
 def remove_old_elements(node):
     for element in node.findall("{}if".format(NAMESPACES["xacro"])):

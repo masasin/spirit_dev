@@ -9,6 +9,7 @@
     <param name="image_queue_length" value="${params['past_image']['general']['image_queue_length']}"/>
     <xacro:if value="${method == 'ConstantTimeDelay'}">
       <param name="ref_time" value="${method_ns['ref_time']}"/>
+      <param name="coeff_time" value="${method_ns['coeff_time']}"/>
     </xacro:if>
     <xacro:if value="${method == 'Spirit'}">
       <param name="coeff_distance" value="${method_ns['coeff_distance']}"/>
@@ -25,6 +26,7 @@
       <param name="coeff_elevation" value="${method_ns['coeff_elevation']}"/>
     </xacro:if>
     <xacro:if value="${method == 'ConstantDistance'}">
+      <param name="coeff_distance" value="${method_ns['coeff_distance']}"/>
       <param name="ref_distance" value="${method_ns['ref_distance']}"/>
     </xacro:if>
   </node>
