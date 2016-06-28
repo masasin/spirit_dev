@@ -30,6 +30,8 @@ past_image:
     coeff_direction_with_current: 0.5
     coeff_distance_with_current: 1
     ref_distance: 1.5
+    thresh_distance: 0.01  # m
+    thresh_yaw: 0.02  # rad
   ConstantDistance:
     coeff_distance: 1
     ref_distance: 1.5
