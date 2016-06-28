@@ -6,6 +6,7 @@ Helper functions and classes for general use.
 
 """
 from __future__ import division
+from functools import partial
 from time import localtime, strftime
 
 import numpy as np
@@ -42,6 +43,29 @@ def unit_vector(v):
         return v / norm
     else:
         return np.asarray(v)
+
+
+class memoize(object):
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self.func
+        return partial(self, obj)
+
+    def __call__(self, *args, **kwargs):
+        obj = args[0]
+        try:
+            cache = obj.__cache__
+        except AttributeError:
+            cache = obj.__cache__ = {}
+        key = (self.func, args[1:], frozenset(kwargs.items()))
+        try:
+            res = cache[key]
+        except KeyError:
+            res = cache[key] = self.func(*args, **kwargs)
+        return res
 
 
 class Pose(object):
@@ -224,6 +248,7 @@ class Frame(object):
         self.stamp_str = strftime("%Y-%m-%d %H:%M:%S",
                                   localtime(self.stamp.to_time()))
 
+    @memoize
     def rel_position(self, pose):
         """
         Calculate the relative position with another pose, with local reference.
@@ -239,8 +264,10 @@ class Frame(object):
             The x, y, z relative positions.
 
         """
-        return self.pose.rel_position(pose, rotation_matrix=self.rotation_matrix)
+        return self.pose.rel_position(pose,
+                                      rotation_matrix=self.rotation_matrix)
 
+    @memoize
     def rel_euler(self, pose):
         """
         Calculate the relative angle with another pose.
@@ -258,6 +285,7 @@ class Frame(object):
         """
         return self.pose.rel_euler(pose)
 
+    @memoize
     def distance(self, pose):
         """
         Calculate the distance to another pose.
