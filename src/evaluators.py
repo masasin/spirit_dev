@@ -86,9 +86,15 @@ class Evaluator(object):
                 return self.frames[0]
 
             results = {}
-            for frame in self.frames:
-                results[frame] = self._evaluate_frame(self.pose, frame)
-            return min(results, key=results.get)
+            try:
+                for frame in self.frames:
+                    results[frame] = self._evaluate_frame(self.pose, frame)
+            except RuntimeError:
+                # A new frame was added. Cancel the calculation and keep the
+                # displayed frame the same.
+                return self.current_frame
+            else:
+                return min(results, key=results.get)
 
     def __getattr__(self, name):
         """
