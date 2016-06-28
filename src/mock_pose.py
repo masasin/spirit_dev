@@ -26,7 +26,7 @@ class PoseGenerator(object):
         self.pose_pub = rospy.Publisher("/ardrone/pose",
                                         PoseStamped, queue_size=1)
         self.tf_pub = tf2_ros.TransformBroadcaster()
-        self.rate = rospy.Rate(200)
+        self.rate = rospy.Rate(30)
         self.n_items = 100000
         x = np.arange(self.n_items)
         self.x_pos = np.sin(0.1 * x * np.pi / 180)
