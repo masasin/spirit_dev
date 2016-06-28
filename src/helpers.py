@@ -380,6 +380,7 @@ class Quat(object):
             The Euler angle, in the order of pitch, roll, yaw.
 
         """
+        # noinspection PyUnresolvedReferences
         return tf.transformations.euler_from_quaternion(quaternion,
                                                         EULER_CONVENTION)
 
