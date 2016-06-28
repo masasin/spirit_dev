@@ -27,6 +27,8 @@ past_image:
     coeff_centrality: 2.5
     coeff_direction: 0.1
     coeff_distance: 1
+    coeff_direction_with_current: 0.5
+    coeff_distance_with_current: 1
     ref_distance: 1.5
   ConstantDistance:
     coeff_distance: 1

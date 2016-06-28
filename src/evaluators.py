@@ -244,6 +244,46 @@ class Spirit(Evaluator):
         return ((frame.distance(pose) - self.ref_distance)
                 / self.ref_distance)**2
 
+    # noinspection PyUnusedLocal
+    def direction_with_current(self, pose, frame):
+        """
+        Get how close the yaws of pose and the currently displayed frame are.
+
+        Parameters
+        ----------
+        pose : Pose
+            The pose to be evaluated.
+        frame : Frame
+            (Unused) The frame against which the pose is evaluated.
+
+        Returns
+        -------
+        float
+            The similar direction score.
+
+        """
+        return self.direction(pose, self.current_frame)
+
+    # noinspection PyUnusedLocal
+    def distance_with_current(self, pose, frame):
+        """
+        Get the closeness to the currently displayed frame.
+
+        Parameters
+        ----------
+        pose : Pose
+            The pose to be evaluated.
+        frame : Frame
+            (Unused) The frame against which the pose is evaluated.
+
+        Returns
+        -------
+        float
+            The similar distance score.
+
+        """
+        return self.distance(pose, self.current_frame)
+
 
 class Murata(Evaluator):
     """
@@ -285,9 +325,9 @@ class Murata(Evaluator):
         Parameters
         ----------
         pose : Pose
-            The pose to be evaluated.
+            (Unused) The pose to be evaluated.
         frame : Frame
-            The frame against which the pose is evaluated.
+            (Unused) The frame against which the pose is evaluated.
 
         Returns
         -------
@@ -326,9 +366,9 @@ class Murata(Evaluator):
         Parameters
         ----------
         pose : Pose
-            The pose to be evaluated.
+            (Unused) The pose to be evaluated.
         frame : Frame
-            The frame against which the pose is evaluated.
+            (Unused) The frame against which the pose is evaluated.
 
         Returns
         -------
