@@ -111,7 +111,7 @@ class Evaluator(object):
             If the ros parameter has not been defined.
 
         """
-        if name in self._parent._method_params:
+        if name in self._parent.eval_method_params:
             self.__setattr__(name, self._parent.__getattr__(name))
             return self.__getattribute__(name)
         else:
