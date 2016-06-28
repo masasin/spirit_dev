@@ -12,7 +12,8 @@ import numpy as np
 from numpy.linalg import norm
 
 import rospy
-from geometry_msgs.msg import Header, Point, PoseStamped, Quaternion
+from geometry_msgs.msg import Point, PoseStamped, Quaternion
+from std_msgs.msg import Header
 import tf
 
 
