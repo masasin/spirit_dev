@@ -46,11 +46,12 @@ def unit_vector(v):
         return np.asarray(v)
 
 
+# noinspection PyPep8Naming
 class memoize(object):
     def __init__(self, func):
         self.func = func
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj):
         if obj is None:
             return self.func
         return partial(self, obj)
