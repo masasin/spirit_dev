@@ -97,7 +97,7 @@ class PoseGenerator(object):
 
         """
         idx = sequence % self.n_items
-        return Pose.generate_stamped(coords=(30 * self.x_pos[idx], 0, 0),
+        return Pose.generate_stamped(position=(30 * self.x_pos[idx], 0, 0),
                                      orientation=(0, 1, 0, -0.6),
                                      sequence=sequence)
 
@@ -116,7 +116,7 @@ class PoseGenerator(object):
         The generated pose.
 
         """
-        return Pose.generate_stamped(coords=np.random.rand(1, 3) / 100,
+        return Pose.generate_stamped(position=np.random.rand(1, 3) / 100,
                                      orientation=(0.1, 0, 0.1, 0.1),
                                      sequence=sequence)
 
