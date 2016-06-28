@@ -277,6 +277,7 @@ class Murata(Evaluator):
         )
         super(Murata, self)._evaluate_frame(pose, frame)
 
+    # noinspection PyUnusedLocal
     def height(self, pose, frame):
         """
         Get the closeness to a reference height.
@@ -317,6 +318,7 @@ class Murata(Evaluator):
         """
         return frame.rel_euler(pose)[2] ** 2
 
+    # noinspection PyUnusedLocal
     def elevation(self, pose, frame):
         """
         Get the closeness to the reference elevation.
