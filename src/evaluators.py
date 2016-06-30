@@ -214,9 +214,8 @@ class Spirit(Evaluator):
         dx, dy, dz = frame.rel_position(pose)
         return min((dx**2 + dz**2) / dy**2, 0.2) if dy < 0 else 0.2
 
-    @staticmethod
     @memoize
-    def direction(pose, frame):
+    def direction(self, pose, frame):
         """
         Get how close the yaws of pose and frame are.
 

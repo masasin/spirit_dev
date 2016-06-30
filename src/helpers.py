@@ -6,7 +6,7 @@ Helper functions and classes for general use.
 
 """
 from __future__ import division
-from functools import partial
+from functools import partial, update_wrapper
 from time import localtime, strftime
 
 import numpy as np
@@ -50,11 +50,12 @@ def unit_vector(v):
 class memoize(object):
     def __init__(self, func):
         self.func = func
+        update_wrapper(self, func)
 
-    def __get__(self, obj):
-        if obj is None:
+    def __get__(self, instance, owner):
+        if instance is None:
             return self.func
-        return partial(self, obj)
+        return partial(self, instance)
 
     def __call__(self, *args, **kwargs):
         obj = args[0]
