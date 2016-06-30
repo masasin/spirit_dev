@@ -180,7 +180,7 @@ def main():
     Main entry point for script.
 
     """
-    rospy.init_node("past_image_selector")
+    rospy.init_node("past_image_selector", log_level=rospy.INFO)
     Selector()
     rospy.loginfo("Started the past image selector")
     rospy.spin()
