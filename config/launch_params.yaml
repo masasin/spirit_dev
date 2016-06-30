@@ -1,6 +1,6 @@
 camera:
   mock_camera: true  # Default is false.
-  show: true  # Default is false.
+  show: false  # Default is false.
   streams:
     realtime: true
     slow: true
@@ -14,7 +14,7 @@ control:
   js_number: 1  # Default is 0.
 
 pose:
-  mock_pose: false  # Default is false.
+  mock_pose: true  # Default is false.
   real:
     use_mocap: true  # Default is true.
     use_odometry: false  # Default is false.
