@@ -183,13 +183,13 @@ class Spirit(Evaluator):
     """
     def select_best_frame(self):
         # Do not change frame if no difference in position and orientation.
-        if self.current_frame:
+        if self.current_frame is not None:
             distance = self.current_frame.distance(self.pose)
             yaw = self.current_frame.rel_euler(self.pose)[2]
             if distance < self.thresh_distance and yaw < self.thresh_yaw:
                 return self.current_frame
 
-        super(Spirit, self).select_best_frame()
+        return super(Spirit, self).select_best_frame()
 
     @staticmethod
     def centrality(pose, frame):
@@ -326,7 +326,7 @@ class Murata(Evaluator):
             {var: value for var, value in zip(("dxg", "dyg", "dzg"),
                                               pose.position - frame.position)}
         )
-        super(Murata, self)._evaluate_frame(pose, frame)
+        return super(Murata, self)._evaluate_frame(pose, frame)
 
     # noinspection PyUnusedLocal
     def height(self, pose, frame):
