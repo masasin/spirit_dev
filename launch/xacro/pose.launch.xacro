@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:property name="params" value="${load_yaml('../../config/launch_params.yaml')}" />
+    <xacro:property name="params" value="${load_yaml('../../config/.launch_params.yaml')}" />
     <xacro:property name="real" value="${params['pose']['real']}" />
 
     <xacro:macro name="mocap">

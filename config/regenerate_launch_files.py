@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # (C) 2015  Jean Nassar
 # Released under BSD
+from __future__ import print_function
 import glob
 import imp
 import inspect
@@ -9,6 +10,7 @@ from lxml import etree as et
 import os
 import subprocess as sp
 
+import netifaces as ni
 import rospkg
 import tqdm
 import yaml
@@ -101,6 +103,7 @@ def verify_coeffs(method, past_image_keys):
 
     """
     method_params = past_image_keys[method]
+    cwd = os.getcwd()
     os.chdir(get_ros_dir("spirit", "src"))
     helpers = imp.load_source("helpers", "helpers.py")  # Needed for import
     evaluators = imp.load_source("evaluators", "evaluators.py")
@@ -115,15 +118,43 @@ def verify_coeffs(method, past_image_keys):
     if bad_keys:
         raise TypeError("The following components are not callable: {}"
                         .format(bad_keys))
+    os.chdir(cwd)
+
+
+def update_auto_keys(params):
+    def extract_js_number(s):
+        return int(s[2:])
+
+    params = params.copy()
+    if (not params["camera"]["mock_camera"]
+            and params["camera"]["real"]["drone_ip"] == "auto"):
+        wlan_iface = [i for i in ni.interfaces() if i.startswith("wlan")][-1]
+        drone_ip = ni.ifaddresses(wlan_iface)[ni.AF_INET][0]["addr"]
+        params["camera"]["real"]["drone_ip"] = drone_ip
+        print("drone_ip set to", drone_ip)
+
+    if (params["control"]["use_joystick"]
+            and params["control"]["js_number"] == "auto"):
+        joysticks = [os.path.basename(i) for i in glob.glob("/dev/input/js*")]
+        js_number = extract_js_number(max(joysticks, key=extract_js_number))
+        params["control"]["js_number"] = js_number
+        print("js_number set to", js_number)
+
+    return params
 
 
 def main():
     os.chdir(get_ros_dir("spirit", "config"))
     with open(CONFIG_FILE) as fin:
         launch_params = yaml.load(fin)
+    updated_params = update_auto_keys(launch_params)
+
     method = launch_params["past_image"]["general"]["eval_method"]
     past_image_keys = get_past_image_keys(launch_params)
     verify_coeffs(method, past_image_keys)
+
+    with open("." + CONFIG_FILE, "w") as fout:
+        yaml.dump(updated_params, fout)
 
     os.chdir(get_ros_dir("spirit", "launch"))
     update_past_image_generator(past_image_keys)
