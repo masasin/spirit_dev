@@ -345,7 +345,7 @@ class Controller(object):
         try:
             self.controller = pygame.joystick.Joystick(stick_id)
         except pygame.error:
-            raise NoControllerError
+            raise
         self.stick_id = stick_id
         self.make = self.controller.get_name()
 
