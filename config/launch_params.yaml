@@ -1,16 +1,16 @@
 camera:
-  mock_camera: true  # Default is false.
+  mock_camera: false  # Default is false.
   show: true  # Default is false.
   streams:
     realtime: true
-    slow: true
+    slow: false
     past_image: false
   real:
-    drone_ip: auto  # Default is 192.168.1.1.
+    drone_ip: 192.168.1.1  # Default is 192.168.1.1.
   slowdown: 15  # times. Default is 15.
 
 control:
-  use_joystick: false  # Default is true.
+  use_joystick: true  # Default is true.
   js_number: auto  # Default is 1. /dev/input/js1
 
 pose:

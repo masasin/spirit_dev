@@ -10,7 +10,6 @@ from lxml import etree as et
 import os
 import subprocess as sp
 
-import netifaces as ni
 import rospkg
 import tqdm
 import yaml
@@ -126,12 +125,6 @@ def update_auto_keys(params):
         return int(s[2:])
 
     params = params.copy()
-    if (not params["camera"]["mock_camera"]
-            and params["camera"]["real"]["drone_ip"] == "auto"):
-        wlan_iface = [i for i in ni.interfaces() if i.startswith("wlan")][-1]
-        drone_ip = ni.ifaddresses(wlan_iface)[ni.AF_INET][0]["addr"]
-        params["camera"]["real"]["drone_ip"] = drone_ip
-        print("drone_ip set to", drone_ip)
 
     if (params["control"]["use_joystick"]
             and params["control"]["js_number"] == "auto"):
