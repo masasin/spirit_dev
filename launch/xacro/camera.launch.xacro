@@ -12,7 +12,7 @@
             <param name="navdata_demo" value="False" />
             <param name="realtime_navdata" value="True" />
             <param name="realtime_video" value="True" />
-            <param name="looprate" value="200" />
+            <param name="looprate" value="30" />
 
             <param name="outdoor" value="0" />
             <param name="flight_without_shell" value="0" />
