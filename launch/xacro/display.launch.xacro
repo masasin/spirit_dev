@@ -2,13 +2,16 @@
 <launch xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:property name="params" value="${load_yaml('../../config/.launch_params.yaml')}"/>
     <xacro:macro name="display" params="topic title">
-        <node name="display_${topic}" pkg="spirit" type="display_video.py" output="screen">
+        <node name="display_${topic}" pkg="spirit" type="qt_display_video.py" output="screen">
             <remap from="image" to="ardrone/${topic}" />
             <param name="window_name" value="${title}" />
         </node>
     </xacro:macro>
 
     <xacro:if value="${params['camera']['show']}">
+        <xacro:if value="${params['camera']['streams']['realtime']}">
+            <xacro:display topic="image_raw" title="30 Hz feed" />
+        </xacro:if>
         <xacro:if value="${params['camera']['streams']['slow']}">
 	        <xacro:display topic="slow_image_raw" title="2 Hz feed" />
         </xacro:if>

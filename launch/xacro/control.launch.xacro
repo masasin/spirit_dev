@@ -11,25 +11,21 @@
             <param name="dev" type="str" value="/dev/input/js${params['control']['js_number']}" />
         </node>
 
-        <!-- Launches the joystick controller -->
 	    <node name="joystick_controller"
-              pkg="ardrone_tutorials"
+              pkg="spirit"
               type="joystick_controller.py"
               output="screen"
               required="true">
 
-            <!-- Configures the joystick button mapping -->
             <param name="ButtonEmergency" value="11" />
             <param name="ButtonLand" value="8" />
             <param name="ButtonTakeoff" value="10" />
 
-            <!-- Configures the joystick axis mapping -->
             <param name="AxisRoll" value="0" />
             <param name="AxisPitch" value="1" />
             <param name="AxisYaw" value="2" />
             <param name="AxisZ"	value="3" />
 
-            <!-- Configures the joystick mapping -->
             <param name="ScaleRoll" value="1" />
             <param name="ScalePitch" value="1" />
             <param name="ScaleYaw" value="1" />
