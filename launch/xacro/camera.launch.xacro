@@ -2,16 +2,26 @@
 <launch xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:property name="params" value="${load_yaml('../../config/.launch_params.yaml')}"/>
 
-    <xacro:macro name="ardrone_camera" >
+    <xacro:macro name="ardrone_driver" >
         <node name="ardrone"
               pkg="ardrone_autonomy"
               type="ardrone_driver"
               output="screen"
+              clear_params="true"
               args="-ip ${params['camera']['real']['drone_ip']}" >
             <param name="navdata_demo" value="False" />
             <param name="realtime_navdata" value="True" />
             <param name="realtime_video" value="True" />
-            <param name="looprate" value="30" />
+            <param name="looprate" value="200" />
+
+            <param name="outdoor" value="0" />
+            <param name="flight_without_shell" value="0" />
+
+            <param name="altitude_max" value="2000" />  <!-- in millimeters -->
+            <param name="altitude_min" value="50" />  <!-- in millimeters -->
+            <param name="euler_angle_max" value="0.1" />  <!-- maximum allowable body angle in radians = 5 degrees -->
+            <param name="control_vz_max" value="200" />  <!-- maximum z velocity in mm/sec = 0.2 m/sec -->
+            <param name="control_yaw" value="0.7" />  <!-- maximum rotation rate in radians/sec = 40 deg per second -->
         </node>
     </xacro:macro>
 
@@ -30,13 +40,12 @@
         </node>
     </xacro:macro>
 
-
     <xacro:if value="${params['camera']['mock_camera']}">
         <xacro:mock_camera />
     </xacro:if>
 
     <xacro:unless value="${params['camera']['mock_camera']}">
-        <xacro:ardrone_camera />
+        <xacro:ardrone_driver />
     </xacro:unless>
 
     <node name="reduce_framerate" pkg="spirit" type="reduce_framerate.py" output="screen">

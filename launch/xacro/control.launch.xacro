@@ -3,26 +3,41 @@
     <xacro:property name="params" value="${load_yaml('../../config/.launch_params.yaml')}"/>
 
     <xacro:macro name="joystick_gui" >
-    <rosparam param="joy_node/dev">
-        /dev/input/js${params['control']['js_number']}
-    </rosparam>
-        <node name="drone_autopilot"
-              pkg="tum_ardrone"
-              type="drone_autopilot"
-              output="screen" />
+        <node name="joy_node"
+              pkg="joy"
+              type="joy_node"
+              output="screen"
+              clear_params="true" >
+            <param name="dev" type="str" value="/dev/input/js${params['control']['js_number']}" />
+        </node>
 
-        <node name="drone_gui"
-              pkg="tum_ardrone"
-              type="drone_gui"
-              output="screen" />
+        <!-- Launches the joystick controller -->
+	    <node name="joystick_controller"
+              pkg="ardrone_tutorials"
+              type="joystick_controller.py"
+              output="screen"
+              required="true">
 
-    <node name="joy_node"
-          pkg="joy"
-          type="joy_node"
-          output="screen" />
+            <!-- Configures the joystick button mapping -->
+            <param name="ButtonEmergency" value="11" />
+            <param name="ButtonLand" value="8" />
+            <param name="ButtonTakeoff" value="10" />
+
+            <!-- Configures the joystick axis mapping -->
+            <param name="AxisRoll" value="0" />
+            <param name="AxisPitch" value="1" />
+            <param name="AxisYaw" value="2" />
+            <param name="AxisZ"	value="3" />
+
+            <!-- Configures the joystick mapping -->
+            <param name="ScaleRoll" value="1" />
+            <param name="ScalePitch" value="1" />
+            <param name="ScaleYaw" value="1" />
+            <param name="ScaleZ" value="1" />
+	    </node>
     </xacro:macro>
 
     <xacro:if value="${params['control']['use_joystick']}">
-      <xacro:joystick_gui />
+        <xacro:joystick_gui />
     </xacro:if>
 </launch>
