@@ -2,7 +2,6 @@ camera:
   mock_camera: false  # Default is false.
   show: true  # Default is false.
   streams:
-    realtime: true
     slow: false
     past_image: false
   real:
