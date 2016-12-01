@@ -6,13 +6,15 @@ from __future__ import print_function
 import glob
 import imp
 import inspect
-from lxml import etree as et
+import logging
 import os
 import subprocess as sp
 
-import rospkg
+from lxml import etree as et
 import tqdm
 import yaml
+
+import rospkg
 
 
 CONFIG_FILE = "launch_params.yaml"
