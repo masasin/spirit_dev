@@ -131,7 +131,11 @@ def update_auto_keys(params):
     if (params["control"]["use_joystick"]
             and params["control"]["js_number"] == "auto"):
         joysticks = [os.path.basename(i) for i in glob.glob("/dev/input/js*")]
-        js_number = extract_js_number(max(joysticks, key=extract_js_number))
+        try:
+            js_number = extract_js_number(max(joysticks, key=extract_js_number))
+        except ValueError:
+            logging.warning("No joysticks detected! Defaulting to /dev/input/js0")
+            js_number = 0
         params["control"]["js_number"] = js_number
         print("js_number set to", js_number)
 
