@@ -12,7 +12,7 @@ in the status bar.
 import sys
 from threading import Lock
 
-from PySide import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import rospy
 from sensor_msgs.msg import Image
@@ -25,7 +25,7 @@ CONNECTION_CHECK_PERIOD = 250  # ms
 GUI_UPDATE_PERIOD = 20  # ms
 
 
-class DroneVideoDisplay(QtGui.QMainWindow):
+class DroneVideoDisplay(QtWidgets.QMainWindow):
     state_messages = {
         DroneState.Emergency: "Emergency",
         DroneState.Inited: "Initialized",
@@ -48,7 +48,7 @@ class DroneVideoDisplay(QtGui.QMainWindow):
         # Setup GUI - a label which fills the whole window and holds our image
         self.setWindowTitle(rospy.get_param("~window_name",
                                             "AR.Drone Video Feed"))
-        self.image_box = QtGui.QLabel(self)
+        self.image_box = QtWidgets.QLabel(self)
         self.setCentralWidget(self.image_box)
 
         rospy.Subscriber("/ardrone/navdata", Navdata, self.receive_navdata)
@@ -125,7 +125,7 @@ class DroneVideoDisplay(QtGui.QMainWindow):
 
 def main():
     rospy.init_node("ardrone_video_display")
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     display = DroneVideoDisplay()
     display.show()
     app.exec_()
