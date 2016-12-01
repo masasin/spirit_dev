@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+xhost local:root > /dev/null
+docker run -it \
+    -v ${HOME}/documents/spirit_dev/spirit/:/root/catkin_ws/src/spirit/\
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -e DISPLAY=unix$DISPLAY \
+    --device /dev/snd \
+    spirit_dev_py2
