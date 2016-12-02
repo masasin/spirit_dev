@@ -1,6 +1,0 @@
-SPIRIT is my Masters research project.
-
-After building and running the docker container, run the following commands:
-
-    workon spirit
-    toggleglobalsitepackages
