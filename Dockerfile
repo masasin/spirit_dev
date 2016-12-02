@@ -21,11 +21,10 @@ RUN echo "source /root/catkin_ws/devel/setup.bash" >> /root/.bashrc
 
 RUN apt-get install -y ros-kinetic-ardrone-autonomy
 RUN apt-get install -y ros-kinetic-image-proc
-RUN apt-get install -y ros-kinetic-usb-cam
 
 WORKDIR /root/catkin_ws/src
-# RUN git clone https://github.com/AutonomyLab/ardrone_autonomy.git -b indigo-devel
 RUN git clone https://github.com/ros-drivers/mocap_optitrack.git
+RUN git clone https://github.com/bosch-ros-pkg/usb_cam.git
 
 COPY spirit/ /root/catkin_ws/src/spirit
 
