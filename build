@@ -1,1 +1,1 @@
-docker build -t spirit_dev_py2 . -f Dockerfile.py2
+docker build -t spirit_dev . -f Dockerfile
