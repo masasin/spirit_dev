@@ -32,5 +32,14 @@ WORKDIR /root/catkin_ws
 RUN /ros_entrypoint.sh rosdep install --from-paths src -iy
 RUN /ros_entrypoint.sh catkin_make
 
+RUN apt-get install -y python-opengl
+RUN apt-get install -y  python-pyqt5.qtopengl
+RUN apt-get install -y  python-pyqt5.qtmultimedia
+
+# nvidia-docker hooks
+LABEL com.nvidia.volumes.needed="nvidia_driver"
+ENV PATH /usr/local/nvidia/bin:${PATH}
+ENV LD_LIBRARY_PATH /usr/local/nvidia/lib:/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}
+
 WORKDIR /root/catkin_ws/src/spirit
 RUN /bin/bash -c "source /usr/local/bin/virtualenvwrapper.sh; mkvirtualenv spirit; pip install catkin_pkg defusedxml jupyter lxml numpy pygame pyyaml rospkg tqdm"
