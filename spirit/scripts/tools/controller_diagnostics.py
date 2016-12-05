@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # (C) 2016  Jean Nassar
 # Released under BSD version 4
 """
@@ -10,6 +11,7 @@ automatically, and can be used if its button mapping has been previously
 registered.
 
 """
+from __future__ import print_function
 import logging
 
 import pygame
