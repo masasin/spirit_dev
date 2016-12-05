@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+set -e
+
+xhost +local:root
+
 nvidia-docker run -it \
     -v ${HOME}/documents/spirit_dev/spirit/:/root/catkin_ws/src/spirit/\
     -v /dev/input:/dev/input \
@@ -8,3 +12,5 @@ nvidia-docker run -it \
     --device /dev/snd \
     --privileged \
     spirit_dev
+
+xhost -local:root
