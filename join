@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+
+docker exec -it `docker ps -lqf "ancestor=spirit_dev,status=running"` bash
