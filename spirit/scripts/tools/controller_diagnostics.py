@@ -441,5 +441,7 @@ if __name__ == "__main__":
             try:
                 print(c.state, end="\r")
             except KeyboardInterrupt:
+                print()
+                print("Ending diagnostics...")
                 break
 
