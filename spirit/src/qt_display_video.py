@@ -40,7 +40,7 @@ class DroneVideoDisplay(QtWidgets.QMainWindow):
     }
     msg_disconnected = "Disconnected"
     msg_unknown = "Unknown State"
-    msg_status_template = "{state} (Battery: {battery:.0f})%"
+    msg_status_template = "{state} (Battery: {battery:.0f}%)"
 
     def __init__(self):
         super(DroneVideoDisplay, self).__init__()
