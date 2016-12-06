@@ -9,8 +9,10 @@
               type="mocap_node"
               respawn="false"
               launch-prefix=""
+              output="screen"
               required="true" >
             <rosparam file="$(find spirit)/config/mocap.yaml" command="load" />
+            <param name="optitrack_config/multicast_address" value="239.255.42.99" />
         </node>
     </xacro:macro>
 
