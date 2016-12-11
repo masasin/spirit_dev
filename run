@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-xhost +local:root
+xhost +local:root > /dev/null
 
 nvidia-docker run -it \
     -v ${HOME}/documents/spirit_dev/spirit/:/root/catkin_ws/src/spirit/\
@@ -9,6 +9,7 @@ nvidia-docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e DISPLAY \
     -e QT_X11_NO_MITSHM=1 \
+    --network=host \
     --device /dev/snd \
     --privileged \
     spirit_dev

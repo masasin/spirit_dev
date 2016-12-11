@@ -6,3 +6,5 @@ rigid_bodies:
         pose2d: ardrone/ground_pose
         child_frame_id: ardrone/body
         parent_frame_id: world
+optitrack_config:
+    multicast_address: 239.255.42.99
