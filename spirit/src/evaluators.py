@@ -215,8 +215,7 @@ class Spirit(Evaluator):
         dx, dy, dz = frame.rel_position(pose)
         return min((dx**2 + dz**2) / dy**2, 0.2) if dy < 0 else 0.2
 
-    @staticmethod
-    def centrality2(pose, frame):
+    def centrality2(self, pose, frame):
         """
         Get how close to the centre of the frame the pose is.
 
