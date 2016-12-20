@@ -14,14 +14,14 @@ control:
   js_number: auto  # Default is 1. /dev/input/js1
 
 pose:
-  mock_pose: false  # Default is false.
+  mock_pose: true  # Default is false.
   real:
     use_mocap: true  # Default is true.
     use_odometry: false  # Default is false.
 
 past_image:
   general:
-    eval_method: Spirit
+    eval_method: ConstantTimeDelay  # Default is Spirit.
     image_queue_length: 60  # Use None for infinite.
   Spirit:
     # coeff_centrality: 2.5
@@ -38,7 +38,7 @@ past_image:
     ref_distance: 1.5
   ConstantTimeDelay:
     coeff_time: 1
-    ref_time: 200
+    ref_delay: 200
   Murata:
     coeff_height: 2
     coeff_direction: 0.4
@@ -49,4 +49,4 @@ past_image:
 
 visualization:
   show: true
-  debug: false  # false, online, offline
+  debug: offline  # false, online, offline
