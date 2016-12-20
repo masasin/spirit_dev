@@ -35,6 +35,10 @@ RUN /ros_entrypoint.sh catkin_make
 RUN apt-get install -y python-opengl
 RUN apt-get install -y  python-pyqt5.qtopengl
 RUN apt-get install -y  python-pyqt5.qtmultimedia
+RUN apt-get install -y python-dev
+RUN apt-get install -y libxml2-dev
+RUN apt-get install -y libxslt1-dev
+RUN apt-get install -y zlib1g-dev
 
 # nvidia-docker hooks
 LABEL com.nvidia.volumes.needed="nvidia_driver"

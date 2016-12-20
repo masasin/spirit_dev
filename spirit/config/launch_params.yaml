@@ -1,5 +1,5 @@
 camera:
-  mock_camera: false  # Default is false.
+  mock_camera: true  # Default is false.
   show: true  # Default is false.
   streams:
     realtime: true
