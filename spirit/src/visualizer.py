@@ -689,7 +689,8 @@ class Screen(RendererBase):
         while self.is_active:
             try:
                 self.step()
-            except pg.error:
+            except pg.error as e:
+                print(e)
                 pg.quit()
                 self.is_active = False
             pg.time.wait(self.wait)
