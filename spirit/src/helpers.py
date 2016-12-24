@@ -183,6 +183,10 @@ class Pose(object):
 
         return position, orientation
 
+    @classmethod
+    def from_components(cls, position, orientation, sequence=0):
+        return cls(cls.generate_stamped(position, orientation, sequence))
+
     @staticmethod
     def generate_stamped(position, orientation, sequence=0):
         """
