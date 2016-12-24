@@ -823,8 +823,8 @@ def test_offline(size=(640, 480)):
     # rot_cam = [0.0006, 0.0042, 0.0166, 0.9999]
     # pos_drone = [-0.4767, 1.3597, 0.0770]
     # rot_drone = [0.0078, 0.0087, 0.0059, 0.9999]
-    screen.pose_cam = Pose.generate_stamped(pos_cam, rot_cam)
-    screen.pose_drone = Pose.generate_stamped(pos_drone, rot_drone)
+    screen.pose_cam = Pose(Pose.generate_stamped(pos_cam, rot_cam))
+    screen.pose_drone = Pose(Pose.generate_stamped(pos_drone, rot_drone))
 
     time.sleep(3)
     screen.add_textures("media/bird.jpg")
