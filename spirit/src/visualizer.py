@@ -441,7 +441,9 @@ class RendererBase(TexturesBase):
             The current pose of the drone.
 
         """
-        rel_pos, rot_cam, rot_drone = self._find_rel_pos(pose_cam, pose_drone)
+        rel_pos = pose_cam.position  - pose_drone.position
+        rot_cam = pose_cam.orientation.copy()
+        rot_drone = pose_drone.orientation.copy()
 
         rot_cam[0] *= -1
         rot_cam[1], rot_cam[2] = rot_cam[2], rot_cam[1]
@@ -464,7 +466,7 @@ class RendererBase(TexturesBase):
 
             # Set camera position.
             # Convert position to OpenGL coordinate frame first.
-            rel_pos[1], rel_pos[2] = rel_pos[2], -rel_pos[1]
+            rel_pos[1], rel_pos[2] = -rel_pos[2], -rel_pos[1]
             gl.glTranslate(*rel_pos)
 
             self.draw_background(scale=scale, centre=centre)
@@ -559,36 +561,6 @@ class RendererBase(TexturesBase):
                 gl.glColor3fv(colour)
                 gl.glRasterPos2f(x, y)
                 glut.glutBitmapString(font, text)
-
-    @staticmethod
-    def _find_rel_pos(pose_cam, pose_drone):
-        """
-        Find the relative positions and orientations of the camera and the
-        drone.
-
-        Parameters
-        ----------
-        pose_cam : Pose
-            The pose of the drone when the background image was taken.
-        pose_drone : Pose
-            The current pose of the drone.
-
-        Returns
-        -------
-        rel_pos : np.ndarray
-            A 3-array with the x, y, and z positions of the relative positions
-            of the drone, converted to the OpenGL coordinate system.
-        rot_cam : np.ndarray
-            A quaternion representing the orientation of the camera, in x, y, z,
-            w format.
-        rot_drone : np.ndarray
-            A quaternion representing the orientation of the drone, in x, y, z,
-            w format.
-
-        """
-        rel_pos = pose_cam.position - pose_drone.position
-        rel_pos[2] *= -1
-        return rel_pos, pose_cam.orientation, pose_drone.orientation
 
     def _find_drone_on_image(self, rel_pos):
         """
