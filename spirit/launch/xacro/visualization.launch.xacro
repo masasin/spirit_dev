@@ -3,7 +3,7 @@
     <xacro:property name="params" value="${load_yaml('../../config/.launch_params.yaml')}"/>
 
     <xacro:if value="${params['visualization']['show']}">
-      <node name="visualizer" pkg="spirit" type="visualizer.py" output="screen">
+      <node name="visualizer" pkg="spirit" type="visualizer.py" required="true" output="screen">
 	  <param name="debug" value="${params['visualization']['debug']}" />
       </node>
     </xacro:if>
