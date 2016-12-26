@@ -12,6 +12,7 @@
       <param name="coeff_time" value="${method_ns['coeff_time']}"/>
     </xacro:if>
     <xacro:if value="${method == 'Spirit'}">
+      <param name="coeff_centrality" value="${method_ns['coeff_centrality']}"/>
       <param name="coeff_distance_with_current" value="${method_ns['coeff_distance_with_current']}"/>
       <param name="coeff_direction_with_current" value="${method_ns['coeff_direction_with_current']}"/>
       <param name="thresh_yaw" value="${method_ns['thresh_yaw']}"/>
