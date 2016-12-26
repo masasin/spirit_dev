@@ -346,9 +346,9 @@ class Murata(Evaluator):
 
     """
     def _evaluate_frame(self, pose, frame):
-        self._frame_vars.update(
+        self._vars_frame.update(
             {var: value for var, value in zip(("dxg", "dyg", "dzg"),
-                                              pose.position - frame.position)}
+                                              pose.position - frame.pose.position)}
         )
         return super(Murata, self)._evaluate_frame(pose, frame)
 
@@ -370,7 +370,7 @@ class Murata(Evaluator):
             The height score.
 
         """
-        return ((self._frame_vars["dzg"] - self.ref_height)
+        return ((self._vars_frame["dzg"] - self.ref_height)
                 / self.ref_height)**2
 
     @staticmethod
@@ -411,7 +411,7 @@ class Murata(Evaluator):
             The elevation score.
 
         """
-        return np.arctan2(self._frame_vars["dzg"], self._frame_vars["dyg"]) ** 2
+        return np.arctan2(self._vars_frame["dzg"], self._vars_frame["dyg"]) ** 2
 
     def distance(self, pose, frame):
         """
