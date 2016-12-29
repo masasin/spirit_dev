@@ -317,7 +317,7 @@ class Spirit(Evaluator):
             The similar distance score.
 
         """
-        return self.distance(frame.pose, self.current_frame)
+        return frame.distance(pose) / self.ref_distance
 
 
 class Murata(Evaluator):
