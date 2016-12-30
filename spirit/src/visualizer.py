@@ -429,6 +429,27 @@ class RendererBase(TexturesBase):
         self.fov_x = Fov.v2h(self.fov_y, self.aspect_ratio)
         self._image_distance = self.height / (2 * np.tan(d2r(self.fov_y) / 2))
 
+    @staticmethod
+    def _glize_angle(quaternion):
+        """
+        Change a quaternion to OpenGL format.
+
+        Parameters
+        ----------
+        quaternion : Sequence[float]
+            A quaternion in x, y, z, w format.
+
+        Returns
+        -------
+        Sequence[float]
+            The quaternion in OpenGL format.
+
+        """
+        quaternion = quaternion.copy()
+        quaternion[0] *= -1
+        quaternion[1], quaternion[2] = quaternion[2], quaternion[1]
+        return quaternion
+
     def render(self, pose_cam, pose_drone):
         """
         Render the scene.
@@ -441,15 +462,9 @@ class RendererBase(TexturesBase):
             The current pose of the drone.
 
         """
-        rel_pos = pose_cam.position  - pose_drone.position
-        rot_cam = pose_cam.orientation.copy()
-        rot_drone = pose_drone.orientation.copy()
-
-        rot_cam[0] *= -1
-        rot_cam[1], rot_cam[2] = rot_cam[2], rot_cam[1]
-
-        rot_drone[0] *= -1
-        rot_drone[1], rot_drone[2] = rot_drone[2], rot_drone[1]
+        rel_pos = pose_cam.position - pose_drone.position
+        rot_cam = self._glize_angle(pose_cam.orientation)
+        rot_drone = self._glize_angle(pose_drone.orientation)
 
         # Temporarily turn off zooming.
         if self.distance:
