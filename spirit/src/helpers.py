@@ -185,6 +185,24 @@ class Pose(object):
 
     @classmethod
     def from_components(cls, position, orientation, sequence=0):
+        """
+        Generate a Pose from its components.
+
+        Parameters
+        ----------
+        position : Sequence[float]
+            The x, y, and z coordinates of the pose.
+        orientation : Sequence[float]
+            The x, y, z, and w quaternion of the pose.
+        sequence : Optional[int]
+            The sequence number of the pose.
+
+        Returns
+        -------
+        Pose
+            The generated pose.
+
+        """
         return cls(cls.generate_stamped(position, orientation, sequence))
 
     @staticmethod
