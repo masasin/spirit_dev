@@ -142,6 +142,9 @@ qtcreator-*
 # Pycharm
 .idea/
 
+# Jupyter
+.ipynb_checkpoints
+
 # Catkin custom files
 CATKIN_IGNORE
 spirit/config/.launch_params.yaml
