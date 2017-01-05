@@ -45,7 +45,7 @@ class Selector(object):
         If the rosparam has not been set.
 
     """
-    def __init__(self, image_queue_length=None, eval_method=None):
+    def __init__(self, image_queue_length=None, eval_method=None, debug=False):
         if image_queue_length is None:
             image_queue_length = rospy.get_param("~image_queue_length")
         if eval_method is None:
@@ -59,6 +59,7 @@ class Selector(object):
         self.pose = None
         self.current_frame = None
         self.tracked = None
+        self.debug = debug
 
         self.evaluator = get_evaluator(eval_method, parent=self)
 
@@ -121,7 +122,8 @@ class Selector(object):
         best_frame = self.evaluator.select_best_frame()
         if best_frame is not None:
             self.current_frame = best_frame
-            self.past_image_pub.publish(best_frame.image)
+            if not self.debug:
+                self.past_image_pub.publish(best_frame.image)
             self.past_pose_pub.publish(best_frame.pose_stamped)
 
     def tracked_callback(self, tracked):
