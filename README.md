@@ -1,6 +1,6 @@
 SPIRIT (Subimposed Past Image Records Implemented for Teleoperation) is the Masters research project of Jean Nassar.
 
-The thesis can be found in the [thesis](https://github.com/masasin/thesis) repository.
+The thesis can be found in the [spirit_thesis](https://github.com/masasin/spirit_thesis) repository.
 
 Assumptions:
 
