@@ -45,18 +45,21 @@ class Selector(object):
         If the rosparam has not been set.
 
     """
-    def __init__(self):
-        self.clear()
-        self.current_frame = None
+    def __init__(self, image_queue_length=None, eval_method=None):
+        if image_queue_length is None:
+            image_queue_length = rospy.get_param("~image_queue_length")
+        if eval_method is None:
+            eval_method = rospy.get_param("~eval_method")
 
-        self.frames = deque([], rospy.get_param("~image_queue_length"))
+        self.clear()
+
+        self.frames = deque([], image_queue_length)
 
         self.image = None
         self.pose = None
         self.current_frame = None
         self.tracked = None
 
-        eval_method = rospy.get_param("~eval_method")
         self.evaluator = get_evaluator(eval_method, parent=self)
 
         with open(os.path.join(rospkg.RosPack().get_path("spirit"),
