@@ -25,7 +25,7 @@ In order to run the system:
     * [ ] Perform wanding and ground-plane setup.
     * [ ] Create a rigid body from the markers on the drone.
   * [ ] Open the Rigid Bodies pane.
-    * [ ] (Optional) Set the name to something convenient, such as "drone".
+    * [ ] Set the name to something convenient, such as "drone". (Optional) 
     * [ ] Under Advanced, set User Data to "1".
   * [ ] Open the Streaming pane. Ensure all settings are as follows:
     * Broadcast Frame Data: On
