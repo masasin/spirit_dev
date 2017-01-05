@@ -14,6 +14,6 @@ nvidia-docker run -it \
     --network=host \
     --device /dev/snd \
     --privileged \
-    spirit_dev
+    spirit_dev:v2
 
 xhost -local:root
