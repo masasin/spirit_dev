@@ -45,8 +45,14 @@ class Evaluator(object):
     parent : Selector
         The selector using the evaluator.
 
+    Attributes
+    ----------
+    is_busy : bool
+        Whether a calculation is currently running.
+
     """
     def __init__(self, parent):
+        self.is_busy = False
         self._parent = parent
         self._vars_frame = {}
 
@@ -67,10 +73,15 @@ class Evaluator(object):
             The score for the pose against the frame.
 
         """
-        frame_score = sum(coeff * self.__getattribute__(component)(pose, frame)
-                          for component, coeff in self.eval_coeffs.items())
-        self._vars_frame = {}
-        return frame_score
+        try:
+            self.is_busy = True
+            score = sum(coeff * self.__getattribute__(component)(pose, frame)
+                        for component, coeff in self.eval_coeffs.items())
+            self._vars_frame = {}
+        finally:
+            self.is_busy = False
+
+        return score
 
     def select_best_frame(self):
         """

@@ -100,6 +100,8 @@ class Selector(object):
         """
         Update `pose`, and select the best past image.
 
+        Short circuits if an evaluation function is still being run.
+
         Parameters
         ----------
         pose_stamped : PoseStamped
@@ -109,6 +111,9 @@ class Selector(object):
         rospy.logdebug("New pose")
         self._pose_stamped = pose_stamped
         self.pose = Pose(pose_stamped)
+
+        if self.evaluator.is_busy:
+            return
 
         best_frame = self.evaluator.select_best_frame()
         if best_frame is not None:
