@@ -236,6 +236,18 @@ class Pose(object):
         pose_stamped.pose.orientation = Quaternion(*orientation)
         return pose_stamped
 
+    def __repr__(self):
+        return "<Pose ({position}, {orientation})>".format(
+            position=self.position.tolist(),
+            orientation=self.orientation.tolist(),
+            time=self.header.stamp)
+
+    def __str__(self):
+        return "<Pose ({position}, {orientation}): {time}>".format(
+            position=self.position.tolist(),
+            orientation=self.orientation.tolist(),
+            time=self.header.stamp)
+
 
 class Frame(object):
     """
@@ -328,10 +340,8 @@ class Frame(object):
         """
         return self.pose.distance(pose)
 
-    def __str__(self):
-        return "Frame ({position}): {time}".format(
-            position=self.pose.position.tolist(),
-            time=self.stamp)
+    def __repr__(self):
+        return "<Frame({pose})>".format(pose=self.pose)
 
 
 class Fov(object):
