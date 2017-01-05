@@ -115,17 +115,29 @@ class Drone(Shape):
         ]) * size
         self.arrow_vertices += offset
         self.arrow_vertices[:, 1] *= height
-        self.arrow_colours = (
+
+        self.arrow_colours_l = (
             (1, 0, 0),  # Red on left
             (1, 1, 1),  # White in front
+            (1, 0.5, 0),  # Orange in back
+        )
+        self.arrow_edges_l = (
+            (1, 0), (0, 3),
+        )
+        self.arrow_surfaces_l = (
+            (0, 1, 3, 0),
+        )
+
+        self.arrow_colours_r = (
             (0, 1, 0),  # Green on right
-            (1, 0.5, 0)  # Orange in back
+            (1, 1, 1),  # White in front
+            (1, 0.5, 0),  # Orange in back
         )
-        self.arrow_edges = (
-            (0, 1), (1, 2), (2, 3), (0, 3),
+        self.arrow_edges_r = (
+            (1, 2), (2, 3),
         )
-        self.arrow_surfaces = (
-            (0, 1, 2, 3),
+        self.arrow_surfaces_r = (
+            (2, 1, 3, 2),
         )
 
     def draw(self, quaternion=(0, 0, 0, 1), edge_colour=(1, 1, 1)):
@@ -145,8 +157,11 @@ class Drone(Shape):
         # Draw arrow
         with new_matrix():
             gl.glRotate(*Quat.to_axis(quaternion))
-            self._draw_components(self.arrow_vertices, self.arrow_colours,
-                                  self.arrow_edges, self.arrow_surfaces,
+            self._draw_components(self.arrow_vertices, self.arrow_colours_l,
+                                  self.arrow_edges_l, self.arrow_surfaces_l,
+                                  edge_colour)
+            self._draw_components(self.arrow_vertices, self.arrow_colours_r,
+                                  self.arrow_edges_r, self.arrow_surfaces_r,
                                   edge_colour)
 
 
