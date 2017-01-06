@@ -30,6 +30,7 @@ In order to run the system:
 
 * [ ] Set up the motion capture (mocap) PC. (Windows environment)
   * [ ] Connect to the motion capture system via Ethernet.
+  * [ ] Connect to the operating station via ethernet.
   * [ ] Set the motion capture PC's IP address (currently ローカルエリア接続４) to 192.168.0.1.
   * [ ] Start Motive.
   * [ ] Open a recent project file, or:
@@ -55,7 +56,6 @@ In order to run the system:
     * Address: 192.168.0.2
     * Netmask: 255.255.255.0
     * Gateway: 192.168.0.1
-  * [ ] Connect to the mocap PC via ethernet.
   * [ ] Connect the PS3 controller.
   * [ ] Activate the controller by pressing the central PS button.
   * [ ] Run the docker container.
