@@ -82,8 +82,8 @@ In order to run the system:
 
 Troubleshooting:
   * Check the launch configuration file to see if you didn't turn it off by mistake.
-  * If the live camera feed is not displayed, check if the operating station is connected to the drone's WiFi.
-  * If the drone does not take off, check if the battery is charged.
+  * If the live camera feed is not displayed, and the past image feed is black, check that the operating station is connected to the drone's WiFi.
+  * If the drone does not take off, check that the battery is charged.
   * If the past image feed shows "No data yet", check that:
     * the mocap system is connected
     * the mocap system is sending data
