@@ -129,7 +129,7 @@ class Drone(Shape):
         self.arrow_colours_l = (
             (1, 0, 0),  # Red on left
             (1, 1, 1),  # White in front
-            (1, 0.5, 0),  # Orange in back
+            (1, 0, 0),  # Orange in back
         )
         self.arrow_edges_l = (
             (1, 0), (0, 3),
@@ -141,7 +141,7 @@ class Drone(Shape):
         self.arrow_colours_r = (
             (0, 1, 0),  # Green on right
             (1, 1, 1),  # White in front
-            (1, 0.5, 0),  # Orange in back
+            (1, 0, 0),  # Orange in back
         )
         self.arrow_edges_r = (
             (1, 2), (2, 3),
@@ -622,14 +622,10 @@ class RendererBase(TexturesBase):
         """
         # TODO: Consider rotation of the camera
         dx, dy, dz = rel_pos
-        try:
-            centre_x = self._image_distance * dx / dy + self.width / 2
-        except ZeroDivisionError:
-            centre_x = self.width / 2
-        try:
-            centre_y = self._image_distance * dz / dy + self.height / 2
-        except ZeroDivisionError:
-            centre_y = self.height / 2
+        # offset_x = self._image_distance * dx / dy
+        # offset_y = self._image_distance * dz / dy
+        centre_x = self.width / 2
+        centre_y = self.height / 2
         return centre_x, centre_y
 
 
