@@ -7,13 +7,13 @@ nvidia-docker run -it \
     -v ${HOME}/documents/spirit_dev/spirit/:/root/catkin_ws/src/spirit/\
     -v ${HOME}/.vimrc:/root/.vimrc\
     -v ${HOME}/.vim:/root/.vim\
-    -v /dev/input:/dev/input \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -e DISPLAY \
     -e QT_X11_NO_MITSHM=1 \
     --network=host \
     --device /dev/snd \
+    --device /dev/input \
     --privileged \
-    spirit_dev:v2
+    spirit_dev
 
 xhost -local:root
