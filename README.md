@@ -1,6 +1,8 @@
-SPIRIT (Subimposed Past Image Records Implemented for Teleoperation) is the Masters research project of Jean Nassar.
+# SPIRIT (Subimposed Past Image Records Implemented for Teleoperation)
 
-The thesis can be found in the [spirit_thesis](https://github.com/masasin/spirit_thesis) repository.
+This is my Masters research project.
+
+The thesis (*A UAV Teleoperation System Using Subimposed Past Image Records*) can be found in the [spirit_thesis](https://github.com/masasin/spirit_thesis) repository.
 
 Assumptions:
 
@@ -35,7 +37,8 @@ In order to run the system:
   * [ ] Open the Rigid Bodies pane.
     * [ ] Set the name to something convenient, such as "drone". (Optional) 
     * [ ] Under Advanced, set User Data to "1".
-  * [ ] Open the Streaming pane. Ensure all settings are as follows:
+    * [ ] Under Orientation, click "Reset to Current Orientation".
+  * [ ] Open the Streaming pane. Ensure all settings are as follows:
     * Broadcast Frame Data: On
     * Local Interface: 192.168.0.1
     * Stream Markers: True
