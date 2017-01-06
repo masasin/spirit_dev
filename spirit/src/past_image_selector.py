@@ -48,6 +48,8 @@ class Selector(object):
     def __init__(self, image_queue_length=None, eval_method=None, debug=False):
         if image_queue_length is None:
             image_queue_length = rospy.get_param("~image_queue_length")
+            if image_queue_length == "None":
+                image_queue_length = None
         if eval_method is None:
             eval_method = rospy.get_param("~eval_method")
 
