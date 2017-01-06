@@ -61,14 +61,24 @@ class Drone(Shape):
     surfaces
     arrow_vertices : Sequence[Sequence[float]]
         A sequence of 3D coordinates representing the vertices on the arrow.
-    arrow_colours : Sequence[Sequence[float]]
-        A sequence of RGB values between 0 and 1, assigned to arrow vertices.
-    arrow_edges : Sequence[Sequence[int]]
-        A sequence of 2-tuple representing the indices of the arrow vertices to
-        be joined.
-    arrow_surfaces : Sequence[Sequence[int]]
-        A sequence of the list of indices of vertices forming the arrow, in
-        order.
+    arrow_colours_l : Sequence[Sequence[float]]
+        A sequence of RGB values between 0 and 1, assigned to vertices of the
+        left half of the arrow.
+    arrow_edges_l : Sequence[Sequence[int]]
+        A sequence of 2-tuple representing the indices of the vertices of the
+        left side of the arrow to be joined.
+    arrow_surfaces_l : Sequence[Sequence[int]]
+        A sequence of the list of indices of vertices forming the left side of
+        the arrow, in order.
+    arrow_colours_r : Sequence[Sequence[float]]
+        A sequence of RGB values between 0 and 1, assigned to vertices of the
+        right half of the arrow.
+    arrow_edges_r : Sequence[Sequence[int]]
+        A sequence of 2-tuple representing the indices of the vertices of the
+        right side of the arrow to be joined.
+    arrow_surfaces_r : Sequence[Sequence[int]]
+        A sequence of the list of indices of vertices forming the right side of
+        the arrow, in order.
 
     See Also
     --------
