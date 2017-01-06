@@ -28,7 +28,8 @@ If permission errors occur on files created in the docker container, you can run
 
 In order to run the system:
 
-* [ ] Set up the motion capture (mocap) PC.
+* [ ] Set up the motion capture (mocap) PC. (Windows environment)
+  * [ ] Connect to the motion capture system via Ethernet.
   * [ ] Set the motion capture PC's IP address (currently ローカルエリア接続４) to 192.168.0.1.
   * [ ] Start Motive.
   * [ ] Open a recent project file, or:
@@ -47,7 +48,7 @@ In order to run the system:
     * Command Port: 1510
     * Data Port: 1511
     * Multicast Interface: 239.255.42.99
-* [ ] Set up the operating station.
+* [ ] Set up the operating station. (Linux environment)
   * [ ] Create a Wired Ethernet connection with the following settings:
     * Automatically connect to this network when it is available: True
     * IPv4 Method: Manual
@@ -63,7 +64,7 @@ In order to run the system:
     * [ ] Connect the battery. 
     * [ ] Ensure correct startup.
     * [ ] Connect the operating station to the drone WiFi. The password is the string of digits on the SSID.
-* [ ] Set up the environment (from the docker container):
+* [ ] Set up the ROS environment. (Docker container on operating station)
   * [ ] Set appropriate values in the `config/launch_params.yaml` file. (Optional)
   * [ ] Regenerate the launch files: `config/regenerate_launch_files.py`.
 * [ ] Launch the system: `roslaunch spirit spirit.launch`.
