@@ -102,10 +102,14 @@ class DroneController(object):
 
         Parameters
         ----------
-        roll :
-        pitch
-        yaw_velocity
-        z_velocity
+        roll : float
+            The roll input.
+        pitch : float
+            The pitch input.
+        yaw_velocity : float
+            The yaw input.
+        z_velocity : float
+            The z-velocity input.
 
         """
         self.command.linear.x = pitch
