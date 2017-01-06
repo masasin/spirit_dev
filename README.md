@@ -35,10 +35,10 @@ In order to run the system:
     * [ ] Perform wanding and ground-plane setup.
     * [ ] Create a rigid body from the markers on the drone.
   * [ ] Open the Rigid Bodies pane.
-    * [ ] Set the name to something convenient, such as "drone". (Optional) 
+    * [ ] Set the name to something convenient, such as "drone". (Optional)
     * [ ] Under Advanced, set User Data to "1".
-    * [ ] Under Orientation, click "Reset to Current Orientation".
-  * [ ] Open the Streaming pane. Ensure all settings are as follows:
+    * [ ] Under Orientation, click "Reset to Current Orientation".
+  * [ ] Open the Streaming pane. Ensure all settings are as follows:
     * Broadcast Frame Data: On
     * Local Interface: 192.168.0.1
     * Stream Markers: True
