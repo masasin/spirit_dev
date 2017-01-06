@@ -21,15 +21,15 @@ pose:
 
 past_image:
   general:
-    eval_method: ConstantTimeDelay  # Default is Spirit.
-    image_queue_length: None  # Use None for infinite.
+    eval_method: Spirit  # Default is Spirit.
+    image_queue_length: 20  # Use None for infinite.
   Spirit:
     coeff_centrality: 0
-    coeff_centrality2: 2
-    coeff_direction: 0.3
+    coeff_centrality2: 4
+    coeff_direction: 4
     coeff_distance: 4
-    coeff_direction_with_current: 0.5
-    coeff_distance_with_current: 1
+    coeff_direction_with_current: 1
+    coeff_distance_with_current: 2
     ref_distance: 1.5  # m
     thresh_distance: 0.01  # m
     thresh_yaw: 0.02  # rad
@@ -38,7 +38,7 @@ past_image:
     ref_distance: 1.5
   ConstantTimeDelay:
     coeff_time: 1
-    ref_delay: 200
+    ref_delay: 2
   Murata:
     coeff_height: 2
     coeff_direction: 0.4
