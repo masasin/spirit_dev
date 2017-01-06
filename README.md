@@ -1,6 +1,8 @@
-SPIRIT (Subimposed Past Image Records Implemented for Teleoperation) is the Masters research project of Jean Nassar.
+# SPIRIT (Subimposed Past Image Records Implemented for Teleoperation)
 
-The thesis can be found in the [spirit_thesis](https://github.com/masasin/spirit_thesis) repository.
+This is my Masters research project.
+
+The thesis (*A UAV Teleoperation System Using Subimposed Past Image Records*) can be found in the [spirit_thesis](https://github.com/masasin/spirit_thesis) repository.
 
 Assumptions:
 
@@ -26,15 +28,20 @@ If permission errors occur on files created in the docker container, you can run
 
 In order to run the system:
 
-* [ ] Set up the motion capture (mocap) PC.
+* [ ] Set up the hardware.
+  * [ ] Connect the mocap cameras to the mocap router via ethernet.
+  * [ ] Connect the mocap PC to the mocap router via ethernet.
+  * [ ] Connect the mocap PC to the operating station via ethernet.
+* [ ] Set up the mocap PC. (Windows environment)
   * [ ] Set the motion capture PC's IP address (currently ローカルエリア接続４) to 192.168.0.1.
   * [ ] Start Motive.
   * [ ] Open a recent project file, or:
     * [ ] Perform wanding and ground-plane setup.
     * [ ] Create a rigid body from the markers on the drone.
   * [ ] Open the Rigid Bodies pane.
-    * [ ] Set the name to something convenient, such as "drone". (Optional) 
+    * [ ] Set the name to something convenient, such as "drone". (Optional)
     * [ ] Under Advanced, set User Data to "1".
+    * [ ] Under Orientation, click "Reset to Current Orientation".
   * [ ] Open the Streaming pane. Ensure all settings are as follows:
     * Broadcast Frame Data: On
     * Local Interface: 192.168.0.1
@@ -44,14 +51,13 @@ In order to run the system:
     * Command Port: 1510
     * Data Port: 1511
     * Multicast Interface: 239.255.42.99
-* [ ] Set up the operating station.
+* [ ] Set up the operating station. (Linux environment)
   * [ ] Create a Wired Ethernet connection with the following settings:
     * Automatically connect to this network when it is available: True
     * IPv4 Method: Manual
     * Address: 192.168.0.2
     * Netmask: 255.255.255.0
     * Gateway: 192.168.0.1
-  * [ ] Connect to the mocap PC via ethernet.
   * [ ] Connect the PS3 controller.
   * [ ] Activate the controller by pressing the central PS button.
   * [ ] Run the docker container.
@@ -60,7 +66,7 @@ In order to run the system:
     * [ ] Connect the battery. 
     * [ ] Ensure correct startup.
     * [ ] Connect the operating station to the drone WiFi. The password is the string of digits on the SSID.
-* [ ] Set up the environment (from the docker container):
+* [ ] Set up the ROS environment. (Docker container on operating station)
   * [ ] Set appropriate values in the `config/launch_params.yaml` file. (Optional)
   * [ ] Regenerate the launch files: `config/regenerate_launch_files.py`.
 * [ ] Launch the system: `roslaunch spirit spirit.launch`.
@@ -83,3 +89,4 @@ Troubleshooting:
     * the mocap system is sending data
     * the mocap system identifies the drone as a rigid body
     * the rigid body's User Data is set to "1"
+    * the drone is actually being tracked
