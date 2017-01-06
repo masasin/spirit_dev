@@ -16,6 +16,7 @@ import logging
 
 import pygame
 
+
 class Position(object):
     """
     A class containing a controller axis position.
