@@ -612,8 +612,14 @@ class RendererBase(TexturesBase):
         """
         # TODO: Consider rotation of the camera
         dx, dy, dz = rel_pos
-        centre_x = self._image_distance * dx / dy + self.width / 2
-        centre_y = self._image_distance * dz / dy + self.height / 2
+        try:
+            centre_x = self._image_distance * dx / dy + self.width / 2
+        except ZeroDivisionError:
+            centre_x = self.width / 2
+        try:
+            centre_y = self._image_distance * dz / dy + self.height / 2
+        except ZeroDivisionError:
+            centre_y = self.height / 2
         return centre_x, centre_y
 
 
