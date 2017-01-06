@@ -28,9 +28,11 @@ If permission errors occur on files created in the docker container, you can run
 
 In order to run the system:
 
-* [ ] Set up the motion capture (mocap) PC. (Windows environment)
-  * [ ] Connect to the motion capture system via Ethernet.
-  * [ ] Connect to the operating station via ethernet.
+* [ ] Set up the hardware.
+  * [ ] Connect the mocap cameras to the mocap router via ethernet.
+  * [ ] Connect the mocap PC to the mocap router via ethernet.
+  * [ ] Connect the mocap PC to the operating station via ethernet.
+* [ ] Set up the mocap PC. (Windows environment)
   * [ ] Set the motion capture PC's IP address (currently ローカルエリア接続４) to 192.168.0.1.
   * [ ] Start Motive.
   * [ ] Open a recent project file, or:
