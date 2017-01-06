@@ -89,3 +89,4 @@ Troubleshooting:
     * the mocap system is sending data
     * the mocap system identifies the drone as a rigid body
     * the rigid body's User Data is set to "1"
+    * the drone is actually being tracked
