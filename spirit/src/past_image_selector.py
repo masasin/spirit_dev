@@ -71,7 +71,7 @@ class Selector(object):
         self.eval_method_params = params["past_image"][eval_method].keys()
         self.eval_coeffs = OrderedDict()
         for param, coefficient in params["past_image"][eval_method].items():
-            if param.startswith("coeff_"):
+            if param.startswith("coeff_") and coefficient != 0:
                 component = param.split("coeff_", 1)[1]
                 self.eval_coeffs[component] = coefficient
 
