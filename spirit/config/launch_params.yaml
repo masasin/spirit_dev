@@ -22,15 +22,15 @@ pose:
 past_image:
   general:
     eval_method: Spirit  # Default is Spirit.
-    image_queue_length: 20  # Use None for infinite.
+    image_queue_length: 30  # Use None for infinite.
   Spirit:
     coeff_centrality: 0
-    coeff_centrality2: 4
+    coeff_centrality2: 8
     coeff_direction: 4
-    coeff_distance: 4
+    coeff_distance: 8
     coeff_direction_with_current: 1
     coeff_distance_with_current: 2
-    ref_distance: 1.5  # m
+    ref_distance: 3  # m
     thresh_distance: 0.01  # m
     thresh_yaw: 0.02  # rad
   ConstantDistance:
