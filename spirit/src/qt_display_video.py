@@ -129,8 +129,8 @@ class DroneVideoDisplay(QtWidgets.QMainWindow):
             tracked="" if self.tracked else " TRACKING_LOST"
         )
 
-        def cbk_tracked(self, tracked):
-            self.tracked = tracked.data
+    def cbk_tracked(self, tracked):
+        self.tracked = tracked.data
 
 
 def main():
