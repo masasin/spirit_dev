@@ -56,12 +56,20 @@ class Verifier(object):
         rospy.loginfo("Waiting for a connection")
 
     @staticmethod
-    def beep():
+    def start_beep():
         """
-        Plays an audio file containing a beep.
+        Plays an audio file containing a beep indefinitely.
 
         """
-        pygame.mixer.music.play()
+        pygame.mixer.music.play(-1)
+
+    @staticmethod
+    def stop_beep():
+        """
+        Stops the currently playing beep.
+
+        """
+        pygame.mixer.music.stop()
 
     def callback(self, pose):
         """
@@ -129,12 +137,13 @@ class Verifier(object):
                               "Please check your setup.")
             else:
                 rospy.logwarn("Tracking lost!")
-                self.beep()
+                self.start_beep()
         elif self.connected:
             if self.tracking is None:
                 rospy.loginfo("Tracking acquired")
             else:
                 rospy.loginfo("Tracking reacquired")
+                self.stop_beep()
 
         self._tracking = value
 
