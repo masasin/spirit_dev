@@ -26,12 +26,17 @@ If permission errors occur on files created in the docker container, you can run
 
     sudo chown -R $USER /path/to/folder
 
+The following checklist is specifically designed for use with the Mocap Optitrack system available in the Kyoto University Mechatronics Laboratory, and the computer SPIRIT was originally run on.
+It can be adapted as necessary.
+For instance, if odometry is used to find the drone's pose, the motion capture part is not needed.
+
 In order to run the system:
 
 * [ ] Set up the hardware.
   * [ ] Connect the mocap cameras to the mocap router via ethernet.
   * [ ] Connect the mocap PC to the mocap router via ethernet.
   * [ ] Connect the mocap PC to the operating station via ethernet.
+  * [ ] Connect the PS3 controller to the operating station via USB.
 * [ ] Set up the mocap PC. (Windows environment)
   * [ ] Set the motion capture PC's IP address (currently ローカルエリア接続４) to 192.168.0.1.
   * [ ] Start Motive.
@@ -58,7 +63,6 @@ In order to run the system:
     * Address: 192.168.0.2
     * Netmask: 255.255.255.0
     * Gateway: 192.168.0.1
-  * [ ] Connect the PS3 controller.
   * [ ] Activate the controller by pressing the central PS button.
   * [ ] Run the docker container.
 * [ ] Set up the drone.
@@ -90,3 +94,4 @@ Troubleshooting:
     * the mocap system identifies the drone as a rigid body
     * the rigid body's User Data is set to "1"
     * the drone is actually being tracked
+  * If no sound plays when the drone tracking is lost, stop sounds from other sources and restart the computer.
