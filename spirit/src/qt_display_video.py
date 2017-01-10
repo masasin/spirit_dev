@@ -126,7 +126,7 @@ class DroneVideoDisplay(QtWidgets.QMainWindow):
         self.msg_status_bar = self.msg_status_template.format(
             state=state,
             battery=navdata.batteryPercent,
-            tracked="" if self.tracked else " TRACKING_LOST"
+            tracked="" if self.tracked else " TRACKING LOST"
         )
 
     def cbk_tracked(self, tracked):
