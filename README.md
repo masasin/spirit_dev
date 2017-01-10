@@ -93,10 +93,12 @@ In order to run the system:
 
 ## Troubleshooting
 
-  * Check the launch configuration file to see if you didn't turn it off by mistake.
+  * Check the launch configuration file to see if you didn't turn an option off by mistake.
+  * Make sure that the configuration files have been generated.
+  * If 192.168.0.1 does not appear in Motive, it means it was started before being connected to the operating station for the first time. Restart Motive and repeat the rest of that section.
   * If the live camera feed is not displayed, and the past image feed is black, check that the operating station is connected to the drone's WiFi.
   * If the drone does not take off, check that the battery is charged.
-  * If the past image feed shows "No data yet", check that:
+  * If the past image feed is black, check that:
     * the mocap system is connected
     * the mocap system is sending data
     * the mocap system identifies the drone as a rigid body
