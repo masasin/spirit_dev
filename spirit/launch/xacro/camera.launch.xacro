@@ -18,7 +18,7 @@
             <param name="flight_without_shell" value="0" />
 
             <param name="altitude_max" value="2000" />  <!-- in millimeters -->
-            <param name="altitude_min" value="50" />  <!-- in millimeters -->
+            <param name="altitude_min" value="0" />  <!-- in millimeters -->
             <param name="euler_angle_max" value="0.1" />  <!-- maximum allowable body angle in radians = 5 degrees -->
             <param name="control_vz_max" value="200" />  <!-- maximum z velocity in mm/sec = 0.2 m/sec -->
             <param name="control_yaw" value="0.7" />  <!-- maximum rotation rate in radians/sec = 40 deg per second -->
