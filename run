@@ -5,6 +5,7 @@ xhost +local:root > /dev/null
 
 nvidia-docker run -it \
     -v ${HOME}/documents/spirit_dev/spirit/:/root/catkin_ws/src/spirit/\
+    -v ${HOME}/documents/spirit_analysis/analysis/:/root/catkin_ws/src/spirit/analysis\
     -v ${HOME}/.vimrc:/root/.vimrc\
     -v ${HOME}/.vim:/root/.vim\
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -14,6 +15,6 @@ nvidia-docker run -it \
     --device /dev/snd \
     --device /dev/input \
     --privileged \
-    spirit_dev
+    spirit_dev:v2
 
 xhost -local:root
