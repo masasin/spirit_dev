@@ -8,7 +8,7 @@ A controller interface for the drone.
 """
 import rospy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Empty
+from std_msgs.msg import Bool, Empty
 from ardrone_autonomy.msg import Navdata
 
 from drone_state import DroneState
@@ -26,6 +26,8 @@ class DroneController(object):
     ----------
     state : int
         The state of the drone, as defined in `drone_state`.
+    arrived : bool
+        Whether the user believes that the drone has arrived at the target.
     pub_land : rospy.Publisher
         Publisher to /ardrone/land. Initiates landing.
     pub_reset : rospy.Publisher
@@ -34,12 +36,16 @@ class DroneController(object):
         Publisher to /ardrone/takeoff. Initiates takeoff.
     pub_command : rospy.Publisher
         Publisher to /cmd_vel. Controls the drone.
+    pub_arrived : rospy.Publisher
+        Publisher to /ardrone/arrived. Records whether the user believes that
+        the drone is at the target.
     command : Twist
         Twist message containing the current commands to the drone.
 
     """
     def __init__(self):
         self.state = None
+        self.arrived = False
 
         # Subscribe to navdata
         rospy.Subscriber('/ardrone/navdata', Navdata, self.update_state)
@@ -53,9 +59,13 @@ class DroneController(object):
         # Publish to /cmd_vel to control drone
         self.pub_command = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
+        # Publish arrival status.
+        self.pub_arrived = rospy.Publisher("/ardrone/arrived", Bool, queue_size=1)
+
         # Setup regular publishing of control packets
         self.command = Twist()
         rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000.0), self.send_command)
+        rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000.0), self.publish_arrival_status)
 
         # Land the drone if we are shutting down
         rospy.on_shutdown(self.land)
@@ -95,6 +105,13 @@ class DroneController(object):
 
         """
         self.pub_reset.publish(Empty())
+
+    def publish_arrival_status(self):
+        """
+        Publish the arrival status.
+
+        """
+        self.pub_arrived.publish(Bool(self.arrived))
 
     def set_command(self, roll=0, pitch=0, yaw_velocity=0, z_velocity=0):
         """

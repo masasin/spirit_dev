@@ -21,14 +21,16 @@ class Button(object):
 
     By default, the PS3 controller is used with the following mapping:
 
-    - Emergency: R1
-    - Takeoff: L1
     - Landing: L2
+    - Arrived at Destination: R2
+    - Takeoff: L1
+    - Emergency: R1
 
     """
-    emergency = 11
     land = 8
+    arrived = 9
     takeoff = 10
+    emergency = 11
 
 
 class Axis(object):
@@ -81,6 +83,12 @@ def handle_joystick(data):
                                data.axes[Axis.pitch] * Scale.pitch,
                                data.axes[Axis.yaw] * Scale.yaw,
                                data.axes[Axis.height] * Scale.height)
+
+    if data.buttons[Button.arrived]:
+        rospy.loginfo("Arrival Button Pressed")
+        controller.arrived = True
+    else:
+        controller.arrived = False
 
 
 def update_mappings():
