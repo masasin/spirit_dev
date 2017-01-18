@@ -6,6 +6,8 @@
 A controller interface for the drone.
 
 """
+from __future__ import division
+
 import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool, Empty
@@ -64,8 +66,8 @@ class DroneController(object):
 
         # Setup regular publishing of control packets
         self.command = Twist()
-        rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000.0), self.send_command)
-        rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000.0), self.publish_arrival_status)
+        rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000), self.send_command)
+        rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000), self.publish_arrival_status)
 
         # Land the drone if we are shutting down
         rospy.on_shutdown(self.land)
