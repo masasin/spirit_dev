@@ -36,6 +36,7 @@ For instance, if odometry is used to find the drone's pose, the motion capture p
 
 In order to run the system:
 
+* [ ] Make sure the targets are in the correct position.
 * [ ] Set up the hardware.
   * [ ] Connect the mocap cameras to the mocap router via ethernet.
   * [ ] Connect the mocap PC to the mocap router via ethernet.
@@ -46,6 +47,7 @@ In order to run the system:
   * [ ] Start Motive.
   * [ ] Open a recent project file, or:
     * [ ] Perform wanding and ground-plane setup.
+    * [ ] Put the drone markers in the field of view of the camera.
     * [ ] Create a rigid body from the markers on the drone.
   * [ ] Open the Rigid Bodies pane.
     * [ ] Set the name to something convenient, such as "drone". (Optional)
@@ -74,6 +76,7 @@ In order to run the system:
     * [ ] Connect the battery. 
     * [ ] Ensure correct startup.
     * [ ] Connect the operating station to the drone WiFi. The password is the string of digits on the SSID.
+    * [ ] Put the indoor hull on the drone.
 * [ ] Set up the ROS environment. (Docker container on operating station)
   * [ ] Run the following commands to enable the necessary packages inside the work environment:
     * [ ] `workon spirit`
@@ -87,9 +90,8 @@ In order to run the system:
   * [ ] If the past image feed is displayed, "No data yet" is not displayed.
   * [ ] The battery is high. (The drone will not take off with a low battery.)
 * [ ] Test the controller connection:
-  * [ ] Identify the Emergency button. (Default is R1.)
-  * [ ] Tap the Emergency button. The drone lights should turn red momentarily, and the status should change to Emergency.
-* [ ] Launch the drone and fly. Tap the Takeoff button to take off, and the Land button to land. Use the Emergency button in emergencies. 
+  * [ ] Tap the Emergency button (default is R1). The drone lights should turn red momentarily, and the status should change to Emergency.
+* [ ] Launch the drone and fly. Tap the Takeoff button to take off, and the Land button to land. Use the Emergency button in emergencies. Tap the Arrived button to indicate that you believe that you are at the target.
 
 ## Troubleshooting
 
@@ -104,4 +106,4 @@ In order to run the system:
     * the mocap system identifies the drone as a rigid body
     * the rigid body's User Data is set to "1"
     * the drone is actually being tracked
-  * If no sound plays when the drone tracking is lost, stop sounds from other sources and restart the computer.
+  * If no sound plays when the drone tracking is lost, stop sounds from other sources and restart the computer. The issue can be reproduced by running Google Play Music.
