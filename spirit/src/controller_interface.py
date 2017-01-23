@@ -62,12 +62,14 @@ class DroneController(object):
         self.pub_command = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
         # Publish arrival status.
-        self.pub_arrived = rospy.Publisher("/ardrone/arrived", Bool, queue_size=1)
+        self.pub_arrived = rospy.Publisher("/ardrone/arrived", Bool,
+                                           queue_size=1)
 
         # Setup regular publishing of control packets
         self.command = Twist()
         rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000), self.send_command)
-        rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000), self.publish_arrival_status)
+        rospy.Timer(rospy.Duration(COMMAND_PERIOD / 1000),
+                    self.publish_arrival_status)
 
         # Land the drone if we are shutting down
         rospy.on_shutdown(self.land)
