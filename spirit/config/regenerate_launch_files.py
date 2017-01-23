@@ -9,8 +9,17 @@ import inspect
 import logging
 import os
 import subprocess as sp
+import sys
 
-from lxml import etree as et
+try:
+    from lxml import etree as et
+except ImportError:
+    logging.critical("Cannot run the program!")
+    logging.critical("Are you in the correct virtual environment? Try running "
+                     "`workon spirit` and `toggleglobalsitepackages` in this "
+                     "terminal.")
+    sys.exit(1)
+
 import tqdm
 import yaml
 
