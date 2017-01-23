@@ -19,6 +19,7 @@
 
             <param name="ButtonEmergency" value="11" />
             <param name="ButtonLand" value="8" />
+            <param name="ButtonArrived" value="9" />
             <param name="ButtonTakeoff" value="10" />
 
             <param name="AxisRoll" value="0" />

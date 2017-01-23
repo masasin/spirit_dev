@@ -100,6 +100,7 @@ def update_mappings():
                                            Button.emergency))
     Button.land = int(rospy.get_param("~ButtonLand", Button.land))
     Button.takeoff = int(rospy.get_param("~ButtonTakeoff", Button.takeoff))
+    Button.arrived = int(rospy.get_param("~ButtonArrived", Button.arrived))
     Axis.roll = int(rospy.get_param("~AxisRoll", Axis.roll))
     Axis.pitch = int(rospy.get_param("~AxisPitch", Axis.pitch))
     Axis.yaw = int(rospy.get_param("~AxisYaw", Axis.yaw))
