@@ -110,9 +110,14 @@ class DroneController(object):
         """
         self.pub_reset.publish(Empty())
 
-    def publish_arrival_status(self):
+    def publish_arrival_status(self, event):
         """
         Publish the arrival status.
+
+        Parameters
+        ----------
+        event : TimerEvent
+            Used by the Timer.
 
         """
         self.pub_arrived.publish(Bool(self.arrived))
