@@ -70,6 +70,7 @@ In order to run the system:
     * Netmask: 255.255.255.0
     * Gateway: 192.168.0.1
   * [ ] Activate the controller by pressing the central PS button.
+  * [ ] Ensure that the volume is high enough.
   * [ ] Run the docker container.
 * [ ] Set up the drone.
     * [ ] Charge the battery if it is not charged. WARNING: Do not leave on charge for too long when full.
@@ -106,4 +107,6 @@ In order to run the system:
     * the mocap system identifies the drone as a rigid body
     * the rigid body's User Data is set to "1"
     * the drone is actually being tracked
-  * If no sound plays when the drone tracking is lost, stop sounds from other sources and restart the computer. The issue can be reproduced by running Google Play Music.
+  * If no sound plays when the drone tracking is lost:
+    * Ensure that the volume is not muted or low.
+    * Otherwise, stop sounds from other sources and restart the computer. The issue can be reproduced by running Google Play Music.
