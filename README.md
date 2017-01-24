@@ -80,7 +80,7 @@ In order to run the system:
 * [ ] Set up the ROS environment. (Docker container on operating station)
   * [ ] Run the following commands to enable the necessary packages inside the work environment:
     * [ ] `workon spirit`
-    * [ ] `toggleglobalsitepackages`
+    * [ ] Enable global site-packages with `toggleglobalsitepackages` if necessary. Rerun the command if you see "Disabled global site-packages".
   * [ ] Set appropriate values in the `config/launch_params.yaml` file. (Optional)
   * [ ] Regenerate the launch files: `config/regenerate_launch_files.py`.
 * [ ] Launch the system: `roslaunch spirit spirit.launch`.
