@@ -26,11 +26,11 @@ past_image:
   Spirit:
     coeff_centrality: 0
     coeff_centrality2: 8
-    coeff_direction: 4
+    coeff_direction: 12
     coeff_distance: 8
     coeff_direction_with_current: 1
     coeff_distance_with_current: 2
-    ref_distance: 3  # m
+    ref_distance: 4  # m
     thresh_distance: 0.01  # m
     thresh_yaw: 0.087  # rad
   ConstantDistance:
