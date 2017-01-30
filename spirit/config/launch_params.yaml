@@ -1,3 +1,6 @@
+drone:
+  ip: 192.168.1.1  # Default is 192.168.1.1.
+
 camera:
   mock_camera: false  # Default is false.
   show: true  # Default is false.
@@ -5,8 +8,6 @@ camera:
     realtime: false
     slow: true
     past_image: false
-  real:
-    drone_ip: 192.168.1.1  # Default is 192.168.1.1.
   slowdown: 15  # times. Default is 15.
 
 control:

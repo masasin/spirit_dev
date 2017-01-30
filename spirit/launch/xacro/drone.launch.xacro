@@ -8,7 +8,7 @@
               type="ardrone_driver"
               output="screen"
               clear_params="true"
-              args="-ip ${params['camera']['real']['drone_ip']}" >
+              args="-ip ${params['drone']['ip']}" >
             <param name="navdata_demo" value="False" />
             <param name="realtime_navdata" value="True" />
             <param name="realtime_video" value="True" />
