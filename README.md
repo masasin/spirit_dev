@@ -70,7 +70,7 @@ In order to run the system:
     * Netmask: 255.255.255.0
     * Gateway: 192.168.0.1
   * [ ] Activate the controller by pressing the central PS button.
-  * [ ] Ensure that the volume is high enough.
+  * [ ] Ensure that the volume is high enough, and that any earphones are worn.
   * [ ] Run the docker container.
 * [ ] Set up the drone.
     * [ ] Charge the battery if it is not charged. WARNING: Do not leave on charge for too long when full.
@@ -109,4 +109,5 @@ In order to run the system:
     * the drone is actually being tracked
   * If no sound plays when the drone tracking is lost:
     * Ensure that the volume is not muted or low.
+    * Ensure that earphones are unplugged, or worn.
     * Otherwise, stop sounds from other sources and restart the computer. The issue can be reproduced by running Google Play Music.
