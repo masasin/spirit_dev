@@ -88,14 +88,14 @@ class Drone(Shape):
     def __init__(self, size=0.3, height=0.13):
         offset = [0, 0, size]
 
-        vertices = np.array([
+        self.vertices = np.array([
             (1, -1, -1), (1, 1, -1),
             (-1, 1, -1), (-1, -1, -1),
             (1, -1, 1), (1, 1, 1),
             (-1, -1, 1), (-1, 1, 1),
         ]) * size
-        vertices += offset
-        vertices[:, 1] *= height
+        self.vertices += offset
+        self.vertices[:, 1] *= height
 
         colours = (
             (0.5, 0.5, 0.5),
@@ -117,7 +117,7 @@ class Drone(Shape):
             # (4, 0, 3, 6),
         )
 
-        super(Drone, self).__init__(vertices, colours, edges, surfaces)
+        super(Drone, self).__init__(self.vertices, colours, edges, surfaces)
 
         self.arrow_vertices = np.array([
             (-1, 1, 1), (0, 1, -1), (1, 1, 1), (0, 1, 0),
@@ -138,16 +138,25 @@ class Drone(Shape):
             (0, 1, 3, 0),
         )
 
-        self.arrow_colours_r = (
-            (0, 1, 0),  # Green on right
-            (1, 1, 1),  # White in front
-            (0, 0.7, 0),  # Dark green in back
+        self.surf_colours = (
+            (
+                (0.9, 0, 0),
+                (1, 0, 0),
+                (0.7, 0, 0),
+                (0.7, 0, 0),
+            ),
+            (
+                (0, 0.7, 0),
+                (0, 0.7, 0),
+                (0, 1, 0),
+                (0, 0.9, 0),
+            ),
         )
-        self.arrow_edges_r = (
-            (1, 2), (2, 3),
-        )
-        self.arrow_surfaces_r = (
-            (2, 1, 3, 2),
+
+        self.surf_surfaces = (
+            # (0, 1, 2, 3),
+            ((3, 2, 7, 6),),
+            ((4, 5, 1, 0),),
         )
 
     def draw(self, quaternion=(0, 0, 0, 1), edge_colour=(1, 1, 1)):
@@ -167,6 +176,9 @@ class Drone(Shape):
         # Draw arrow
         with new_matrix():
             gl.glRotate(*Quat.to_axis(quaternion))
+            for colour, surface in zip(self.surf_colours, self.surf_surfaces):
+                self._draw_components(self.vertices, colour,
+                                      (), surface, edge_colour)
             self._draw_components(self.arrow_vertices, self.arrow_colours_l,
                                   self.arrow_edges_l, self.arrow_surfaces_l,
                                   edge_colour)
