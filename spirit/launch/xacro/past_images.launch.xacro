@@ -15,7 +15,7 @@
       <param name="coeff_centrality" value="${method_ns['coeff_centrality']}"/>
       <param name="coeff_distance_with_current" value="${method_ns['coeff_distance_with_current']}"/>
       <param name="coeff_direction_with_current" value="${method_ns['coeff_direction_with_current']}"/>
-      <param name="thresh_yaw" value="${method_ns['thresh_yaw']}"/>
+      <param name="thresh_yaw" value="${3.14159/180*method_ns['thresh_yaw']}"/>
       <param name="coeff_centrality2" value="${method_ns['coeff_centrality2']}"/>
       <param name="coeff_distance" value="${method_ns['coeff_distance']}"/>
       <param name="ref_distance" value="${method_ns['ref_distance']}"/>

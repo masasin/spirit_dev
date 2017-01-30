@@ -12,16 +12,16 @@
             <param name="navdata_demo" value="False" />
             <param name="realtime_navdata" value="True" />
             <param name="realtime_video" value="True" />
-            <param name="looprate" value="30" />
+	    <param name="looprate" value="${params['drone']['loop_rate']}" />
 
-            <param name="outdoor" value="0" />
-            <param name="flight_without_shell" value="0" />
+            <param name="outdoor" value="${params['drone']['outdoor_hull']}" />
+            <param name="flight_without_shell" value="${params['drone']['no_hull']}" />
 
-            <param name="altitude_max" value="2000" />  <!-- in millimeters -->
-            <param name="altitude_min" value="0" />  <!-- in millimeters -->
-            <param name="euler_angle_max" value="0.1" />  <!-- maximum allowable body angle in radians = 5 degrees -->
-            <param name="control_vz_max" value="1000" />  <!-- maximum z velocity in mm/sec = 0.2 m/sec -->
-            <param name="control_yaw" value="1.4" />  <!-- maximum rotation rate in radians/sec = 40 deg per second -->
+            <param name="altitude_max" value="${params['drone']['altitude_max']}" />
+            <param name="altitude_min" value="${params['drone']['altitude_min']}" />
+	    <param name="euler_angle_max" value="${3.14159/180*params['drone']['max_body_angle']}" />
+            <param name="control_vz_max" value="${params['drone']['control_vz_max']}" />
+	    <param name="control_yaw" value="${3.14159/180*params['drone']['control_yaw']}" />
         </node>
     </xacro:macro>
 

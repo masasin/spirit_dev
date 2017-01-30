@@ -17,20 +17,21 @@
               output="screen"
               required="true">
 
-            <param name="ButtonLand" value="8" />
-            <param name="ButtonArrived" value="9" />
-            <param name="ButtonTakeoff" value="10" />
-            <param name="ButtonEmergency" value="11" />
+	      <param name="ButtonLand" value="${params['control']['button']['land']" />
+	      <param name="ButtonArrived" value="${params['control']['button']['arrived']" />
+	      <param name="ButtonTakeoff" value="${params['control']['button']['takeoff']" />
+	      <param name="ButtonEmergency" value="${params['control']['button']['emergency']" />
 
-            <param name="AxisRoll" value="0" />
-            <param name="AxisPitch" value="1" />
-            <param name="AxisYaw" value="2" />
-            <param name="AxisZ"	value="3" />
+	      <param name="AxisRoll" value="${params['control']['axis']['roll']" />
+	      <param name="AxisPitch" value="${params['control']['axis']['pitch']" />
+	      <param name="AxisYaw" value="${params['control']['axis']['yaw']" />
+	      <param name="AxisZ" value="${params['control']['axis']['z']" />
 
-            <param name="ScaleRoll" value="1" />
-            <param name="ScalePitch" value="1" />
-            <param name="ScaleYaw" value="1" />
-            <param name="ScaleZ" value="1" />
+	      <param name="ScaleRoll" value="${params['control']['scale']['roll']" />
+	      <param name="ScalePitch" value="${params['control']['scale']['pitch']" />
+	      <param name="ScaleYaw" value="${params['control']['scale']['yaw']" />
+	      <param name="ScaleZ" value="${params['control']['scale']['z']" />
+
 	    </node>
     </xacro:macro>
 

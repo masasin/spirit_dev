@@ -1,25 +1,3 @@
-drone:
-  ip: 192.168.1.1  # Default is 192.168.1.1.
-
-camera:
-  mock_camera: false  # Default is false.
-  show: true  # Default is false.
-  streams:
-    realtime: false
-    slow: true
-    past_image: false
-  slowdown: 15  # times. Default is 15.
-
-control:
-  use_joystick: true  # Default is true.
-  js_number: auto  # Default is 1. /dev/input/js1
-
-pose:
-  mock_pose: false  # Default is false.
-  real:  # Only used if mock_pose is false
-    use_mocap: true  # Default is true.
-    use_odometry: false  # Default is false.
-
 past_image:
   general:
     eval_method: Spirit  # Default is Spirit.
@@ -33,7 +11,7 @@ past_image:
     coeff_distance_with_current: 2
     ref_distance: 3  # m
     thresh_distance: 0.2  # m
-    thresh_yaw: 0.087  # rad
+    thresh_yaw: 10  # deg
   ConstantDistance:
     coeff_distance: 1
     ref_distance: 1.5
@@ -47,6 +25,51 @@ past_image:
     coeff_distance: 4
     ref_height: 0.3
     ref_distance: 1.5
+
+drone:
+  ip: 192.168.1.1  # Default is 192.168.1.1.
+  no_hull: false
+  outdoor_hull: false
+  loop_rate: 30  # Hz
+  altitude_max: 2000  # mm
+  altitude_min: 0  # mm
+  max_body_angle: 10  # deg
+  control_vz_max: 1000  # mm/s
+  control_yaw: 90  # deg/s
+
+camera:
+  mock_camera: false  # Default is false.
+  show: true  # Default is false.
+  streams:
+    realtime: false
+    slow: true
+    past_image: false
+  slowdown: 15  # times. Default is 15.
+
+control:
+  use_joystick: true  # Default is true.
+  js_number: auto  # Default is 1. /dev/input/js1
+  button:
+    land: 8
+    arrived: 9
+    takeoff: 10
+    emergency: 11
+  axis:
+    roll: 0
+    pitch: 1
+    yaw: 2
+    z: 3
+  scale:
+    roll: 1
+    pitch: 1
+    yaw: 1
+    z: 1
+
+pose:
+  mock_pose: false  # Default is false.
+  real:  # Only used if mock_pose is false
+    use_mocap: true  # Default is true.
+    use_odometry: false  # Default is false.
 
 visualization:
   show: true
