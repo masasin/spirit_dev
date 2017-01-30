@@ -1,15 +1,15 @@
 past_image:
   general:
     eval_method: Spirit  # Default is Spirit.
-    image_queue_length: 20  # Use None for infinite.
+    image_queue_length: 200  # Use None for infinite.
   Spirit:
     coeff_centrality: 0
-    coeff_centrality2: 12
+    coeff_centrality2: 8
     coeff_direction: 4
-    coeff_distance: 8
+    coeff_distance: 12
     coeff_direction_with_current: 1
     coeff_distance_with_current: 2
-    ref_distance: 3  # m
+    ref_distance: 2  # m
     thresh_distance: 0.2  # m
     thresh_yaw: 10  # deg
   ConstantDistance:
@@ -30,21 +30,12 @@ drone:
   ip: 192.168.1.1  # Default is 192.168.1.1.
   no_hull: false
   outdoor_hull: false
-  loop_rate: 30  # Hz
+  loop_rate: 200  # Hz
   altitude_max: 2000  # mm
   altitude_min: 0  # mm
-  max_body_angle: 10  # deg
-  control_vz_max: 1000  # mm/s
+  max_body_angle: 2.5  # deg
+  control_vz_max: 5000  # mm/s
   control_yaw: 90  # deg/s
-
-camera:
-  mock_camera: false  # Default is false.
-  show: true  # Default is false.
-  streams:
-    realtime: false
-    slow: true
-    past_image: false
-  slowdown: 15  # times. Default is 15.
 
 control:
   use_joystick: true  # Default is true.
@@ -70,6 +61,15 @@ pose:
   real:  # Only used if mock_pose is false
     use_mocap: true  # Default is true.
     use_odometry: false  # Default is false.
+
+camera:
+  mock_camera: false  # Default is false.
+  show: true  # Default is false.
+  streams:
+    realtime: false
+    slow: true
+    past_image: false
+  slowdown: 15  # times. Default is 15.
 
 visualization:
   show: true
