@@ -126,16 +126,35 @@ class Drone(Shape):
         self.arrow_vertices += offset
         self.arrow_vertices[:, 1] *= height
 
-        self.arrow_colours_l = (
-            (1, 0, 0),  # Red on left
-            (1, 1, 1),  # White in front
-            (0.7, 0, 0),  # Dark red in back
+        self.arrow_colours = (
+            (
+                (1, 0, 0),  # Red on left
+                (1, 1, 1),  # White in front
+                (0.7, 0, 0),  # Dark red in back
+            ),
+            (
+                (0, 1, 0),  # Green on right
+                (1, 1, 1),  # White in front
+                (0, 0.7, 0),  # Dark green in back
+            ),
         )
-        self.arrow_edges_l = (
-            (1, 0), (0, 3),
+        self.arrow_edges = (
+            (
+                (1, 0),
+                (0, 3),
+            ),
+            (
+                (1, 2),
+                (2, 3),
+            ),
         )
-        self.arrow_surfaces_l = (
-            (0, 1, 3, 0),
+        self.arrow_surfaces = (
+            (
+                (0, 1, 3, 0),
+            ),
+            (
+                (2, 1, 3, 2),
+            ),
         )
 
         self.surf_colours = (
@@ -179,12 +198,12 @@ class Drone(Shape):
             for colour, surface in zip(self.surf_colours, self.surf_surfaces):
                 self._draw_components(self.vertices, colour,
                                       (), surface, edge_colour)
-            self._draw_components(self.arrow_vertices, self.arrow_colours_l,
-                                  self.arrow_edges_l, self.arrow_surfaces_l,
-                                  edge_colour)
-            self._draw_components(self.arrow_vertices, self.arrow_colours_r,
-                                  self.arrow_edges_r, self.arrow_surfaces_r,
-                                  edge_colour)
+            for colours, edges, surfaces in zip(self.arrow_colours,
+                                                self.arrow_edges,
+                                                self.arrow_surfaces):
+                self._draw_components(self.arrow_vertices, colours,
+                                      edges, surfaces,
+                                      edge_colour)
 
 
 class TexturesBase(object):
