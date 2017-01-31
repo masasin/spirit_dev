@@ -28,6 +28,7 @@ import rospkg
 
 CONFIG_FILE = "launch_params.yaml"
 NAMESPACES = {"xacro": "{http://www.ros.org/wiki/xacro}"}
+DEGREE_KEYS = ("thresh_yaw",)
 # et.register_namespace("xacro", "http://www.ros.org/wiki/xacro")
 
 
@@ -75,9 +76,12 @@ def add_new_keys(node, keys):
                              attrib={"value": "${{method == '{}'}}"
                              .format(method_name)})
         for key in key_list:
-            et.SubElement(element, "param",
-                          attrib={"name": key,
-                                  "value": "${{method_ns['{}']}}".format(key)})
+            et.SubElement(
+                element,
+                "param",
+                attrib={"name": key,
+                        "value": "${{{}method_ns['{}']}}".format(
+                            "3.14159/180*" if key in DEGREE_KEYS else "", key)})
         node.append(element)
 
 
