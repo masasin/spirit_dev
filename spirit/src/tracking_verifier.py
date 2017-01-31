@@ -64,7 +64,10 @@ class Verifier(object):
         Plays an audio file containing a beep indefinitely.
 
         """
-        pygame.mixer.music.play(-1)
+        try:
+            pygame.mixer.music.play(-1)
+        except pygame.error:
+            pass
 
     @staticmethod
     def stop_beep():
@@ -72,7 +75,10 @@ class Verifier(object):
         Stops the currently playing beep.
 
         """
-        pygame.mixer.music.stop()
+        try:
+            pygame.mixer.music.stop()
+        except pygame.error:
+            pass
 
     def callback(self, pose):
         """
