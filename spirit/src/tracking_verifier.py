@@ -40,7 +40,10 @@ class Verifier(object):
     """
     def __init__(self):
         pygame.init()
-        pygame.mixer.music.load(os.path.join(SPIRIT_ROOT, "media/beep.wav"))
+        try:
+            pygame.mixer.music.load(os.path.join(SPIRIT_ROOT, "media/beep.wav"))
+        except pygame.error:
+            rospy.logwarn("Cannot initialize mixer system.")
 
         self.subscriber = rospy.Subscriber("/ardrone/pose", PoseStamped,
                                            self.callback, queue_size=1)
