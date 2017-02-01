@@ -193,16 +193,6 @@ class Spirit(Evaluator):
     Use the evaluator from SPIRIT.
 
     """
-    def select_best_frame(self):
-        # Do not change frame if no difference in position and orientation.
-        if self.current_frame is not None:
-            distance = self.current_frame.distance(self.pose)
-            yaw = self.current_frame.rel_euler(self.pose)[2]
-            if distance < self.thresh_distance and yaw < self.thresh_yaw:
-                return self.current_frame
-
-        return super(Spirit, self).select_best_frame()
-
     @staticmethod
     def centrality(pose, frame):
         """
