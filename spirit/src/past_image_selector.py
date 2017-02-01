@@ -96,7 +96,7 @@ class Selector(object):
         """
         rospy.logdebug("New image")
         self.image = image
-        if self.can_make_frame:
+        if self.can_make_frame and (self.moved or not self.frames):
             rospy.logdebug("Adding frames to queue")
             frame = Frame(self._pose_stamped, self.image)
             self.frames.append(frame)
@@ -152,6 +152,35 @@ class Selector(object):
 
         """
         return self.image and self.pose and self.tracked
+
+    @property
+    def moved(self):
+        """
+        Check if we have moved significantly.
+
+        If there are no thresholds, return True.
+
+        Returns
+        -------
+        bool
+            Whether we have moved.
+
+        """
+        if (self.thresh_distance is None) and (self.thresh_yaw is None):
+            return True
+
+        if self.frames:
+            if self.thresh_distance is not None:
+                distance = self.frames[-1].distance(self.pose)
+                if distance > self.thresh_distance:
+                    return True
+
+            if self.thresh_yaw is not None:
+                yaw = self.current_frame.rel_euler(self.pose)[2]
+                if yaw > self.thresh_yaw:
+                    return True
+
+        return False
 
     def clear(self):
         """
