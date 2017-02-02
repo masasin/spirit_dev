@@ -75,9 +75,9 @@ In order to run the system:
 * [ ] Set up the drone.
     * [ ] Charge the battery if it is not charged. WARNING: Do not leave on charge for too long when full.
     * [ ] Connect the battery. 
+    * [ ] Put the indoor hull on the drone.
     * [ ] Ensure correct startup.
     * [ ] Connect the operating station to the drone WiFi. The password is the string of digits on the SSID.
-    * [ ] Put the indoor hull on the drone.
 * [ ] Set up the ROS environment. (Docker container on operating station)
   * [ ] Run the following commands to enable the necessary packages inside the work environment:
     * [ ] `workon spirit`
