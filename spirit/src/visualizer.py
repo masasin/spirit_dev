@@ -893,7 +893,7 @@ def main():
     elif debug == "online":
         visualizer = TestVisualizer((640, 360))
     else:
-        visualizer = Visualizer((960, 540))
+        visualizer = Visualizer((640, 360))
     rospy.loginfo("Started visualizer")
     while visualizer.is_active:
         pass
