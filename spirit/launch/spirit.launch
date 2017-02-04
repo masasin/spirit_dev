@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <include file="$(find spirit)/launch/launchers/camera.launch" />
+    <include file="$(find spirit)/launch/launchers/drone.launch" />
     <include file="$(find spirit)/launch/launchers/control.launch" />
     <include file="$(find spirit)/launch/launchers/display.launch" />
     <include file="$(find spirit)/launch/launchers/past_images.launch" />
