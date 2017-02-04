@@ -33,8 +33,8 @@ drone:
   loop_rate: 200  # Hz
   altitude_max: 2000  # mm
   altitude_min: 0  # mm
-  max_body_angle: 2.5  # deg
-  control_vz_max: 5000  # mm/s
+  max_body_angle: 5  # deg
+  control_vz_max: 700  # mm/s
   control_yaw: 90  # deg/s
 
 control:
