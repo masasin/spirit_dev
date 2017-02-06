@@ -111,3 +111,4 @@ In order to run the system:
     * Ensure that the volume is not muted or low.
     * Ensure that earphones are unplugged, or worn.
     * Otherwise, stop sounds from other sources and restart the computer. The issue can be reproduced by running Google Play Music.
+  * If the controller is not detected, exit the docker container and connect again after making sure the controller is connected.
